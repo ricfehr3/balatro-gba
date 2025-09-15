@@ -39,6 +39,17 @@ This **tech-demo/proof of concept** is strictly limited in content to a minimal 
 (D-Pad: Navigation) 
 # **Build Instructions:**
 
+## **-Docker-**
+A docker compose file is provided to build this project. 
+
+1.) Install [docker desktop](https://docs.docker.com/compose/install/). 
+
+2.) Open a terminal to this projects directory:
+- On **linux** run `UID=$(id -u) GID=$(id -g) docker compose up`
+- On **windows** run `docker compose up`
+
+Docker will build the project and the ROM will be in the same location as step 7 describes below.
+
 ## **-Windows-**
 Video Tutorial: https://youtu.be/72Zzo1VDYzQ?si=UDmEdbST1Cx1zZV2
 ### With `Git` (not required)
