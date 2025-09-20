@@ -9,18 +9,52 @@ static const u16 small_blind_token_palette[PAL_ROW_LEN] = {0x0000, 0x7FFF, 0x34A
 static const u16 big_blind_token_palette[PAL_ROW_LEN] = {0x0000, 0x2527, 0x15F5, 0x36FC, 0x1E9C, 0x01B4, 0x0D0A, 0x010E};
 static const u16 boss_blind_token_palette[PAL_ROW_LEN] = {0x0000, 0x2CC9, 0x3D0D, 0x5E14, 0x5171, 0x4D0F, 0x2CC8, 0x3089}; // This variable is temporary, each boss blind will have its own unique palette
 
+#define SMALL_BLIND_REWARD 3
+#define BIG_BLIND_REWARD 4
+#define BOSS_BLIND_REWARD 5
+
+// TODO: add multiplyer as a fixed for handle 1.5
+static Blind blindMap[MAX_BLINDS] =
+{
+    {
+        .type = SMALL_BLIND,
+        .palette = small_blind_token_palette,
+        .reward = SMALL_BLIND_REWARD,
+        .tid = SMALL_BLIND_TID,
+        .pb = SMALL_BLIND_PB,
+    },
+    {
+        .type = BIG_BLIND,
+        .palette = big_blind_token_palette,
+        .reward = BIG_BLIND_REWARD,
+        .tid = BIG_BLIND_TID,
+        .pb = BIG_BLIND_PB,
+    },
+    {
+        .type = BOSS_BLIND,
+        .palette = boss_blind_token_palette,
+        .reward = BOSS_BLIND_REWARD,
+        .tid = BOSS_BLIND_TID,
+        .pb = BOSS_BLIND_PB,
+    },
+};
+
 void blind_init()
 {
     // Blind graphics (fighting grit every step of the way as usual)
     GRIT_CPY(&tile_mem[4][SMALL_BLIND_TID], blinds_gfxTiles);
 
-    memcpy16(&pal_obj_mem[PAL_ROW_LEN * SMALL_BLIND_PB], &small_blind_token_palette, sizeof(small_blind_token_palette) / 2);
-    memcpy16(&pal_obj_mem[PAL_ROW_LEN * BIG_BLIND_PB], &big_blind_token_palette, sizeof(big_blind_token_palette) / 2);
-    // Boss Blind (This is temporary. Each boss blind is unique and will have to have its own graphics and palette which will probably be stored in some huge array)
-    memcpy16(&pal_obj_mem[PAL_ROW_LEN * BOSS_BLIND_PB], &boss_blind_token_palette, sizeof(boss_blind_token_palette) / 2);
+    for(int i = 0; i < MAX_BLINDS; i++) {
+        const u16* pal = blindMap[i].palette;
+
+        u32 pb = blindMap[i].pb;
+        u32 pal_offset = PAL_ROW_LEN * pb;
+
+        memcpy16(&pal_obj_mem[pal_offset], pal, PAL_ROW_LEN);
+    }
 }
 
-int blind_get_requirement(int type, int ante)
+int blind_get_requirement(enum BlindType type, int ante)
 {
     if (ante < 0 || ante > MAX_ANTE)
     {
@@ -40,54 +74,22 @@ int blind_get_requirement(int type, int ante)
     }
 }
 
-int blind_get_reward(int type)
+int blind_get_reward(enum BlindType type)
 {
-    switch (type)
-    {
-        case SMALL_BLIND:
-            return 3;
-        case BIG_BLIND:
-            return 4;
-        case BOSS_BLIND:
-            return 5;
-        default:
-            return 0; // Invalid type
-    }
+    return blindMap[type].reward;
 }
 
-u16 blind_get_color(int type, int index)
+u16 blind_get_color(enum BlindType type, int index)
 {
-    switch (type)
-    {
-        case SMALL_BLIND:
-            return small_blind_token_palette[index];
-        case BIG_BLIND:
-            return big_blind_token_palette[index];
-        case BOSS_BLIND:
-            return boss_blind_token_palette[index];
-        default:
-            return 0; // Invalid type
-    }
+    return blindMap[type].palette[index];
 }
 
-Sprite *blind_token_new(int type, int x, int y, int sprite_index)
+Sprite *blind_token_new(enum BlindType type, int x, int y, int sprite_index)
 {
-    Sprite *sprite = NULL;
-
-    switch (type)
-    {
-        case SMALL_BLIND:
-            sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP, ATTR1_SIZE_32x32, SMALL_BLIND_TID, SMALL_BLIND_PB, sprite_index);
-            break;
-        case BIG_BLIND:
-            sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP, ATTR1_SIZE_32x32, BIG_BLIND_TID, BIG_BLIND_PB, sprite_index);
-            break;
-        case BOSS_BLIND:
-            sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP, ATTR1_SIZE_32x32, BOSS_BLIND_TID, BOSS_BLIND_PB, sprite_index);
-            break;
-        default:
-            return NULL;
-    }
+    u16 a0 = ATTR0_SQUARE | ATTR0_4BPP;
+    u16 a1 = ATTR1_SIZE_32x32;
+    u32 tid = blindMap[type].tid, pb = blindMap[type].pb;
+    Sprite* sprite = sprite_new(a0, a1, tid, pb, sprite_index);
 
     sprite_position(sprite, x, y);
 

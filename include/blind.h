@@ -8,11 +8,20 @@
 // +1 is added because we'll actually be indexing at 1, but if something causes you to go to ante 0, there will still be a value there.
 static const int ante_lut[MAX_ANTE + 1] = {100, 300, 800, 2000, 5000, 11000, 20000, 35000, 50000};
 
-#define MAX_BLINDS 3
+enum BlindType {
+    SMALL_BLIND,
+    BIG_BLIND,
+    BOSS_BLIND,
+    MAX_BLINDS
+};
 
-#define SMALL_BLIND 0
-#define BIG_BLIND 1
-#define BOSS_BLIND 2
+typedef struct Blind {
+    enum BlindType type;
+    const u16* palette;
+    s32 reward;
+    u32 tid;
+    u32 pb;
+} Blind;
 
 #define SMALL_BLIND_PB 1
 #define BIG_BLIND_PB 2
@@ -41,10 +50,10 @@ enum BlindState
 
 void blind_init();
 
-int blind_get_requirement(int type, int ante);
-int blind_get_reward(int type);
-u16 blind_get_color(int type, int index);
+int blind_get_requirement(enum BlindType type, int ante);
+int blind_get_reward(enum BlindType type);
+u16 blind_get_color(enum BlindType type, int index);
 
-Sprite *blind_token_new(int type, int x, int y, int sprite_index); 
+Sprite *blind_token_new(enum BlindType type, int x, int y, int sprite_index);
 
 #endif // BLIND_H
