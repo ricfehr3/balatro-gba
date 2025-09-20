@@ -19,19 +19,19 @@ static JokerEffect sinful_joker_effect(Card *scored_card, u8 sinful_suit) {
 }
 
 static JokerEffect greedy_joker_effect(Joker *joker, Card *scored_card) {
-    return sinful_joker_effect(scored_card, DIAMONDS);
+    return sinful_joker_effect(scored_card, CARD_SUIT_DIAMONDS);
 }
 
 static JokerEffect lusty_joker_effect(Joker *joker, Card *scored_card) {
-    return sinful_joker_effect(scored_card, HEARTS);
+    return sinful_joker_effect(scored_card, CARD_SUIT_HEARTS);
 }
 
 static JokerEffect wrathful_joker_effect(Joker *joker, Card *scored_card) {
-    return sinful_joker_effect(scored_card, SPADES);
+    return sinful_joker_effect(scored_card, CARD_SUIT_SPADES);
 }
 
 static JokerEffect gluttonous_joker_effect(Joker *joker, Card *scored_card) {
-    return sinful_joker_effect(scored_card, CLUBS);
+    return sinful_joker_effect(scored_card, CARD_SUIT_CLUBS);
 }
 
 static JokerEffect jolly_joker_effect(Joker *joker, Card *scored_card) {
@@ -40,8 +40,8 @@ static JokerEffect jolly_joker_effect(Joker *joker, Card *scored_card) {
         return effect; // if card != null, we are not at the end-phase of scoring yet
 
     // This is really inefficient but the only way at the moment to check for whole-hand conditions
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
+    u8 suits[CARD_SUIT_MAX];
+    u8 ranks[CARD_RANK_MAX];
     get_played_distribution(ranks, suits);
 
     if (hand_contains_n_of_a_kind(ranks) >= 2)
@@ -54,8 +54,8 @@ static JokerEffect zany_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
+    u8 suits[CARD_SUIT_MAX];
+    u8 ranks[CARD_RANK_MAX];
     get_played_distribution(ranks, suits);
 
     if (hand_contains_n_of_a_kind(ranks) >= 3)
@@ -68,8 +68,8 @@ static JokerEffect mad_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
+    u8 suits[CARD_SUIT_MAX];
+    u8 ranks[CARD_RANK_MAX];
     get_played_distribution(ranks, suits);
 
     if (hand_contains_two_pair(ranks))
@@ -82,8 +82,8 @@ static JokerEffect crazy_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
+    u8 suits[CARD_SUIT_MAX];
+    u8 ranks[CARD_RANK_MAX];
     get_played_distribution(ranks, suits);
 
     if (hand_contains_straight(ranks))
@@ -96,8 +96,8 @@ static JokerEffect droll_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
+    u8 suits[CARD_SUIT_MAX];
+    u8 ranks[CARD_RANK_MAX];
     get_played_distribution(ranks, suits);
 
     if (hand_contains_flush(suits))
@@ -110,8 +110,8 @@ static JokerEffect sly_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
+    u8 suits[CARD_SUIT_MAX];
+    u8 ranks[CARD_RANK_MAX];
     get_played_distribution(ranks, suits);
 
     if (hand_contains_n_of_a_kind(ranks) >= 2)
@@ -124,8 +124,8 @@ static JokerEffect wily_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
+    u8 suits[CARD_SUIT_MAX];
+    u8 ranks[CARD_RANK_MAX];
     get_played_distribution(ranks, suits);
 
     if (hand_contains_n_of_a_kind(ranks) >= 3)
@@ -138,8 +138,8 @@ static JokerEffect clever_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
+    u8 suits[CARD_SUIT_MAX];
+    u8 ranks[CARD_RANK_MAX];
     get_played_distribution(ranks, suits);
 
     if (hand_contains_two_pair(ranks))
@@ -152,8 +152,8 @@ static JokerEffect devious_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
+    u8 suits[CARD_SUIT_MAX];
+    u8 ranks[CARD_RANK_MAX];
     get_played_distribution(ranks, suits);
 
     if (hand_contains_straight(ranks))
@@ -166,8 +166,8 @@ static JokerEffect crafty_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
+    u8 suits[CARD_SUIT_MAX];
+    u8 ranks[CARD_RANK_MAX];
     get_played_distribution(ranks, suits);
 
     if (hand_contains_flush(suits))
@@ -227,7 +227,7 @@ static JokerEffect walkie_talkie_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card == NULL)
         return effect;
 
-    if (scored_card->rank == TEN || scored_card->rank == FOUR) {
+    if (scored_card->rank == CARD_RANK_TEN || scored_card->rank == CARD_RANK_FOUR) {
             effect.chips = 10;
             effect.mult = 4;
     }
@@ -241,8 +241,17 @@ static JokerEffect fibonnaci_joker_effect(Joker *joker, Card *scored_card) {
         return effect;
 
     switch (scored_card->rank) {
-        case ACE: case TWO: case THREE: case FIVE: case EIGHT:
+        case CARD_RANK_ACE:
+        // Fallthru
+        case CARD_RANK_TWO:
+        // Fallthru
+        case CARD_RANK_THREE:
+        // Fallthru
+        case CARD_RANK_FIVE:
+        // Fallthru
+        case CARD_RANK_EIGHT:
             effect.mult = 8;
+        // Fallthru
         default:
             break;
     }
@@ -282,7 +291,7 @@ static JokerEffect blackboard_joker_effect(Joker *joker, Card *scored_card) {
     for (int i = 0; i < hand_size; i++ )
     {
         u8 suit = hand[i]->card->suit;
-        if (suit == HEARTS || suit == DIAMONDS) {
+        if (suit == CARD_SUIT_HEARTS || suit == CARD_SUIT_DIAMONDS) {
             all_cards_are_spades_or_clubs = false;
             break;
         }
@@ -342,7 +351,9 @@ static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card
     for (int i = 0; i < hand_size; i++ )
     {
         switch (hand[i]->card->rank) {
-            case KING: case QUEEN: case JACK:
+            case CARD_RANK_KING:
+            case CARD_RANK_QUEEN:
+            case CARD_RANK_JACK:
                 if (random() % 2 == 0)
                     effect.money += 1;
             default:
@@ -359,7 +370,9 @@ static JokerEffect business_card_joker_effect(Joker *joker, Card *scored_card) {
         return effect;
 
     switch (scored_card->rank) {
-        case KING: case QUEEN: case JACK:
+        case CARD_RANK_KING:
+        case CARD_RANK_QUEEN:
+        case CARD_RANK_JACK:
             if (random() % 2 == 0)
                 effect.money = 2;
         default:
@@ -374,7 +387,7 @@ static JokerEffect scholar_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card == NULL)
         return effect;
 
-    if (scored_card->rank == ACE) {
+    if (scored_card->rank == CARD_RANK_ACE) {
         effect.chips = 20;
         effect.mult = 4;
     }
@@ -388,7 +401,9 @@ static JokerEffect scary_face_joker_effect(Joker *joker, Card *scored_card) {
         return effect;
 
     switch (scored_card->rank) {
-        case KING: case QUEEN: case JACK:
+        case CARD_RANK_KING:
+        case CARD_RANK_QUEEN:
+        case CARD_RANK_JACK:
             effect.chips = 30;
         default:
             break;
@@ -427,7 +442,9 @@ static JokerEffect smiley_face_joker_effect(Joker *joker, Card *scored_card) {
         return effect;
 
     switch (scored_card->rank) {
-        case KING: case QUEEN: case JACK:
+        case CARD_RANK_KING:
+        case CARD_RANK_QUEEN:
+        case CARD_RANK_JACK:
             effect.mult = 5;
         default:
             break;
@@ -443,7 +460,9 @@ static JokerEffect even_steven_joker_effect(Joker *joker, Card *scored_card) {
 
     if (card_get_value(scored_card) % 2 == 0) {
         switch (scored_card->rank) {
-            case KING: case QUEEN: case JACK:
+            case CARD_RANK_KING:
+            case CARD_RANK_QUEEN:
+            case CARD_RANK_JACK:
                 break;
             default:
                 effect.mult = 4;

@@ -363,8 +363,8 @@ enum HandType hand_get_type()
 
     res_hand_type = HIGH_CARD;
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
+    u8 suits[CARD_SUIT_MAX];
+    u8 ranks[CARD_RANK_MAX];
     get_hand_distribution(ranks, suits);
 
     // Check for flush
@@ -381,7 +381,12 @@ enum HandType hand_get_type()
 
     // Check for royal flush vs regular straight flush
     if (res_hand_type == STRAIGHT_FLUSH) {
-        if (ranks[TEN] && ranks[JACK] && ranks[QUEEN] && ranks[KING] && ranks[ACE])
+        if (
+            ranks[CARD_RANK_TEN] &&
+            ranks[CARD_RANK_JACK] &&
+            ranks[CARD_RANK_QUEEN] &&
+            ranks[CARD_RANK_KING] &&
+            ranks[CARD_RANK_ACE])
             return ROYAL_FLUSH;
         return STRAIGHT_FLUSH;
     }
@@ -1008,7 +1013,7 @@ static void game_main_menu_init()
 {
     affine_background_change_background(AFFINE_BG_MAIN_MENU);
     change_background(BG_ID_MAIN_MENU);
-    main_menu_ace = card_object_new(card_new(SPADES, ACE));
+    main_menu_ace = card_object_new(card_new(CARD_SUIT_SPADES, CARD_RANK_ACE));
     card_object_set_sprite(main_menu_ace, 0); // Set the sprite for the ace of spades
     main_menu_ace->sprite_object->sprite->obj->attr0 |= ATTR0_AFF_DBL; // Make the sprite double sized
     main_menu_ace->sprite_object->tx = int2fx(88);
@@ -1129,9 +1134,9 @@ void game_start()
     discards = max_discards;
 
     // Fill the deck with all the cards. Later on this can be replaced with a more dynamic system that allows for different decks and card types.
-    for (int suit = 0; suit < NUM_SUITS; suit++)
+    for (int suit = 0; suit < CARD_SUIT_MAX; suit++)
     {
-        for (int rank = 0; rank < NUM_RANKS; rank++)
+        for (int rank = 0; rank < CARD_RANK_MAX; rank++)
         {
             Card *card = card_new(suit, rank);
             deck_push(card);

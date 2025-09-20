@@ -3,8 +3,8 @@
 #include "game.h"
 
 static void get_distribution(CardObject **cards, int top, u8 *ranks_out, u8 *suits_out) {
-    for (int i = 0; i < NUM_RANKS; i++) ranks_out[i] = 0;
-    for (int i = 0; i < NUM_SUITS; i++) suits_out[i] = 0;
+    for (int i = 0; i < CARD_RANK_MAX; i++) ranks_out[i] = 0;
+    for (int i = 0; i < CARD_SUIT_MAX; i++) suits_out[i] = 0;
 
     for (int i = 0; i <= top; i++) {
         if (cards[i] && card_object_is_selected(cards[i])) {
@@ -25,7 +25,7 @@ void get_played_distribution(u8 *ranks_out, u8 *suits_out) {
 // Returns the highest N of a kind. So a full-house would return 3.
 u8 hand_contains_n_of_a_kind(u8 *ranks) {
     u8 highest_n = 0;
-    for (int i = 0; i < NUM_RANKS; i++) {
+    for (int i = 0; i < CARD_RANK_MAX; i++) {
         if (ranks[i] > highest_n)
             highest_n = ranks[i];
     }
@@ -34,7 +34,7 @@ u8 hand_contains_n_of_a_kind(u8 *ranks) {
 
 bool hand_contains_two_pair(u8 *ranks) {
     bool contains_other_pair = false;
-    for (int i = 0; i < NUM_RANKS; i++) {
+    for (int i = 0; i < CARD_RANK_MAX; i++) {
         if (ranks[i] >= 2) {
             if (contains_other_pair)
                 return true;
@@ -47,7 +47,7 @@ bool hand_contains_two_pair(u8 *ranks) {
 bool hand_contains_full_house(u8* ranks) {
     int count_three = 0;
     int count_pair = 0;
-    for (int i = 0; i < NUM_RANKS; i++) {
+    for (int i = 0; i < CARD_RANK_MAX; i++) {
         if (ranks[i] >= 3) {
             count_three++;
         }
@@ -64,20 +64,25 @@ bool hand_contains_full_house(u8* ranks) {
 }
 
 bool hand_contains_straight(u8 *ranks) {
-    for (int i = 0; i < NUM_RANKS - 4; i++)
+    for (int i = 0; i < CARD_RANK_MAX - 4; i++)
     {
         if (ranks[i] && ranks[i + 1] && ranks[i + 2] && ranks[i + 3] && ranks[i + 4])
             return true;
     }
     // Check for ace low straight
-    if (ranks[ACE] && ranks[TWO] && ranks[THREE] && ranks[FOUR] && ranks[FIVE])
+    if (
+        ranks[CARD_RANK_ACE]   &&
+        ranks[CARD_RANK_TWO]   &&
+        ranks[CARD_RANK_THREE] &&
+        ranks[CARD_RANK_FOUR]  &&
+        ranks[CARD_RANK_FIVE])
         return true;
 
     return false;
 }
 
 bool hand_contains_flush(u8 *suits) {
-    for (int i = 0; i < NUM_SUITS; i++)
+    for (int i = 0; i < CARD_SUIT_MAX; i++)
     {
         if (suits[i] >= MAX_SELECTION_SIZE) // this allows MAX_SELECTION_SIZE - 1 for four fingers joker
         {

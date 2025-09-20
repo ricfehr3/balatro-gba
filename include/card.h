@@ -11,6 +11,7 @@
 #define CARD_PB 0
 #define CARD_STARTING_LAYER 0
 
+/*
 // Card suits
 #define HEARTS 0
 #define CLUBS 1
@@ -34,6 +35,7 @@
 #define ACE 12
 #define NUM_RANKS 13
 #define RANK_OFFSET 2 // Because the first rank is 2 and ranks start at 0
+*/
 
 enum CardSuit {
     CARD_SUIT_HEARTS,
