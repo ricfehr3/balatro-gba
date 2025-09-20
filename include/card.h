@@ -35,13 +35,38 @@
 #define NUM_RANKS 13
 #define RANK_OFFSET 2 // Because the first rank is 2 and ranks start at 0
 
+enum CardSuit {
+    CARD_SUIT_HEARTS,
+    CARD_SUIT_CLUBS,
+    CARD_SUIT_DIAMONDS,
+    CARD_SUIT_SPADES,
+    CARD_SUIT_MAX,
+};
+
+enum CardRank {
+    CARD_RANK_TWO,
+    CARD_RANK_THREE,
+    CARD_RANK_FOUR,
+    CARD_RANK_FIVE,
+    CARD_RANK_SIX,
+    CARD_RANK_SEVEN,
+    CARD_RANK_EIGHT,
+    CARD_RANK_NINE,
+    CARD_RANK_TEN,
+    CARD_RANK_JACK,
+    CARD_RANK_QUEEN,
+    CARD_RANK_KING,
+    CARD_RANK_ACE,
+    CARD_RANK_MAX,
+};
+
 #define IMPOSSIBLY_HIGH_CARD_VALUE 100
 
 // Card types
 typedef struct
 {
-    u8 suit;
-    u8 rank;
+    enum CardSuit suit;
+    enum CardRank rank;
 } Card;
 
 typedef struct CardObject
@@ -54,7 +79,7 @@ typedef struct CardObject
 void card_init();
 
 // Card methods
-Card *card_new(u8 suit, u8 rank);
+Card *card_new(enum CardSuit suit, enum CardRank rank);
 void card_destroy(Card **card);
 u8 card_get_value(Card *card);
 
