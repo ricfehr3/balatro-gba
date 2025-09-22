@@ -8,7 +8,7 @@ on:
       - "v*"
   pull_request:
     branches:
-      - main
+      - feature/ci-upload-button
   workflow_dispatch:
     inputs:
       clear_cache:
