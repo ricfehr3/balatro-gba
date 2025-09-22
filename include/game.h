@@ -4,9 +4,9 @@
 #define MAX_HAND_SIZE 16
 #define MAX_DECK_SIZE 52
 #define MAX_JOKERS_HELD_SIZE 5 // This doesn't account for negatives right now.
-#define MAX_SHOP_JOKERS 2      // TODO: Make this dynamic and allow for other items besides jokers
+#define MAX_SHOP_JOKERS 2 // TODO: Make this dynamic and allow for other items besides jokers
 #define MAX_SELECTION_SIZE 5
-#define MAX_CARD_SCORE_DIGITS 2                            // Current digit limit for score received from cards including mult etc. from jokers
+#define MAX_CARD_SCORE_DIGITS 2 // Current digit limit for score received from cards including mult etc. from jokers
 #define MAX_CARD_SCORE_STR_LEN (MAX_CARD_SCORE_DIGITS + 1) // For the '+' or 'X'
 #define FRAMES(x) (((x) + game_speed - 1) / game_speed)
 
@@ -81,25 +81,25 @@ void game_update();
 void game_set_state(enum GameState new_game_state);
 
 // Forward declaration
-struct List;
+struct List; 
 typedef struct List List;
 
 // Utility functions for other files
 typedef struct CardObject CardObject; // forward declaration, actually declared in card.h
 typedef struct JokerObject JokerObject;
-CardObject **get_hand_array(void);
-int get_hand_top(void);
-int hand_get_size(void);
-CardObject **get_played_array(void);
-int get_played_top(void);
-List *get_jokers(void);
+CardObject**    get_hand_array(void);
+int             get_hand_top(void);
+int             hand_get_size(void);
+CardObject**    get_played_array(void);
+int             get_played_top(void);
+List*           get_jokers(void);
 
 int get_deck_top(void);
 int get_num_discards_remaining(void);
 int get_money(void);
 
-extern int game_speed; // had to do this use this it the sprites animations
-                              // that were not affected by game_speed, like discard
-                              // and draw-to-deck animations.
+extern int game_speed;  // had to do this use this it the sprites animations
+                        // that were not affected by game_speed, like discard
+                        // and draw-to-deck animations.
 
 #endif // GAME_H
