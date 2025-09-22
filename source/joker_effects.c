@@ -591,7 +591,7 @@ static JokerEffect triboulet_joker_effect(Joker *joker, Card *scored_card) {
         return effect;
 
     switch (scored_card->rank) {
-        case KING: case QUEEN: case JACK:
+        case KING: case QUEEN:
             effect.xmult = 2;
         default:
             break;
