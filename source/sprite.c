@@ -1,3 +1,4 @@
+#include "game.h"
 #include "sprite.h"
 #include "util.h"
 #include "audio_utils.h"
@@ -12,7 +13,7 @@
 #define SPRITE_FOCUS_RAISE_PX 10
 
 OBJ_ATTR obj_buffer[MAX_SPRITES];
-OBJ_AFFINE *obj_aff_buffer = (OBJ_AFFINE*)obj_buffer;
+OBJ_AFFINE *obj_aff_buffer = (OBJ_AFFINE *)obj_buffer;
 
 static Sprite *free_sprites[MAX_SPRITES] = {NULL};
 static bool free_affines[MAX_AFFINES] = {false};
@@ -25,7 +26,7 @@ Sprite *sprite_new(u16 a0, u16 a1, u32 tid, u32 pb, int sprite_index)
     sprite->obj = NULL;
     sprite->aff = NULL;
 
-    if(!free_sprites[sprite_index])
+    if (!free_sprites[sprite_index])
     {
         free_sprites[sprite_index] = sprite;
     }
@@ -39,9 +40,9 @@ Sprite *sprite_new(u16 a0, u16 a1, u32 tid, u32 pb, int sprite_index)
     {
         int aff_index = MAX_AFFINES;
 
-        for(int i = 0; i < MAX_AFFINES; i++)
+        for (int i = 0; i < MAX_AFFINES; i++)
         {
-            if(!free_affines[i])
+            if (!free_affines[i])
             {
                 free_affines[i] = true;
                 aff_index = i;
@@ -73,7 +74,8 @@ Sprite *sprite_new(u16 a0, u16 a1, u32 tid, u32 pb, int sprite_index)
 
 void sprite_destroy(Sprite **sprite)
 {
-    if (*sprite == NULL) return;
+    if (*sprite == NULL)
+        return;
     obj_hide((*sprite)->obj);
     free_sprites[(*sprite)->obj - obj_buffer] = NULL;
     if ((*sprite)->aff != NULL)
@@ -86,14 +88,15 @@ void sprite_destroy(Sprite **sprite)
 
 int sprite_get_layer(Sprite *sprite)
 {
-    if (sprite == NULL || sprite->obj == NULL) return -1;
+    if (sprite == NULL || sprite->obj == NULL)
+        return -1;
     return sprite->obj - obj_buffer;
 }
 
 // Sprite functions
 void sprite_init()
 {
-    oam_init(obj_buffer, MAX_SPRITES); 
+    oam_init(obj_buffer, MAX_SPRITES);
 }
 
 void sprite_draw()
@@ -112,9 +115,9 @@ int sprite_get_pb(const Sprite *sprite)
 }
 
 // SpriteObject methods
-SpriteObject* sprite_object_new()
+SpriteObject *sprite_object_new()
 {
-    SpriteObject* sprite_object = (SpriteObject*)malloc(sizeof(SpriteObject));
+    SpriteObject *sprite_object = (SpriteObject *)malloc(sizeof(SpriteObject));
     sprite_object->sprite = NULL;
     sprite_object_reset_transform(sprite_object);
     sprite_object->selected = false;
@@ -123,15 +126,16 @@ SpriteObject* sprite_object_new()
     return sprite_object;
 }
 
-void sprite_object_destroy(SpriteObject** sprite_object)
+void sprite_object_destroy(SpriteObject **sprite_object)
 {
-    if (*sprite_object == NULL) return;
+    if (*sprite_object == NULL)
+        return;
     sprite_destroy(&((*sprite_object)->sprite));
     free(*sprite_object);
     *sprite_object = NULL;
 }
 
-void sprite_object_set_sprite(SpriteObject* sprite_object, Sprite* sprite)
+void sprite_object_set_sprite(SpriteObject *sprite_object, Sprite *sprite)
 {
     if (sprite_object == NULL)
         return;
@@ -139,7 +143,7 @@ void sprite_object_set_sprite(SpriteObject* sprite_object, Sprite* sprite)
     sprite_object->sprite = sprite;
 }
 
-void sprite_object_reset_transform(SpriteObject* sprite_object)
+void sprite_object_reset_transform(SpriteObject *sprite_object)
 {
     sprite_object->tx = 0; // Target position
     sprite_object->ty = 0;
@@ -155,10 +159,10 @@ void sprite_object_reset_transform(SpriteObject* sprite_object)
     sprite_object->vrotation = 0;
 }
 
-void sprite_object_update(SpriteObject* sprite_object)
+void sprite_object_update(SpriteObject *sprite_object)
 {
-    sprite_object->vx += (sprite_object->tx - sprite_object->x) / 8;
-    sprite_object->vy += (sprite_object->ty - sprite_object->y) / 8;
+    sprite_object->vx += (sprite_object->tx - sprite_object->x) / (8 / game_speed); // SPEED
+    sprite_object->vy += (sprite_object->ty - sprite_object->y) / (8 / game_speed);
 
     sprite_object->vscale += (sprite_object->tscale - sprite_object->scale) / 8; // Scale up the card when it's played
 
@@ -211,38 +215,39 @@ void sprite_object_update(SpriteObject* sprite_object)
     sprite_position(sprite_object->sprite, fx2int(sprite_object->x), fx2int(sprite_object->y));
 }
 
-void sprite_object_shake(SpriteObject* sprite_object, mm_word sound_id)
+void sprite_object_shake(SpriteObject *sprite_object, mm_word sound_id)
 {
     sprite_object->vscale = float2fx(0.3f);
-    sprite_object->vrotation = float2fx(8.0f); //Rotate the card when it's scored
+    sprite_object->vrotation = float2fx(8.0f); // Rotate the card when it's scored
 
-    if (sound_id == UNDEFINED) return; // If no sound ID is provided, do nothing
+    if (sound_id == UNDEFINED)
+        return; // If no sound ID is provided, do nothing
 
     play_sfx(sound_id, MM_BASE_PITCH_RATE);
 }
 
-void sprite_object_set_selected(SpriteObject* sprite_object, bool selected)
+void sprite_object_set_selected(SpriteObject *sprite_object, bool selected)
 {
     if (sprite_object == NULL)
         return;
     sprite_object->selected = selected;
 }
 
-bool sprite_object_is_selected(SpriteObject* sprite_object)
+bool sprite_object_is_selected(SpriteObject *sprite_object)
 {
     if (sprite_object == NULL)
         return false;
     return sprite_object->selected;
 }
 
-Sprite* sprite_object_get_sprite(SpriteObject* sprite_object)
+Sprite *sprite_object_get_sprite(SpriteObject *sprite_object)
 {
     if (sprite_object == NULL)
         return NULL;
     return sprite_object->sprite;
 }
 
-void sprite_object_set_focus(SpriteObject* sprite_object, bool focus)
+void sprite_object_set_focus(SpriteObject *sprite_object, bool focus)
 {
     if (sprite_object->focused == focus)
     {
@@ -250,11 +255,11 @@ void sprite_object_set_focus(SpriteObject* sprite_object, bool focus)
     }
     sprite_object->focused = focus;
 
-    play_sfx(SFX_CARD_FOCUS , MM_BASE_PITCH_RATE + rand() % 512);
+    play_sfx(SFX_CARD_FOCUS, MM_BASE_PITCH_RATE + rand() % 512);
     sprite_object->ty = sprite_object->ty + int2fx((focus ? -1 : 1) * SPRITE_FOCUS_RAISE_PX);
 }
 
-bool sprite_object_is_focused(SpriteObject* sprite_object)
+bool sprite_object_is_focused(SpriteObject *sprite_object)
 {
     return sprite_object->focused;
 }
