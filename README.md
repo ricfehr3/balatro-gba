@@ -1,8 +1,9 @@
 # Balatro-GBA
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/cellos51/balatro-gba/build_ci_workflow.yml?style=flat&logo=github&branch=main&label=Builds&labelColor=gray&color=default&v=1)](https://github.com/cellos51/balatro-gba/actions)
-[![Open Issues](https://custom-icon-badges.demolab.com/github/issues/cellos51/balatro-gba?logo=bug&style=flat&label=Issues&labelColor=gray&color=red&v=2)](https://github.com/cellos51/balatro-gba/issues)
-[![Pull Requests](https://custom-icon-badges.demolab.com/github/issues-pr/cellos51/balatro-gba?logo=git-pull-request&style=flat&label=Pull%20Requests&labelColor=gray&color=indigo&v=3)](https://github.com/cellos51/balatro-gba/pulls)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/cellos51/balatro-gba/build_ci_workflow.yml?style=flat&logo=github&branch=main&label=Builds&labelColor=gray&color=default&maxAge=7200)](https://github.com/cellos51/balatro-gba/actions)
+[![Open Issues](https://custom-icon-badges.demolab.com/github/issues/cellos51/balatro-gba?logo=issue-opened&style=flat&label=Issues&labelColor=gray&color=red&maxAge=7200)](https://github.com/cellos51/balatro-gba/issues)
+[![Pull Requests](https://custom-icon-badges.demolab.com/github/issues-pr/cellos51/balatro-gba?logo=git-pull-request&style=flat&label=Pull%20Requests&labelColor=gray&color=indigo&maxAge=7200)](https://github.com/cellos51/balatro-gba/pulls)
+[![GitHub Discussions](https://custom-icon-badges.demolab.com/github/discussions/cellos51/balatro-gba?logo=comment-discussion&label=Discussions&labelColor=gray&color=blue&style=flat&maxAge=7200)](https://github.com/cellos51/balatro-gba/discussions)
 
 This is an attempt to recreate the game **'Balatro'** as accurately as possible, including all of the visual effects that make Balatro feel satisfying to play.
 This **tech-demo/proof of concept** is strictly limited in content to a minimal version of Balatro and will **NOT** recreate the full game. **This version is intended for people who already own and know how the official full game works.** Please refer to the Balatro Wiki if you need help understanding certain mechanics or abilities.
@@ -45,10 +46,10 @@ A docker compose file is provided to build this project.
 1.) Install [docker desktop](https://docs.docker.com/compose/install/). 
 
 2.) Open a terminal to this projects directory:
-- On **linux** run `UID=$(id -u) GID=$(id -g) docker compose up`
-- On **windows** run `docker compose up`
+- On **Linux** run `UID=$(id -u) GID=$(id -g) docker compose up`
+- On **Windows** run `docker compose up`
 
-Docker will build the project and the ROM will be in the same location as step 7 describes below.
+Docker will build the project and the ROM will be in the same location as how Step 7 describes below.
 
 ## **-Windows-**
 Video Tutorial: https://youtu.be/72Zzo1VDYzQ?si=UDmEdbST1Cx1zZV2
@@ -71,13 +72,13 @@ Disregard Steps 3-4 and instead click the green code button on the main reposito
 
 ## **-Linux-**
 
-1.) Add the devkitPro repo using these instructions https://devkitpro.org/wiki/devkitPro_pacman
+1.) Add the devkitPro repository using these instructions https://devkitpro.org/wiki/devkitPro_pacman
 
-2.) Install devkitPro by running `sudo pacman -S gba-dev` and accepting all packages
+2.) Install devkitPro by running `sudo pacman -S gba-dev` and accepting all packages.
 
-3.) Activate the devkitPro environment by running `source /etc/profile.d/devkit-env.sh` or opening a new shell
+3.) Activate the devkitPro environment by running `source /etc/profile.d/devkit-env.sh` or opening a new shell.
 
-4.) Follow instructions from windows tutorial step 3
+4.) Follow instructions from the Windows tutorial starting from Step 3
 
 ## **Common Issues:**
 
