@@ -38,10 +38,16 @@ GRAPHICS	:= graphics
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork
 
+GIT_DIRTY := $(shell git diff-index --quiet HEAD -- || echo "-dirty")
+GIT_HASH := $(shell git rev-parse --short HEAD)
+GIT_C_FLAGS := -DGIT_HASH=\"$(GIT_HASH)\" -DGIT_DIRTY=\"$(GIT_DIRTY)\"
+
 CFLAGS	:= -g -O3 -Wall -Werror\
         -mcpu=arm7tdmi -mtune=arm7tdmi \
         -ffast-math -fomit-frame-pointer -funroll-loops \
         $(ARCH)
+
+CFLAGS  += $(GIT_C_FLAGS)
 
 CFLAGS	+=	$(INCLUDE)
 
