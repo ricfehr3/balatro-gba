@@ -158,9 +158,14 @@ void sprite_object_reset_transform(SpriteObject* sprite_object)
 
 void sprite_object_update(SpriteObject* sprite_object)
 {
-    sprite_object->vx += (sprite_object->tx - sprite_object->x) / (8 / game_speed); // SPEED
-    sprite_object->vy += (sprite_object->ty - sprite_object->y) / (8 / game_speed);
+    sprite_object->vx += (sprite_object->tx - sprite_object->x) / (8 / get_game_speed()); // SPEED
+    sprite_object->vy += (sprite_object->ty - sprite_object->y) / (8 / get_game_speed()); // this makes the game_speed not be
+                                                                                          // able to be more than 8, because of 
+                                                                                          //integer division making it a divide by 0.
+                                                                                          // shouldn't be a problem since speed 9 or more 
+                                                                                          // is way too much lol.
 
+                                                                                          
     sprite_object->vscale += (sprite_object->tscale - sprite_object->scale) / 8; // Scale up the card when it's played
 
     sprite_object->vrotation += (sprite_object->trotation - sprite_object->rotation) / 8; // Rotate the card when it's played
