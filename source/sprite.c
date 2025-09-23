@@ -161,7 +161,6 @@ void sprite_object_update(SpriteObject* sprite_object)
     sprite_object->vx += ((sprite_object->tx - sprite_object->x) * get_game_speed()) / 8; // SPEED
     sprite_object->vy += ((sprite_object->ty - sprite_object->y) * get_game_speed()) / 8; 
 
-                                                                                          
     sprite_object->vscale += (sprite_object->tscale - sprite_object->scale) / 8; // Scale up the card when it's played
 
     sprite_object->vrotation += (sprite_object->trotation - sprite_object->rotation) / 8; // Rotate the card when it's played
