@@ -32,7 +32,7 @@
 static uint rng_seed = 0;
 
 static uint timer = 0; // This might already exist in libtonc but idk so i'm just making my own
-static int game_speed = 1; // BY DEFAULT IS SET TO 1, but if changed to 2 - 8, should speed up all (or most) of the game aspects that should be sped up by speed, as in the original game.
+static int game_speed = 1; // BY DEFAULT IS SET TO 1, but if changed to 2 or more, should speed up all (or most) of the game aspects that should be sped up by speed, as in the original game.
 static int background = 0;
 
 static enum GameState game_state = GAME_SPLASH_SCREEN; // The current game state, this is used to determine what the game is doing at any given time
