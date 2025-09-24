@@ -57,26 +57,35 @@ typedef enum
     DISPLAY_BLIND_PANEL
 } _BlindSelectStates;
 
+typedef struct 
+{
+    int chips;
+    int mult;
+    char *display_name;
+} HandValues;
+
 // Used as a No Operation for game states that have no init and/or exit function.
 // ricfehr3 did the work of determining whether a noop or a NULL check was more 
 // efficient. Well, this is the answer.
 // Thanks!
 static void _noop() {}
 
-static void game_main_menu_init();
-static void game_main_menu_update();
-static void game_lose_init();
-static void game_win_init();
-static void game_playing_update();
-static void game_round_end_update();
-static void game_shop_update();
-static void game_blind_select_update();
-static void game_lose_update();
-static void game_win_update();
-static void game_round_init();
-static void game_state_shop_exit();
-static void game_blind_select_exit();
-static void game_round_end_exit();
+// These functions need to be forward declared
+// so they're visible to the state_info array.
+static void game_main_menu_on_init();
+static void game_main_menu_on_update();
+static void game_round_on_init();
+static void game_playing_on_update();
+static void game_round_end_on_update();
+static void game_round_end_on_exit();
+static void game_shop_on_update();
+static void game_shop_on_exit();
+static void game_blind_select_on_update();
+static void game_blind_select_on_exit();
+static void game_lose_on_init();
+static void game_lose_on_update();
+static void game_win_on_init();
+static void game_win_on_update();
 
 static uint rng_seed = 0;
 
@@ -84,12 +93,30 @@ static uint timer = 0; // This might already exist in libtonc but idk so i'm jus
 static int game_speed = 1; // BY DEFAULT IS SET TO 1, but if changed to 2 or more, should speed up all (or most) of the game aspects that should be sped up by speed, as in the original game.
 static int background = 0;
 
-StateInfo states[GAME_STATE_MAX] = 
+static const StateInfo state_info[GAME_STATE_MAX] = 
 {
 #define DEF_STATE_INFO(stateEnum, init_fn, update_fn, exit_fn) \
     { .state = stateEnum, .on_init = init_fn, .on_update = update_fn, .on_exit = exit_fn },
 #include "../include/game_state_table.h"
 #undef DEF_STATE_INFO
+};
+
+static const HandValues hand_values[] = 
+{
+    { .chips = 0,       .mult = 0,      .display_name = NULL        },  // NONE
+    { .chips = 5,       .mult = 1,      .display_name = "HIGH C"    },  // HIGH_CARD
+    { .chips = 10,      .mult = 2,      .display_name = "PAIR"      },  // PAIR
+    { .chips = 20,      .mult = 2,      .display_name = "2 PAIR"    },  // TWO_PAIR
+    { .chips = 30,      .mult = 3,      .display_name = "3 OAK"     },  // THREE_OF_A_KIND
+    { .chips = 60,      .mult = 7,      .display_name = "4 OAK"     },  // FOUR_OF_A_KIND
+    { .chips = 30,      .mult = 4,      .display_name = "STRT"      },  // STRAIGHT
+    { .chips = 35,      .mult = 4,      .display_name = "FLUSH"     },  // FLUSH
+    { .chips = 40,      .mult = 4,      .display_name = "FULL H"    },  // FULL_HOUSE 
+    { .chips = 100,     .mult = 8,      .display_name = "STRT F"    },  // STRAIGHT_FLUSH
+    { .chips = 100,     .mult = 8,      .display_name = "ROYAL F"   },  // ROYAL_FLUSH
+    { .chips = 120,     .mult = 12,     .display_name = "5 OAK"     },  // FIVE_OF_A_KIND
+    { .chips = 140,     .mult = 14,     .display_name = "FLUSH H"   },  // FLUSH_HOUSE
+    { .chips = 160,     .mult = 16,     .display_name = "FLUSH 5"   }   // FLUSH_FIVE
 };
 
 static enum GameState game_state = GAME_STATE_SPLASH_SCREEN; // The current game state, this is used to determine what the game is doing at any given time
@@ -935,79 +962,13 @@ void set_hand()
 {
     tte_erase_rect_wrapper(HAND_TYPE_RECT);
     hand_type = hand_get_type();
-    switch (hand_type)
-    {
-    case HIGH_CARD:
-        print_hand_type("HIGH C");
-        chips = 5;
-        mult = 1;
-        break;
-    case PAIR:
-        print_hand_type("PAIR");
-        chips = 10;
-        mult = 2;
-        break;
-    case TWO_PAIR:
-        print_hand_type("2 PAIR");
-        chips = 20;
-        mult = 2;
-        break;
-    case THREE_OF_A_KIND:
-        print_hand_type("3 OAK");
-        chips = 30;
-        mult = 3;
-        break;
-    case STRAIGHT:
-        print_hand_type("STRT");
-        chips = 30;
-        mult = 4;
-        break;
-    case FLUSH:
-        print_hand_type("FLUSH");
-        chips = 35;
-        mult = 4;
-        break;
-    case FULL_HOUSE:
-        print_hand_type("FULL H");
-        chips = 40;
-        mult = 4;
-        break;
-    case FOUR_OF_A_KIND:
-        print_hand_type("4 OAK");
-        chips = 60;
-        mult = 7;
-        break;
-    case STRAIGHT_FLUSH:
-        print_hand_type("STRT F");
-        chips = 100;
-        mult = 8;
-        break;
-    case ROYAL_FLUSH:
-        print_hand_type("ROYAL F");
-        chips = 100;
-        mult = 8;
-        break;
-    case FIVE_OF_A_KIND:
-        print_hand_type("5 OAK");
-        chips = 120;
-        mult = 12;
-        break;
-    case FLUSH_HOUSE:
-        print_hand_type("FLUSH H");
-        chips = 140;
-        mult = 14;
-        break;
-    case FLUSH_FIVE:
-        print_hand_type("FLUSH 5");
-        chips = 160;
-        mult = 16;
-        break;
-    case NONE:
-        chips = 0;
-        mult = 0;
-        break;
-    }
 
+    HandValues hand = hand_values[hand_type];
+
+    chips = hand.chips;
+    mult = hand.mult;
+
+    print_hand_type(hand.display_name);
     display_chips(chips);
     display_mult(mult);
 }
@@ -1151,7 +1112,7 @@ void increment_blind(enum BlindState increment_reason)
     }
 }
 
-static void game_round_init()
+static void game_round_on_init()
 {
     hand_state = HAND_DRAW;
     cards_drawn = 0;
@@ -1200,7 +1161,7 @@ static void game_round_init()
     deck_shuffle(); // Shuffle the deck at the start of the round
 }
 
-static void game_main_menu_init()
+static void game_main_menu_on_init()
 {
     affine_background_change_background(AFFINE_BG_MAIN_MENU);
     change_background(BG_ID_MAIN_MENU);
@@ -1221,7 +1182,7 @@ static void game_over_init()
     main_bg_se_copy_expand_3x3_rect(GAME_OVER_DIALOG_DEST_RECT, GAME_OVER_SRC_RECT_3X3_POS);
 }
 
-static void game_lose_init()
+static void game_lose_on_init()
 {
     game_over_init();
     // Using the text color to match the "Game Over" text
@@ -1229,7 +1190,7 @@ static void game_lose_init()
 
 }
 
-static void game_win_init()
+static void game_win_on_init()
 {
     game_over_init();
     // Using the text color to match the "You Win" text
@@ -1241,8 +1202,8 @@ void game_change_state(enum GameState new_game_state)
 {
     timer = TM_ZERO; // Reset the timer
     
-    states[game_state].on_exit();
-    states[new_game_state].on_init();
+    state_info[game_state].on_exit();
+    state_info[new_game_state].on_init();
 
     game_state = new_game_state;
 }
@@ -2124,7 +2085,7 @@ static void game_round_end_cashout()
     display_score(score); // Set the score display
 }
 
-static void game_playing_update()
+static void game_playing_on_update()
 {
     // Background logic (thissss might be moved to the card'ssss logic later. I'm a sssssnake)
     if (hand_state == HAND_DRAW || hand_state == HAND_DISCARD || hand_state == HAND_SELECT)
@@ -2154,7 +2115,7 @@ static void game_playing_update()
     game_playing_ui_text_update();
 }
 
-static void game_round_end_exit()
+static void game_round_end_on_exit()
 {
     // Cleanup blind tokens from this round to avoid accumulating 
     // allocated blind sprites each round
@@ -2165,7 +2126,7 @@ static void game_round_end_exit()
     // TODO: Reuse sprites for blind selection?
 }
 
-static void game_round_end_update()
+static void game_round_end_on_update()
 {
     static int blind_reward = 0;
     static int hand_reward = 0;
@@ -2842,7 +2803,7 @@ static void game_shop_outro()
     }
 }
 
-static void game_shop_update()
+static void game_shop_on_update()
 {
     change_background(BG_ID_SHOP);
 
@@ -2886,7 +2847,7 @@ static void game_shop_update()
     }
 }
 
-static void game_state_shop_exit()
+static void game_shop_on_exit()
 {
     state = 0; // Reset the state
     
@@ -2906,7 +2867,7 @@ static void game_state_shop_exit()
     increment_blind(BLIND_DEFEATED); // TODO: Move to game_round_end()?
 }
 
-static void game_blind_select_update()
+static void game_blind_select_on_update()
 {
     switch (state) // I'm only using magic numbers here for the sake of simplicity since it's just sequential, but you can replace them with named constants or enums if it makes it clearer
     {
@@ -3066,7 +3027,7 @@ static void game_blind_select_update()
     }
 }
 
-static void game_blind_select_exit()
+static void game_blind_select_on_exit()
 {
     state = 0;
     timer = 0;
@@ -3074,7 +3035,7 @@ static void game_blind_select_exit()
     background = UNDEFINED;
 }
 
-static void game_main_menu_update()
+static void game_main_menu_on_update()
 {
     change_background(BG_ID_MAIN_MENU);
 
@@ -3175,7 +3136,7 @@ static void game_over_anim_frame()
     main_bg_se_move_rect_1_tile_vert(GAME_OVER_ANIM_RECT, SE_UP);
 }
 
-static void game_lose_update()
+static void game_lose_on_update()
 {
     if (timer < GAME_OVER_ANIM_FRAMES)
     {
@@ -3187,7 +3148,7 @@ static void game_lose_update()
     }
 }
 
-static void game_win_update()
+static void game_win_on_update()
 {
     if (timer < GAME_OVER_ANIM_FRAMES)
     {
@@ -3205,5 +3166,5 @@ void game_update()
 
     jokers_update_loop();
 
-    states[game_state].on_update();
+    state_info[game_state].on_update();
 }
