@@ -10,6 +10,12 @@ typedef struct List
     int allocated_size;
 } List;
 
+typedef struct ListNode
+{
+    int next; // -1, end
+    int prev; // -1, beginning
+} ListNode;
+
 List *list_new(int init_size);
 void list_destroy(List **list);
 bool list_append(List *list, void *value);
@@ -21,5 +27,19 @@ bool list_remove_by_value(List *list, void *value);
 bool int_list_append(List *list, intptr_t value);
 intptr_t int_list_get(List *list, int index);
 bool int_list_remove_by_value(List *list, intptr_t value);
+
+bool list_append_new(ListNode* p_a, ListNode* p_b);
+
+typedef struct {
+    int prev;       // link-node idx (into link_pool), or -1
+    int next;       // link-node idx (into link_pool), or -1
+    int elem_idx;   // index into your T_pool (the element this link represents)
+} LinkNode;
+
+typedef struct {
+    int head; // link-node idx or -1
+} list_head;
+
+int list_push_front(list_head *H, int elem_idx);
 
 #endif

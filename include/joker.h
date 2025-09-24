@@ -41,6 +41,8 @@
 #define GREEDY_JOKER_ID 1 // This is just an example to show the patern of making joker IDs
 #define JOKER_STENCIL_ID 16
 
+#include "list.h"
+
 typedef struct 
 {
     u8 id; // Unique ID for the joker, used to identify different jokers
@@ -48,6 +50,7 @@ typedef struct
     u8 value;
     u8 rarity;
     bool processed;
+    ListNode list_head;
 } Joker;
 
 typedef struct JokerObject

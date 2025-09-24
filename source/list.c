@@ -99,3 +99,26 @@ int list_get_size(List *list)
     }
     return list->size;
 }
+
+bool list_append_new(ListNode* p_a, ListNode* p_b)
+{
+    return false;
+}
+
+#include "pool.h"
+int list_push_front(list_head *H, int elem_idx){
+    LinkNode *N = POOL_GET(LinkNode);
+    N->elem_idx = elem_idx;
+    N->prev = -1;
+    N->next = H->head;
+    //if (H->head != -1) LP->nodes[H->head].prev = n;
+    int n = POOL_IDX(LinkNode, N); // get index
+    if (H->head != -1)
+    {
+        POOL_AT(LinkNode, H->head)->prev = n; // get at idx
+    }
+    H->head = n;
+    return n; // return link-node idx (store it if you want O(1) erase later)
+}
+
+// usage: list_push_front(jokers, POOL_IDX(Joker, myjoker));
