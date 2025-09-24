@@ -550,7 +550,7 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
 
 // graphics available from @MathisMartin31
    __attribute__((unused))
-static JokerEffect joker_bootstraps_effect(Joker *joker, Card *scored_card) {
+static JokerEffect bootstraps_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
@@ -652,6 +652,13 @@ const JokerInfo joker_registry[] = {
 
     { COMMON_JOKER, 4, abstract_joker_effect },
     { UNCOMMON_JOKER, 6, bull_joker_effect},
+    { RARE_JOKER, 8, the_duo_joker_effect},
+    { RARE_JOKER, 8, the_trio_joker_effect},
+    { RARE_JOKER, 8, the_family_joker_effect},
+    { RARE_JOKER, 8, the_order_joker_effect},
+    { RARE_JOKER, 8, the_tribe_joker_effect},
+    { UNCOMMON_JOKER, 7, bootstraps_joker_effect},
+    { COMMON_JOKER, 5, shoot_the_moon_joker_effect},
 #endif
 };
 
