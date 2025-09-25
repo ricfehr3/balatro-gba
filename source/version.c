@@ -1,6 +1,3 @@
-#ifndef VERSION_H
-#define VERSION_H
-
 #ifndef GIT_HASH
 #define GIT_HASH "undef"
 #endif
@@ -9,7 +6,5 @@
 #define GIT_DIRTY "-dirty"
 #endif
 
-__attribute__((used))
+__attribute__((section(".version"), used))
 const char balatro_version[] = "GBALATRO_VERSION:" GIT_HASH GIT_DIRTY;
-
-#endif // VERSION_H

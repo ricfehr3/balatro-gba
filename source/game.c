@@ -28,7 +28,6 @@
 #include "soundbank.h"
 
 #include "list.h"
-#include "version.h"
 
 static uint rng_seed = 0;
 
