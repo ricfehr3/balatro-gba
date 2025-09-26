@@ -6,6 +6,7 @@
 
 #include "tonc_memdef.h"
 #include "tonc_memmap.h"
+#include "tonc_tte.h"
 #include "util.h"
 #include "sprite.h"
 #include "card.h"
@@ -72,11 +73,15 @@ typedef void (*SubStateActionFn)();
 // ricfehr3 did the work of determining whether a noop or a NULL check was more 
 // efficient. Well, this is the answer.
 // Thanks!
+// https://github.com/cellos51/balatro-gba/issues/137#issuecomment-3322485129
 static void _noop() {}
 
 // These functions need to be forward declared
 // so they're visible to the state_info array,
 // and the sub-state function tables.
+// This could be done, and maybe should be done,
+// with an X macro, but I'll leave that to the 
+// reviewer(s).
 static void game_main_menu_on_init();
 static void game_main_menu_on_update();
 static void game_round_on_init();
@@ -89,6 +94,7 @@ static void game_blind_select_on_update();
 static void game_blind_select_on_exit();
 static void game_lose_on_init();
 static void game_lose_on_update();
+static void game_lose_on_exit();
 static void game_win_on_init();
 static void game_win_on_update();
 static void game_shop_intro();
@@ -114,11 +120,11 @@ static uint timer = 0; // This might already exist in libtonc but idk so i'm jus
 static int game_speed = 1; // BY DEFAULT IS SET TO 1, but if changed to 2 or more, should speed up all (or most) of the game aspects that should be sped up by speed, as in the original game.
 static int background = 0;
 
-static const StateInfo state_info[GAME_STATE_MAX] = 
+static const StateInfo state_info[] = 
 {
 #define DEF_STATE_INFO(stateEnum, init_fn, update_fn, exit_fn) \
     { .state = stateEnum, .on_init = init_fn, .on_update = update_fn, .on_exit = exit_fn },
-#include "../include/game_state_table.h"
+#include "../include/def_state_info_table.h"
 #undef DEF_STATE_INFO
 };
 
@@ -269,6 +275,18 @@ static inline Card *discard_pop()
 {
     if (discard_top < 0) return NULL;
     return discard_pile[discard_top--];
+}
+
+static inline void reset_background_color()
+{
+    int y = 6;
+
+    memset16(&se_mem[MAIN_BG_SBB][32 * (y - 1)], 0x0006, 1);
+    memset16(&se_mem[MAIN_BG_SBB][1 + 32 * (y - 1)], 0x0007, 2);
+    memset16(&se_mem[MAIN_BG_SBB][3 + 32 * (y - 1)], 0x0008, 1);
+    memset16(&se_mem[MAIN_BG_SBB][4 + 32 * (y - 1)], 0x0009, 4);
+    memset16(&se_mem[MAIN_BG_SBB][7 + 32 * (y - 1)], 0x000A, 1);
+    memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], 0x0406, 1);
 }
 
 // get-functions, for other files to view game state (mainly for jokers)
@@ -1282,11 +1300,9 @@ void game_init()
     blind_select_tokens[BLIND_TYPE_BIG] = blind_token_new(BLIND_TYPE_BIG, CUR_BLIND_TOKEN_POS.x, CUR_BLIND_TOKEN_POS.y, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 4);
     blind_select_tokens[BLIND_TYPE_BOSS] = blind_token_new(BLIND_TYPE_BOSS, CUR_BLIND_TOKEN_POS.x, CUR_BLIND_TOKEN_POS.y, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 5);
 
-    obj_hide(blind_select_tokens[BLIND_TYPE_SMALL]->obj);
-    obj_hide(blind_select_tokens[BLIND_TYPE_BIG]->obj);
-    obj_hide(blind_select_tokens[BLIND_TYPE_BOSS]->obj);
-
-    game_change_state(game_state);
+    obj_hide(blind_select_tokens[SMALL_BLIND]->obj);
+    obj_hide(blind_select_tokens[BIG_BLIND]->obj);
+    obj_hide(blind_select_tokens[BOSS_BLIND]->obj);
 }
 
 void game_start()
@@ -1572,8 +1588,6 @@ static void game_playing_discarded_cards_loop()
         if (discard_top == -1 && discarded_card_object == NULL) // If there are no more discarded cards, stop shuffling
         {
             // After HAND_SHUFFLING the round is over
-            // TODO: Add call to change state here
-            // after adding on_exit
             game_playing_handle_round_over();
         }
     }
@@ -2286,13 +2300,7 @@ static void game_round_end_panel_exit()
     
         if (timer == 1) // Copied from shop. Feels slightly too niche of a function for me personally to make one.
         {
-            int y = 6;
-            memset16(&se_mem[MAIN_BG_SBB][32 * (y - 1)], 0x0006, 1);
-            memset16(&se_mem[MAIN_BG_SBB][1 + 32 * (y - 1)], 0x0007, 2);
-            memset16(&se_mem[MAIN_BG_SBB][3 + 32 * (y - 1)], 0x0008, 1);
-            memset16(&se_mem[MAIN_BG_SBB][4 + 32 * (y - 1)], 0x0009, 4);
-            memset16(&se_mem[MAIN_BG_SBB][7 + 32 * (y - 1)], 0x000A, 1);
-            memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], 0x0406, 1);
+            reset_background_color();
         }
         else if (timer == 2)
         {
@@ -2815,13 +2823,7 @@ static void game_shop_outro()
             }
         }
 
-        int y = 6;
-        memset16(&se_mat[MAIN_BG_SBB][y - 1][0], 0x0006, 1);
-        memset16(&se_mat[MAIN_BG_SBB][y - 1][1], 0x0007, 2);
-        memset16(&se_mat[MAIN_BG_SBB][y - 1][3], 0x0008, 1);
-        memset16(&se_mat[MAIN_BG_SBB][y - 1][4], 0x0009, 4);
-        memset16(&se_mat[MAIN_BG_SBB][y - 1][7], 0x000A, 1);
-        memset16(&se_mat[MAIN_BG_SBB][y - 1][8], SE_HFLIP | 0x0006, 1);
+        reset_background_color();
     }
     else if (timer == 2)
     {
@@ -3166,6 +3168,66 @@ static void game_lose_on_update()
     {
         tte_printf("#{P:%d,%d; cx:0x%X000}GAME OVER", GAME_LOSE_MSG_TEXT_RECT.left, GAME_LOSE_MSG_TEXT_RECT.top, TTE_RED_PB);
     }
+
+    if (key_hit(KEY_START)) game_change_state(GAME_STATE_BLIND_SELECT);
+}
+
+// This function isn't set in stone. This is just a placeholder
+// allowing the player to restart the game. Thought it would be nice to have
+// util we decide what we want to do after a game over.
+static void game_lose_on_exit()
+{
+    // update blind. Will start back on whatever blind you lost on
+    // setting current_blind doesn't seem to work. Jokers are also left over.
+    timer = TM_ZERO;
+    current_blind = SMALL_BLIND;
+    blinds[0] = BLIND_CURRENT;
+    blinds[1] = BLIND_UPCOMING;
+    blinds[2] = BLIND_UPCOMING;
+    round = 0; 
+    ante = 1;
+    money = 4;
+    score = 0;
+    hands = max_hands;
+    discards = max_discards;
+    
+    for (int i = 0; i < list_get_size(jokers); i ++)
+    {
+        JokerObject *joker_object = list_get(jokers, i);
+        joker_object_destroy(&joker_object);
+    }
+
+    tte_erase_screen();
+
+    // For some reason that I haven't figured out yet,
+    // if I don't destroy the blind tokens they won't
+    // show up on the next run.
+    sprite_destroy(&playing_blind_token);
+    sprite_destroy(&round_end_blind_token);
+    sprite_destroy(&blind_select_tokens[SMALL_BLIND]);
+    sprite_destroy(&blind_select_tokens[BIG_BLIND]);
+    sprite_destroy(&blind_select_tokens[BOSS_BLIND]);
+    list_destroy(&jokers_available_to_shop);
+    display_round(round);
+    display_score(score);
+    display_chips(chips);
+    display_mult(mult);
+    display_hands(hands);
+    display_discards(discards);
+    display_money(money);
+    tte_printf(
+        "#{P:%d,%d; cx:0x%X000}%d#{cx:0x%X000}/%d",
+        ANTE_TEXT_RECT.left,
+        ANTE_TEXT_RECT.top,
+        TTE_YELLOW_PB,
+        ante,
+        TTE_WHITE_PB,
+        MAX_ANTE
+    ); // Ante
+
+    affine_background_load_palette(affine_background_gfxPal);
+    reset_background_color();
+    game_init();
 }
 
 static void game_win_on_update()
