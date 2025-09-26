@@ -106,19 +106,18 @@ bool list_append_new(ListNode* p_a, ListNode* p_b)
 }
 
 #include "pool.h"
-int list_push_front(list_head *H, int elem_idx){
+int list_push_front(ListHead *H, int elem_idx){
     LinkNode *N = POOL_GET(LinkNode);
     N->elem_idx = elem_idx;
     N->prev = -1;
     N->next = H->head;
-    //if (H->head != -1) LP->nodes[H->head].prev = n;
-    int n = POOL_IDX(LinkNode, N); // get index
+    int n = POOL_IDX(LinkNode, N); // Get the index of of the node in the pool
     if (H->head != -1)
     {
-        POOL_AT(LinkNode, H->head)->prev = n; // get at idx
+        POOL_AT(LinkNode, H->head)->prev = n; // Get the object at the index H->head
     }
     H->head = n;
-    return n; // return link-node idx (store it if you want O(1) erase later)
+    return n;
 }
 
-// usage: list_push_front(jokers, POOL_IDX(Joker, myjoker));
+// usage: list_push_front(&jokers, POOL_IDX(Joker, myjoker));

@@ -30,16 +30,18 @@ bool int_list_remove_by_value(List *list, intptr_t value);
 
 bool list_append_new(ListNode* p_a, ListNode* p_b);
 
-typedef struct {
-    int prev;       // link-node idx (into link_pool), or -1
-    int next;       // link-node idx (into link_pool), or -1
-    int elem_idx;   // index into your T_pool (the element this link represents)
+typedef struct
+{
+    int prev;       // link-node idx, or -1 if at tail of list
+    int next;       // link-node idx, or -1 if at head of list
+    int elem_idx;   // index into T_pool
 } LinkNode;
 
-typedef struct {
-    int head; // link-node idx or -1
-} list_head;
+typedef struct
+{
+    int head; // link-node idx or -1, or -1 if nothing in list
+} ListHead;
 
-int list_push_front(list_head *H, int elem_idx);
+int list_push_front(ListHead *H, int elem_idx);
 
 #endif

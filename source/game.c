@@ -28,6 +28,7 @@
 #include "soundbank.h"
 
 #include "list.h"
+#include "pool.h"
 
 static uint rng_seed = 0;
 
@@ -80,6 +81,7 @@ static int selection_y = 0;
 static bool sort_by_suit = false;
 
 static List *jokers = NULL;
+static ListHead jokerlist = {.head = -1};
 static List *discarded_jokers = NULL;
 static List *jokers_available_to_shop; // List of joker IDs
 
@@ -164,6 +166,7 @@ List *get_jokers(void) {
 void add_joker(JokerObject *joker_object)
 {
     list_append(jokers, joker_object);
+    list_push_front(&jokerlist, POOL_IDX(JokerObject, joker_object));
 }
 
 void remove_held_joker(int joker_idx)
