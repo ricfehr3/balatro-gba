@@ -117,10 +117,10 @@ static uint timer = 0; // This might already exist in libtonc but idk so i'm jus
 static int game_speed = 1; // BY DEFAULT IS SET TO 1, but if changed to 2 or more, should speed up all (or most) of the game aspects that should be sped up by speed, as in the original game.
 static int background = 0;
 
-static const StateInfo state_info[] = 
+static StateInfo state_info[] = 
 {
 #define DEF_STATE_INFO(stateEnum, init_fn, update_fn, exit_fn) \
-    { .state = stateEnum, .on_init = init_fn, .on_update = update_fn, .on_exit = exit_fn },
+    { .on_init = init_fn, .on_update = update_fn, .on_exit = exit_fn, .substate = 0 },
 #include "../include/def_state_info_table.h"
 #undef DEF_STATE_INFO
 };
@@ -166,7 +166,6 @@ static const SubStateActionFn round_end_state_actions[] =
 static enum GameState game_state = GAME_STATE_SPLASH_SCREEN; // The current game state, this is used to determine what the game is doing at any given time
 static enum HandState hand_state = HAND_DRAW;
 static enum PlayState play_state = PLAY_PLAYING;
-static int substate = 0; // maybe put this in StateInfo struct?
 
 static enum HandType hand_type = NONE;
 
@@ -274,14 +273,16 @@ static inline Card *discard_pop()
     return discard_pile[discard_top--];
 }
 
-static inline void reset_background_color()
+// Resets bg tiles after shop or blind panel is dismissed
+// to match the rest of the game panel background.
+static inline void reset_bg_on_panel_dismissed()
 {
     int y = 6;
 
     memset16(&se_mem[MAIN_BG_SBB][32 * (y - 1)], 0x0006, 1);
     memset16(&se_mem[MAIN_BG_SBB][1 + 32 * (y - 1)], 0x0007, 2);
     memset16(&se_mem[MAIN_BG_SBB][3 + 32 * (y - 1)], 0x0008, 1);
-    memset16(&se_mem[MAIN_BG_SBB][4 + 32 * (y - 1)], 0x0009, 4);
+    memset16(&se_mem[MAIN_BG_SBB][4 + 32 * (y - 1)], 0x0009, 3);
     memset16(&se_mem[MAIN_BG_SBB][7 + 32 * (y - 1)], 0x000A, 1);
     memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], 0x0406, 1);
 }
@@ -2176,7 +2177,7 @@ static void game_round_end_on_exit()
     // Cleanup blind tokens from this round to avoid accumulating 
     // allocated blind sprites each round
     timer = TM_ZERO;
-    substate = 0;
+    state_info[game_state].substate = 0;
     blind_reward = 0;
     hand_reward = 0;
     interest_reward = 0;
@@ -2187,12 +2188,13 @@ static void game_round_end_on_exit()
 
 static void game_round_end_on_update()
 {
-    if (substate == ROUND_END_EXIT) 
+    if (state_info[game_state].substate == ROUND_END_EXIT) 
     {
         game_change_state(GAME_STATE_SHOP);
         return;
     }
 
+    int substate = state_info[game_state].substate;
     round_end_state_actions[substate]();
 }
 
@@ -2201,7 +2203,7 @@ static void game_round_end_start()
     if (timer == TM_RESET_STATIC_VARS) // Reset static variables to default values upon re-entering the round end state
     {   
         change_background(BG_ID_ROUND_END); // Change the background to the round end background
-        substate = START_EXPAND_POPUP; // Change the state to the next one
+        state_info[game_state].substate = START_EXPAND_POPUP; // Change the state to the next one
         timer = TM_ZERO; // Reset the timer
         blind_reward = blind_get_reward(current_blind);
         hand_reward = hands;
@@ -2214,7 +2216,7 @@ static void game_round_end_start_expand_popup()
     
     if (timer == TM_END_POP_MENU_ANIM)
     {
-        substate = DISPLAY_FINISHED_BLIND;
+        state_info[game_state].substate = DISPLAY_FINISHED_BLIND;
         timer = TM_ZERO;
     }
 }
@@ -2242,7 +2244,7 @@ static void game_round_end_display_finished_blind()
     
     if (timer >= TM_END_DISPLAY_FIN_BLIND)
     {
-        substate = DISPLAY_SCORE_MIN;
+        state_info[game_state].substate = DISPLAY_SCORE_MIN;
         timer = TM_ZERO;
     }
 }
@@ -2259,7 +2261,7 @@ static void game_round_end_display_score_min()
     
     if (timer >= TM_END_DISPLAY_SCORE_MIN)
     {
-        substate = UPDATE_BLIND_REWARD;
+        state_info[game_state].substate = UPDATE_BLIND_REWARD;
         timer = TM_ZERO;
     }
 }
@@ -2282,7 +2284,7 @@ static void game_round_end_update_blind_reward()
         tte_erase_rect_wrapper(BLIND_REQ_TEXT_RECT);
         obj_hide(playing_blind_token->obj);
         affine_background_load_palette(affine_background_gfxPal);
-        substate = BLIND_PANEL_EXIT;
+        state_info[game_state].substate = BLIND_PANEL_EXIT;
         timer = TM_ZERO;
     }
 }
@@ -2297,7 +2299,7 @@ static void game_round_end_panel_exit()
     
         if (timer == 1) // Copied from shop. Feels slightly too niche of a function for me personally to make one.
         {
-            reset_background_color();
+            reset_bg_on_panel_dismissed();
         }
         else if (timer == 2)
         {
@@ -2310,7 +2312,7 @@ static void game_round_end_panel_exit()
     else if (timer > FRAMES(20))
     {
         memset16(&pal_bg_mem[REWARD_PANEL_BORDER], 0x1483, 1);
-        substate = DISPLAY_REWARDS;
+        state_info[game_state].substate = DISPLAY_REWARDS;
         timer = TM_ZERO;
     }
 }
@@ -2336,7 +2338,7 @@ static void game_round_end_display_rewards()
     if (hand_reward <= 0 && interest_reward <= 0) // Once all rewards are accounted for go to the next state
     {
         timer = TM_ZERO; // Reset the timer
-        substate = DISPLAY_CASHOUT; // Go to the next state
+        state_info[game_state].substate = DISPLAY_CASHOUT; // Go to the next state
     }
     else if (timer == TM_START_ROUND_END_MENU_AMIN) // Expand the black part of the panel down by one tile
     {
@@ -2403,7 +2405,7 @@ static void game_round_end_display_cashout()
     {
         game_round_end_cashout();
     
-        substate = DISMISS_ROUND_END_PANEL; // Go to the next state
+        state_info[game_state].substate = DISMISS_ROUND_END_PANEL; // Go to the next state
         timer = TM_ZERO; // Reset the timer
     
         obj_hide(round_end_blind_token->obj); // Hide the blind token object
@@ -2420,7 +2422,7 @@ static void game_round_end_dismiss_round_end_panel()
     if (timer >= TM_DISMISS_ROUND_END_TM)
     {
         timer = TM_ZERO; 
-        substate = ROUND_END_EXIT;
+        state_info[game_state].substate = ROUND_END_EXIT;
     }
 }
 
@@ -2527,7 +2529,7 @@ static void game_shop_intro()
 
     if (timer == TM_END_GAME_SHOP_INTRO)
     {
-        substate = GAME_SHOP_ACTIVE;
+        state_info[game_state].substate = GAME_SHOP_ACTIVE;
         timer = TM_ZERO; // Reset the timer
     }
 }
@@ -2654,7 +2656,7 @@ static void shop_top_row_on_key_hit(SelectionGrid* selection_grid, Selection* se
     if (selection->x == NEXT_ROUND_BTN_SEL_X)
     {
         // Go to next blind selection game state
-        substate = 2; // Go to the outro sequence state
+        state_info[game_state].substate = GAME_SHOP_EXIT; // Go to the outro sequence state
         timer = TM_ZERO; // Reset the timer
         reroll_cost = REROLL_BASE_COST;
 
@@ -2820,7 +2822,7 @@ static void game_shop_outro()
             }
         }
 
-        reset_background_color();
+        reset_bg_on_panel_dismissed();
     }
     else if (timer == 2)
     {
@@ -2832,7 +2834,7 @@ static void game_shop_outro()
 
     if (timer >= MENU_POP_OUT_ANIM_FRAMES)
     {
-        substate = 3; // Go to the next state
+        state_info[game_state].substate = GAME_SHOP_MAX; // Go to the next state
         timer = TM_ZERO; // Reset the timer
     }
 }
@@ -2858,18 +2860,20 @@ static void game_shop_on_update()
         game_shop_lights_anim_frame();
     }
 
-    if (substate == GAME_SHOP_MAX)
+    if (state_info[game_state].substate == GAME_SHOP_MAX)
     {
         game_change_state(GAME_STATE_BLIND_SELECT);
         return;
     }
+
+    int substate = state_info[game_state].substate;
 
     shop_state_actions[substate]();
 }
 
 static void game_shop_on_exit()
 {
-    substate = 0; // Reset the state
+    state_info[game_state].substate = 0; // Reset the state
     
     for (int i = 0; i < list_get_size(shop_jokers); i++)
     {
@@ -2889,12 +2893,13 @@ static void game_shop_on_exit()
 
 static void game_blind_select_on_update()
 {
-    if (substate == BLIND_SELECT_MAX)
+    if (state_info[game_state].substate == BLIND_SELECT_MAX)
     {
         game_change_state(GAME_STATE_PLAYING);
         return;
     }
 
+    int substate = state_info[game_state].substate;
     blind_select_state_actions[substate]();
 }
 
@@ -2910,7 +2915,7 @@ static void game_blind_select_start_anim_seq()
     
     if (timer == TM_END_ANIM_SEQ)
     {
-        substate = BLIND_SELECT;
+        state_info[game_state].substate = BLIND_SELECT;
         timer = TM_ZERO; // Reset the timer
     }
 }
@@ -2935,7 +2940,7 @@ static void game_blind_select_handle_input()
     {
         if (selection_y == 0) // Blind selected
         {
-            substate = BLIND_SELECTED_ANIM_SEQ;
+            state_info[game_state].substate = BLIND_SELECTED_ANIM_SEQ;
             timer = TM_ZERO;
             display_round(++round);
         }
@@ -2995,7 +3000,7 @@ static void game_blind_select_selected_anim_seq()
             obj_hide(blind_select_tokens[i]->obj);
         }
     
-        substate = DISPLAY_BLIND_PANEL; // Reset the state
+        state_info[game_state].substate = DISPLAY_BLIND_PANEL; // Reset the state
         timer = TM_ZERO; // Reset the timer
     }
 }
@@ -3004,7 +3009,7 @@ static void game_blind_select_display_blind_panel()
 {
     if (timer >= TM_DISP_BLIND_PANEL_FINISH)
     {
-    	substate = BLIND_SELECT_MAX;
+    	state_info[game_state].substate = BLIND_SELECT_MAX;
     	return;
     }
     
@@ -3025,13 +3030,7 @@ static void game_blind_select_display_blind_panel()
             main_bg_se_copy_rect(from, to);
         }
     
-        int y = 6;
-        memset16(&se_mem[MAIN_BG_SBB][32 * (y - 1)], 0x0006, 1);
-        memset16(&se_mem[MAIN_BG_SBB][1 + 32 * (y - 1)], 0x0007, 2);
-        memset16(&se_mem[MAIN_BG_SBB][3 + 32 * (y - 1)], 0x0008, 1);
-        memset16(&se_mem[MAIN_BG_SBB][4 + 32 * (y - 1)], 0x0009, 4);
-        memset16(&se_mem[MAIN_BG_SBB][7 + 32 * (y - 1)], 0x000A, 1);
-        memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], 0x0406, 1); 
+        reset_bg_on_panel_dismissed();
     }
     
     for (int y = 0; y < timer; y++) // Shift the blind panel down onto screen
@@ -3048,7 +3047,7 @@ static void game_blind_select_display_blind_panel()
 
 static void game_blind_select_on_exit()
 {
-    substate = 0;
+    state_info[game_state].substate = 0;
     timer = 0;
     selection_y = 0;
     background = UNDEFINED;
@@ -3221,7 +3220,6 @@ static void game_lose_on_exit()
     ); // Ante
 
     affine_background_load_palette(affine_background_gfxPal);
-    reset_background_color();
     game_init();
 }
 
