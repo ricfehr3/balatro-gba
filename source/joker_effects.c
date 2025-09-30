@@ -358,12 +358,9 @@ static JokerEffect business_card_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card == NULL)
         return effect;
 
-    switch (scored_card->rank) {
-        case KING: case QUEEN: case JACK:
-            if (random() % 2 == 0)
-                effect.money = 2;
-        default:
-            break;
+    if (card_is_face(scored_card)) {
+        if (random() % 2 == 0)
+            effect.money = 2;
     }
 
     return effect;
@@ -387,11 +384,8 @@ static JokerEffect scary_face_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card == NULL)
         return effect;
 
-    switch (scored_card->rank) {
-        case KING: case QUEEN: case JACK:
-            effect.chips = 30;
-        default:
-            break;
+    if (card_is_face(scored_card)) {
+        effect.chips = 30;
     }
 
     return effect;
@@ -426,11 +420,8 @@ static JokerEffect smiley_face_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card == NULL)
         return effect;
 
-    switch (scored_card->rank) {
-        case KING: case QUEEN: case JACK:
-            effect.mult = 5;
-        default:
-            break;
+    if (card_is_face(scored_card)) {
+        effect.mult = 5;
     }
 
     return effect;
