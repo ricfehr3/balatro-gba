@@ -514,7 +514,7 @@ const JokerInfo joker_registry[] = {
 
     { COMMON_JOKER, 4, abstract_joker_effect },
     { UNCOMMON_JOKER, 6, bull_joker_effect},
-    { UNCOMMON_JOKER, ?, acrobat_joker_effect },
+    { UNCOMMON_JOKER, 6, acrobat_joker_effect },
 #endif
 };
 
