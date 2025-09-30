@@ -341,7 +341,7 @@ static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card
     int hand_size = hand_get_size();
     for (int i = 0; i < hand_size; i++ )
     {
-        if ((random() % 2 == 0) && card_is_face(scored_card)) {
+        if ((random() % 2 == 0) && card_is_face(hand[i]->card)) {
             effect.money += 1;
         }
     }
@@ -451,12 +451,12 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
 }
 
 __attribute__((unused))
-static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card) {
+static JokerEffect acrobat_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card == NULL)
         return effect;
 
-    // 0 remaining hands mean it's the last hand
+    // 0 remaining hands mean we're scoring the last hand
     if (get_num_hands_remaining() == 0) {
         effect.xmult = 3;
     }
@@ -514,7 +514,7 @@ const JokerInfo joker_registry[] = {
 
     { COMMON_JOKER, 4, abstract_joker_effect },
     { UNCOMMON_JOKER, 6, bull_joker_effect},
-    { UNCOMMON_JOKER, ?, abstract_joker_effect },
+    { UNCOMMON_JOKER, ?, acrobat_joker_effect },
 #endif
 };
 
