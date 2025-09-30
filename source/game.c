@@ -2247,14 +2247,14 @@ void game_round_end()
                     memset16(&se_mem[MAIN_BG_SBB][3 + 32 * (y - 1)], 0x0008, 1);
                     memset16(&se_mem[MAIN_BG_SBB][4 + 32 * (y - 1)], 0x0009, 4);
                     memset16(&se_mem[MAIN_BG_SBB][7 + 32 * (y - 1)], 0x000A, 1);
-                    memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], 0x0406, 1);
+                    memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], SE_HORIZONTAL_FLIP | 0x0006, 1);
                 }
                 else if (timer == 2)
                 {
                     int y = 5;
                     memset16(&se_mem[MAIN_BG_SBB][32 * (y - 1)], 0x0001, 1);
                     memset16(&se_mem[MAIN_BG_SBB][1 + 32 * (y - 1)], 0x0002, 7);
-                    memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], 0x0401, 1); 
+                    memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], SE_HORIZONTAL_FLIP | 0x0001, 1); 
                 }
             }   
             else if (timer > FRAMES(20))
@@ -2777,14 +2777,14 @@ static void game_shop_outro()
         memset16(&se_mem[MAIN_BG_SBB][3 + 32 * (y - 1)], 0x0008, 1);
         memset16(&se_mem[MAIN_BG_SBB][4 + 32 * (y - 1)], 0x0009, 4);
         memset16(&se_mem[MAIN_BG_SBB][7 + 32 * (y - 1)], 0x000A, 1);
-        memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], 0x0406, 1);
+        memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], SE_HORIZONTAL_FLIP | 0x0006, 1);
     }
     else if (timer == 2)
     {
         int y = 5;
         memset16(&se_mem[MAIN_BG_SBB][32 * (y - 1)], 0x0001, 1);
         memset16(&se_mem[MAIN_BG_SBB][1 + 32 * (y - 1)], 0x0002, 7);
-        memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], 0x0401, 1);
+        memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], SE_HORIZONTAL_FLIP | 0x0001, 1);
     }
 
     if (timer >= MENU_POP_OUT_ANIM_FRAMES)
@@ -2994,7 +2994,7 @@ void game_blind_select()
                 memset16(&se_mem[MAIN_BG_SBB][3 + 32 * (y - 1)], 0x0008, 1);
                 memset16(&se_mem[MAIN_BG_SBB][4 + 32 * (y - 1)], 0x0009, 4);
                 memset16(&se_mem[MAIN_BG_SBB][7 + 32 * (y - 1)], 0x000A, 1);
-                memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], 0x0406, 1); 
+                memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], SE_HORIZONTAL_FLIP | 0x0006, 1); 
             }
             
             for (int y = 0; y < timer; y++) // Shift the blind panel down onto screen
