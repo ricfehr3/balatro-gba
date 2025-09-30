@@ -191,6 +191,10 @@ int get_num_discards_remaining(void) {
     return discards;
 }
 
+int get_num_hands_remaining(void) {
+    return hands;
+}
+
 int get_money(void) {
     return money;
 }

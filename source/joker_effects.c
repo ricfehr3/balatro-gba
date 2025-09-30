@@ -341,12 +341,8 @@ static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card
     int hand_size = hand_get_size();
     for (int i = 0; i < hand_size; i++ )
     {
-        switch (hand[i]->card->rank) {
-            case KING: case QUEEN: case JACK:
-                if (random() % 2 == 0)
-                    effect.money += 1;
-            default:
-                break;
+        if ((random() % 2 == 0) && card_is_face(scored_card)) {
+            effect.money += 1;
         }
     }
 
@@ -358,9 +354,8 @@ static JokerEffect business_card_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card == NULL)
         return effect;
 
-    if (card_is_face(scored_card)) {
-        if (random() % 2 == 0)
-            effect.money = 2;
+    if ((random() % 2 == 0) && card_is_face(scored_card)) {
+        effect.money = 2;
     }
 
     return effect;
@@ -455,6 +450,20 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
+__attribute__((unused))
+static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card == NULL)
+        return effect;
+
+    // 0 remaining hands mean it's the last hand
+    if (get_num_hands_remaining() == 0) {
+        effect.xmult = 3;
+    }
+
+    return effect;
+}
+
 /* The index of a joker in the registry matches its ID.
  * The joker sprites are matched by ID so the position in the registry
  * determines the joker's sprite.
@@ -505,6 +514,7 @@ const JokerInfo joker_registry[] = {
 
     { COMMON_JOKER, 4, abstract_joker_effect },
     { UNCOMMON_JOKER, 6, bull_joker_effect},
+    { UNCOMMON_JOKER, ?, abstract_joker_effect },
 #endif
 };
 
