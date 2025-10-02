@@ -83,6 +83,7 @@ static bool sort_by_suit = false;
 static List *jokers = NULL;
 static ListHead jokerlist = {.head = -1};
 static List *discarded_jokers = NULL;
+static ListHead discarded_jokers_list = {.head = -1};
 static List *jokers_available_to_shop; // List of joker IDs
 
 // Stacks
@@ -1098,7 +1099,9 @@ void game_set_state(enum GameState new_game_state)
 void jokers_available_to_shop_init()
 {
     int num_defined_jokers = get_joker_registry_size();
+
     jokers_available_to_shop = list_new(num_defined_jokers);
+
     for (intptr_t i = 0; i < num_defined_jokers; i++)
     {
         // Add all joker IDs sequentially
@@ -1116,6 +1119,8 @@ void game_init()
 
     if (discarded_jokers != NULL) list_destroy(&discarded_jokers);
     discarded_jokers = list_new(MAX_JOKERS_HELD_SIZE);
+
+    discarded_jokers_list.head = -1;
 
     hands = max_hands;
     discards = max_discards;
@@ -2425,6 +2430,7 @@ void joker_start_discard_animation(JokerObject *joker_object)
     joker_object->sprite_object->tx = int2fx(JOKER_DISCARD_TARGET.x);
     joker_object->sprite_object->ty = int2fx(JOKER_DISCARD_TARGET.y);
     list_append(discarded_jokers, joker_object);
+    list_push_front(&discarded_jokers_list, POOL_IDX(JokerObject, joker_object));
 }
 
 void game_sell_joker(int joker_idx)
@@ -2945,12 +2951,56 @@ void game_main_menu()
     }
 }
 
+static void _discard_joker_thing()
+{
+    LinkNode* current_node = POOL_AT(LinkNode, discarded_jokers_list.head);
+    do
+    {
+        JokerObject* joker_object = POOL_AT(JokerObject, current_node->elem_idx);
+
+        joker_object_update(joker_object);
+        if (joker_object->sprite_object->x == joker_object->sprite_object->tx
+            && joker_object->sprite_object->y == joker_object->sprite_object->ty)
+        {
+            list_remove(&discarded_jokers_list, current_node);
+            //list_remove_by_idx(discarded_jokers, i);
+            joker_object_destroy(&joker_object);
+        }
+
+        current_node = (current_node->next >= 0) ?
+                           POOL_AT(LinkNode, current_node->next) :
+                           NULL;
+    }
+    while (current_node != NULL);
+}
+
 static void discarded_jokers_update_loop()
 {
+    /*
     if (discarded_jokers == NULL)
         return;
-    
+    */
+    if(discarded_jokers_list.head < 0) {
+        return;
+    }
+
+    _discard_joker_thing();
+
+    /*
+    for (int i = list_get_size(discarded_jokers) - 1; i >= 0; i--)
+    {
+        JokerObject* joker_object = list_get(discarded_jokers, i);
+        joker_object_update(joker_object);
+        if (joker_object->sprite_object->x == joker_object->sprite_object->tx
+            && joker_object->sprite_object->y == joker_object->sprite_object->ty)
+        {
+            list_remove_by_idx(discarded_jokers, i);
+            joker_object_destroy(&joker_object);
+        }
+    }
+    */
     // Iterating backwards because of removal within loop
+    /*
     for (int i = list_get_size(discarded_jokers) - 1; i >= 0; i--)
     {
         JokerObject* joker_object = list_get(discarded_jokers, i);
@@ -2962,6 +3012,7 @@ static void discarded_jokers_update_loop()
             joker_object_destroy(&joker_object);        
         }
     }
+    */
 }
 
 static void held_jokers_update_loop()

@@ -106,7 +106,8 @@ bool list_append_new(ListNode* p_a, ListNode* p_b)
 }
 
 #include "pool.h"
-int list_push_front(ListHead *H, int elem_idx){
+int list_push_front(ListHead *H, int elem_idx)
+{
     LinkNode *N = POOL_GET(LinkNode);
     N->elem_idx = elem_idx;
     N->prev = -1;
@@ -120,4 +121,36 @@ int list_push_front(ListHead *H, int elem_idx){
     return n;
 }
 
+void list_remove(ListHead *H, LinkNode *N)
+{
+    LinkNode* p_prev_node = NULL;
+    LinkNode* p_next_node = NULL;
+
+    if(N->prev >= 0)
+    {
+        p_prev_node = POOL_AT(LinkNode, N->prev);
+    }
+
+    if(N->next >= 0)
+    {
+        p_next_node = POOL_AT(LinkNode, N->next);
+    }
+
+    if(p_prev_node && !p_next_node) // end of list
+    {
+        p_prev_node->next = -1;
+    }
+    else if(p_prev_node && p_next_node) // somewhere in between
+    {
+        p_prev_node->next = POOL_IDX(LinkNode, p_next_node);
+        p_next_node->prev = POOL_IDX(LinkNode, p_prev_node);
+    }
+    else if(p_next_node && !p_prev_node) // beginning of list
+    {
+        p_next_node->prev = -1;
+        H->head = POOL_IDX(LinkNode, p_next_node);
+    }
+
+    POOL_FREE(LinkNode, N);
+}
 // usage: list_push_front(&jokers, POOL_IDX(Joker, myjoker));

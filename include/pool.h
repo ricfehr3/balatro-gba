@@ -63,8 +63,8 @@ int pool_bm_get_free_idx(PoolBitmap *bm);
 
 #define POOL_GET(type) pool_get_##type()
 #define POOL_FREE(type, obj) pool_free_##type(obj)
-#define POOL_IDX(type, obj) pool_idx_##type(obj)
-#define POOL_AT(type, idx) pool_at_##type(idx)
+#define POOL_IDX(type, obj) pool_idx_##type(obj) // the index of the object
+#define POOL_AT(type, idx) pool_at_##type(idx) // the object at
 
 #define POOL_ENTRY(name, capacity) \
 POOL_DECLARE_TYPE(name);

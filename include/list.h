@@ -43,5 +43,6 @@ typedef struct
 } ListHead;
 
 int list_push_front(ListHead *H, int elem_idx);
+void list_remove(ListHead *H, LinkNode *N);
 
 #endif
