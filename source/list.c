@@ -158,3 +158,35 @@ void list_remove(ListHead *H, LinkNode *N)
     POOL_FREE(LinkNode, N);
 }
 // usage: list_push_front(&jokers, POOL_IDX(Joker, myjoker));
+
+int list_size_new(ListHead H)
+{
+    int len = 0;
+    LinkNode* current_node = (H.head >= 0) ?
+        POOL_AT(LinkNode, H.head) :
+        NULL;
+    while (current_node != NULL)
+    {
+        len++;
+        current_node = (current_node->next >= 0) ?
+                        POOL_AT(LinkNode, current_node->next) :
+                        NULL;
+    }
+    return len;
+}
+
+int list_get_new(ListHead H, int elem_idx)
+{
+    int len = 0;
+    LinkNode* current_node = (H.head >= 0) ?
+        POOL_AT(LinkNode, H.head) :
+        NULL;
+    while (current_node != NULL)
+    {
+        if(elem_idx == len++) return current_node->elem_idx;
+        current_node = (current_node->next >= 0) ?
+                        POOL_AT(LinkNode, current_node->next) :
+                        NULL;
+    }
+    return -1;
+}

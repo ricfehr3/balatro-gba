@@ -3,6 +3,7 @@
 #include "util.h"
 #include "hand_analysis.h"
 #include "list.h"
+#include "pool.h"
 #include <stdlib.h>
 
 static JokerEffect default_joker_effect(Joker *joker, Card *scored_card) {
@@ -192,21 +193,36 @@ static JokerEffect joker_stencil_effect(Joker *joker, Card *scored_card) {
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
 
-    List* jokers = get_jokers();
+    //List* jokers = get_jokers();
+    ListHead joker_head = get_jokers_list();
 
     // +1 xmult per empty joker slot...
-    int num_jokers = list_get_size(jokers);
+    //int num_jokers = list_get_size(jokers);
+    int num_jokers = list_size_new(joker_head);
 
     effect.xmult = (MAX_JOKERS_HELD_SIZE) - num_jokers;
 
     // ...and also each stencil_joker adds +1 xmult
-    
+    LinkNode* current_node = (joker_head.head >= 0) ?
+        POOL_AT(LinkNode, joker_head.head) :
+        NULL;
+    while (current_node != NULL)
+    {
+        JokerObject* joker_object = POOL_AT(JokerObject, current_node->elem_idx);
+        if (joker_object->joker->id == JOKER_STENCIL_ID) effect.xmult++;
+        current_node = (current_node->next >= 0) ?
+                        POOL_AT(LinkNode, current_node->next) :
+                        NULL;
+    }
+
+    /*
     for (int i = 0; i < num_jokers; i++ )
     {
         JokerObject* joker_object = list_get(jokers, i);
         if (joker_object->joker->id == JOKER_STENCIL_ID)
             effect.xmult++;
     }
+    */
 
     return effect;
 }
@@ -399,7 +415,8 @@ static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card) {
         return effect; // if card != null, we are not at the end-phase of scoring yet
 
     // +1 xmult per occupied joker slot
-    int num_jokers = list_get_size(get_jokers());
+    //int num_jokers = list_get_size(get_jokers());
+    int num_jokers = list_size_new(get_jokers_list());
     effect.mult = num_jokers * 3;
 
     return effect;

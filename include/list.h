@@ -2,6 +2,7 @@
 #define LIST_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef struct List
 {
@@ -43,6 +44,8 @@ typedef struct
 } ListHead;
 
 int list_push_front(ListHead *H, int elem_idx);
+int list_get_new(ListHead H, int elem_idx);
 void list_remove(ListHead *H, LinkNode *N);
+int list_size_new(ListHead H);
 
 #endif
