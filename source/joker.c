@@ -142,6 +142,7 @@ Joker *joker_new(u8 id)
     joker->modifier = BASE_EDITION; // TODO: Make this a parameter
     joker->value = jinfo->base_value + edition_price_lut[joker->modifier];
     joker->rarity = jinfo->rarity;
+    joker->scaling = 0;
     joker->processed = false;
 
     return joker;
@@ -154,12 +155,27 @@ void joker_destroy(Joker **joker)
     *joker = NULL;
 }
 
-JokerEffect joker_get_score_effect(Joker *joker, Card *scored_card)
+JokerEffect joker_get_score_effect(Joker *joker, Card *scored_card, int scored_when)
 {
     const JokerInfo *jinfo = get_joker_registry_entry(joker->id);
     if (!jinfo) return (JokerEffect){0};
 
-    return jinfo->effect(joker, scored_card);
+    switch (scored_when)
+    {
+        case JOKER_CALLBACK_ON_CARD_SCORED:
+            return jinfo->on_card_scored    ? jinfo->on_card_scored(joker, scored_card) : (JokerEffect){0};
+        case JOKER_CALLBACK_ON_CARD_HELD:
+            return jinfo->on_card_held      ? jinfo->on_card_held(joker, scored_card)   : (JokerEffect){0};
+        case JOKER_CALLBACK_INDEPENDANT:
+            return jinfo->on_joker_scored   ? jinfo->on_joker_scored(joker, NULL)       : (JokerEffect){0};
+        case JOKER_CALLBACK_ON_BLIND_SELECTED:
+            return jinfo->on_blind_selected ? jinfo->on_blind_selected(joker, NULL)     : (JokerEffect){0};
+        case JOKER_CALLBACK_ON_ROUND_END:
+            return jinfo->special_effect    ? jinfo->special_effect(joker, NULL)        : (JokerEffect){0};
+    }
+
+    // we are triggering a special effect outside of the normal loops
+    return jinfo->special_effect ? jinfo->special_effect(joker, NULL) : (JokerEffect){0};
 }
 
 int joker_get_sell_value(const Joker* joker)
@@ -247,11 +263,11 @@ void joker_object_shake(JokerObject *joker_object, mm_word sound_id)
     sprite_object_shake(joker_object->sprite_object, sound_id);
 }
 
-bool joker_object_score(JokerObject *joker_object, Card* scored_card, int *chips, int *mult, int *xmult, int *money, bool *retrigger)
+bool joker_object_score(JokerObject *joker_object, Card* scored_card, int scored_when, int *chips, int *mult, int *xmult, int *money, bool *retrigger)
 {
     if (joker_object->joker->processed == true) return false; // If the joker has already been processed, return false
 
-    JokerEffect joker_effect = joker_get_score_effect(joker_object->joker, scored_card);
+    JokerEffect joker_effect = joker_get_score_effect(joker_object->joker, scored_card, scored_when);
 
     if (memcmp(&joker_effect, &(JokerEffect){0}, sizeof(JokerEffect)) != 0)
     {

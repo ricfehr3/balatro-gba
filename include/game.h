@@ -75,6 +75,14 @@ enum HandType
     FLUSH_FIVE
 };
 
+// Run Stats
+typedef struct {
+    unsigned int hand_type_level [13]; // There are 13 different hand types, all start at level 1
+    unsigned int hand_type_played[13]; // How many times has a hand type been played
+    unsigned int used_planets;
+    unsigned int used_tarot;
+} RunStats;
+
 // Game functions
 void game_init();
 void game_update();

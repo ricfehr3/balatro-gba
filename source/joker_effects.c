@@ -474,47 +474,47 @@ static JokerEffect acrobat_joker_effect(Joker *joker, Card *scored_card) {
  * Otherwise the order is similar to the wiki.
  */
 const JokerInfo joker_registry[] = {
-    { COMMON_JOKER, 2, default_joker_effect },  // DEFAULT_JOKER_ID = 0
-    { COMMON_JOKER, 5, greedy_joker_effect },   // GREEDY_JOKER_ID  = 1
-    { COMMON_JOKER, 5, lusty_joker_effect },    // etc...  2  
-    { COMMON_JOKER, 5, wrathful_joker_effect },         // 3                  
-    { COMMON_JOKER, 5, gluttonous_joker_effect },       // 4               
-    { COMMON_JOKER, 3, jolly_joker_effect },            // 5              
-    { COMMON_JOKER, 4, zany_joker_effect },             // 6
-    { COMMON_JOKER, 4, mad_joker_effect },              // 7
-    { COMMON_JOKER, 4, crazy_joker_effect },            // 8
-    { COMMON_JOKER, 4, droll_joker_effect },            // 9
-    { COMMON_JOKER, 3, sly_joker_effect },              // 10
-    { COMMON_JOKER, 4, wily_joker_effect },             // 11
-    { COMMON_JOKER, 4, clever_joker_effect },           // 12 
-    { COMMON_JOKER, 4, devious_joker_effect },          // 13 
-    { COMMON_JOKER, 4, crafty_joker_effect },           // 14
-    { COMMON_JOKER, 5, half_joker_effect },             // 15
-    { UNCOMMON_JOKER, 8, joker_stencil_effect },        // 16
-    { COMMON_JOKER, 5, banner_joker_effect },           // 17
-    { COMMON_JOKER, 4, walkie_talkie_joker_effect },    // 18
-    { UNCOMMON_JOKER, 8, fibonnaci_joker_effect },      // 19
-    { UNCOMMON_JOKER, 6, blackboard_joker_effect },     // 20
-    { COMMON_JOKER, 5, mystic_summit_joker_effect },    // 21
-    { COMMON_JOKER, 4, misprint_joker_effect },         // 22 
-    { COMMON_JOKER, 4, even_steven_joker_effect },      // 23
-    { COMMON_JOKER, 5, blue_joker_effect },             // 24
-    { COMMON_JOKER, 4, odd_todd_joker_effect },         // 25
-    { COMMON_JOKER, 4, scholar_joker_effect },          // 26
-    { COMMON_JOKER, 4, business_card_joker_effect },    // 27
+    { COMMON_JOKER,   2, NULL, NULL, default_joker_effect, NULL, NULL, NULL, NULL },  // DEFAULT_JOKER_ID = 0
+    { COMMON_JOKER,   5, greedy_joker_effect, NULL, NULL, NULL, NULL, NULL, NULL },   // GREEDY_JOKER_ID  = 1
+    { COMMON_JOKER,   5, lusty_joker_effect, NULL, NULL, NULL, NULL, NULL, NULL },    // etc...  2
+    { COMMON_JOKER,   5, wrathful_joker_effect, NULL, NULL, NULL, NULL, NULL, NULL },         // 3
+    { COMMON_JOKER,   5, gluttonous_joker_effect, NULL, NULL, NULL, NULL, NULL, NULL },       // 4
+    { COMMON_JOKER,   3, NULL, NULL, jolly_joker_effect, NULL, NULL, NULL, NULL },            // 5
+    { COMMON_JOKER,   4, NULL, NULL, zany_joker_effect, NULL, NULL, NULL, NULL },             // 6
+    { COMMON_JOKER,   4, NULL, NULL, mad_joker_effect, NULL, NULL, NULL, NULL },              // 7
+    { COMMON_JOKER,   4, NULL, NULL, crazy_joker_effect, NULL, NULL, NULL, NULL },            // 8
+    { COMMON_JOKER,   4, NULL, NULL, droll_joker_effect, NULL, NULL, NULL, NULL },            // 9
+    { COMMON_JOKER,   3, NULL, NULL, sly_joker_effect, NULL, NULL, NULL, NULL },              // 10
+    { COMMON_JOKER,   4, NULL, NULL, wily_joker_effect, NULL, NULL, NULL, NULL },             // 11
+    { COMMON_JOKER,   4, NULL, NULL, clever_joker_effect, NULL, NULL, NULL, NULL },           // 12
+    { COMMON_JOKER,   4, NULL, NULL, devious_joker_effect, NULL, NULL, NULL, NULL },          // 13
+    { COMMON_JOKER,   4, NULL, NULL, crafty_joker_effect, NULL, NULL, NULL, NULL },           // 14
+    { COMMON_JOKER,   5, NULL, NULL, half_joker_effect, NULL, NULL, NULL, NULL },             // 15
+    { UNCOMMON_JOKER, 8, NULL, NULL, joker_stencil_effect, NULL, NULL, NULL, NULL },          // 16
+    { COMMON_JOKER,   5, NULL, NULL, banner_joker_effect, NULL, NULL, NULL, NULL },           // 17
+    { COMMON_JOKER,   4, walkie_talkie_joker_effect, NULL, NULL, NULL, NULL, NULL, NULL },    // 18
+    { UNCOMMON_JOKER, 8, fibonnaci_joker_effect, NULL, NULL, NULL, NULL, NULL, NULL },        // 19
+    { UNCOMMON_JOKER, 6, NULL, NULL, blackboard_joker_effect, NULL, NULL, NULL, NULL },       // 20
+    { COMMON_JOKER,   5, NULL, NULL, mystic_summit_joker_effect, NULL, NULL, NULL, NULL },    // 21
+    { COMMON_JOKER,   4, NULL, NULL, misprint_joker_effect, NULL, NULL, NULL, NULL },         // 22
+    { COMMON_JOKER,   4, even_steven_joker_effect, NULL, NULL, NULL, NULL, NULL, NULL },      // 23
+    { COMMON_JOKER,   5, NULL, NULL, blue_joker_effect, NULL, NULL, NULL, NULL },             // 24
+    { COMMON_JOKER,   4, odd_todd_joker_effect, NULL, NULL, NULL, NULL, NULL, NULL },         // 25
+    { COMMON_JOKER,   4, scholar_joker_effect, NULL, NULL, NULL, NULL, NULL, NULL },          // 26
+    { COMMON_JOKER,   4, business_card_joker_effect, NULL, NULL, NULL, NULL, NULL, NULL },    // 27
     // Business card should be paired with Shortcut for palette optimization when it's added
-    { COMMON_JOKER, 4, scary_face_joker_effect },       // 28
-    { COMMON_JOKER, 4, smiley_face_joker_effect },      // 29
+    { COMMON_JOKER,   4, scary_face_joker_effect, NULL, NULL, NULL, NULL, NULL, NULL },       // 28
+    { COMMON_JOKER,   4, smiley_face_joker_effect, NULL, NULL, NULL, NULL, NULL, NULL },      // 29
 
     // The following jokers don't have sprites yet, 
     // uncomment them when their sprites are added.
 #if 0
-    { COMMON_JOKER, 5, raised_fist_joker_effect },
-    { COMMON_JOKER, 6, reserved_parking_joker_effect },
+    { COMMON_JOKER,   5, NULL, raised_fist_joker_effect, NULL, NULL, NULL, NULL, NULL },
+    { COMMON_JOKER,   6, NULL, reserved_parking_joker_effect, NULL, NULL, NULL, NULL, NULL },
 
-    { COMMON_JOKER, 4, abstract_joker_effect },
-    { UNCOMMON_JOKER, 6, bull_joker_effect},
-    { UNCOMMON_JOKER, 6, acrobat_joker_effect },
+    { COMMON_JOKER,   4, NULL, NULL, abstract_joker_effect, NULL, NULL, NULL, NULL },
+    { UNCOMMON_JOKER, 6, NULL, NULL, bull_joker_effect, NULL, NULL, NULL, NULL},
+    { UNCOMMON_JOKER, 6, NULL, NULL, acrobat_joker_effect, NULL, NULL, NULL, NULL },
 #endif
 };
 

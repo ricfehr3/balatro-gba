@@ -73,6 +73,8 @@ static int mult = 0;
 static int hand_size = 8; // Default hand size is 8
 static int cards_drawn = 0;
 static int hand_selections = 0;
+//static int current_card_scored = 0; // usefull for retriggers
+static int last_joker_scored_rarity = -1; // Baseball Card exclusive
 
 static int selection_x = 0;
 static int selection_y = 0;
@@ -1778,19 +1780,47 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                 case PLAY_SCORING:
                     if (i == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
                     {
+                        // Special Joker Effects
+
+                        // Baseball card: if an UNCOMMON Joker was scored before, give x1.5 Mult
+                        if (last_joker_scored_rarity == UNCOMMON_JOKER) {
+                            // activate all baseball cards, if any
+                            for (int k = 0; k < list_get_size(jokers); k++)
+                            {
+                                JokerObject *joker = list_get(jokers, k);
+                                if (joker->joker->id != BASEBALL_CARD_ID) {
+                                    continue;
+                                }
+
+                                if (joker_object_score(joker, played[*played_selections - 1]->card, JOKER_CALLBACK_ON_CARD_SCORED, &chips, &mult, NULL, &money, NULL)) // NULLs aren't implemented yet
+                                {
+                                    display_chips(chips);
+                                    display_mult(mult);
+                                    display_money(money);
+
+                                    return; 
+                                }
+                            }
+                        }
+
+
                         // So pretend "played_selections" is now called "scored_cards" and it counts the number of cards that have been scored
                         int scored_cards = 0;
                         for (int j = 0; j <= played_top; j++)
                         {
                             tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
 
+                            // Trigger Jokers on card scored
+
                             if (*played_selections > 0)
                             {
                                 for (int k = 0; k < list_get_size(jokers); k++)
                                 {
                                     JokerObject *joker = list_get(jokers, k);
-                                    if (joker_object_score(joker, played[*played_selections - 1]->card, &chips, &mult, NULL, &money, NULL)) // NULLs aren't implemented yet
+                                    if (joker_object_score(joker, played[*played_selections - 1]->card, JOKER_CALLBACK_ON_CARD_SCORED, &chips, &mult, NULL, &money, NULL)) // NULLs aren't implemented yet
                                     {
+                                        last_joker_scored_rarity = joker->joker->rarity;
+
                                         display_chips(chips);
                                         display_mult(mult);
                                         display_money(money);
@@ -1799,6 +1829,8 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                     }
                                 }
                             }
+
+                            // Score card
 
                             if (card_object_is_selected(played[j]))
                             {
@@ -1833,6 +1865,8 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                 }
                             }
 
+                            // Score Jokers normally
+
                             if (j == played_top && scored_cards == *played_selections) // Check if it's the last card 
                             {
                                 tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
@@ -1840,7 +1874,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                 for (int k = 0; k <= list_get_size(jokers); k++) // Independent joker scoring loop
                                 {
                                     JokerObject *joker = list_get(jokers, k);
-                                    if (joker_object_score(joker, NULL, &chips, &mult, NULL, &money, NULL)) // NULLs aren't implemented yet
+                                    if (joker_object_score(joker, NULL, JOKER_CALLBACK_INDEPENDANT, &chips, &mult, NULL, &money, NULL)) // NULLs aren't implemented yet
                                     {
                                         display_chips(chips);
                                         display_mult(mult);
