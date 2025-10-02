@@ -2963,7 +2963,6 @@ static void _discard_joker_thing()
             && joker_object->sprite_object->y == joker_object->sprite_object->ty)
         {
             list_remove(&discarded_jokers_list, current_node);
-            //list_remove_by_idx(discarded_jokers, i);
             joker_object_destroy(&joker_object);
         }
 
@@ -2976,43 +2975,11 @@ static void _discard_joker_thing()
 
 static void discarded_jokers_update_loop()
 {
-    /*
-    if (discarded_jokers == NULL)
-        return;
-    */
     if(discarded_jokers_list.head < 0) {
         return;
     }
 
     _discard_joker_thing();
-
-    /*
-    for (int i = list_get_size(discarded_jokers) - 1; i >= 0; i--)
-    {
-        JokerObject* joker_object = list_get(discarded_jokers, i);
-        joker_object_update(joker_object);
-        if (joker_object->sprite_object->x == joker_object->sprite_object->tx
-            && joker_object->sprite_object->y == joker_object->sprite_object->ty)
-        {
-            list_remove_by_idx(discarded_jokers, i);
-            joker_object_destroy(&joker_object);
-        }
-    }
-    */
-    // Iterating backwards because of removal within loop
-    /*
-    for (int i = list_get_size(discarded_jokers) - 1; i >= 0; i--)
-    {
-        JokerObject* joker_object = list_get(discarded_jokers, i);
-        joker_object_update(joker_object);
-        if (joker_object->sprite_object->x == joker_object->sprite_object->tx
-            && joker_object->sprite_object->y == joker_object->sprite_object->ty)
-        {
-            list_remove_by_idx(discarded_jokers, i);
-            joker_object_destroy(&joker_object);        
-        }
-    }
-    */
 }
 
 static void held_jokers_update_loop()

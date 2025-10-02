@@ -150,6 +150,10 @@ void list_remove(ListHead *H, LinkNode *N)
         p_next_node->prev = -1;
         H->head = POOL_IDX(LinkNode, p_next_node);
     }
+    else if(!p_prev_node && !p_next_node)
+    {
+        H->head = -1;
+    }
 
     POOL_FREE(LinkNode, N);
 }
