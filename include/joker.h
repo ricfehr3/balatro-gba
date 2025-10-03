@@ -74,20 +74,14 @@ typedef struct  // These jokers are triggered after the played hand has finished
     bool retrigger; // Retrigger played hand (e.g. "Dusk" joker, even though on the wiki it says "On Scored" it makes more sense to have it here)
 } JokerEffect;
 
-typedef JokerEffect (*JokerEffectFunc)(Joker *joker, Card *scored_card);
+typedef JokerEffect (*JokerEffectFunc)(Joker *joker, Card *scored_card, int scored_when);
 typedef struct {
     u8 rarity;
     u8 base_value;
     // The following callbacks need to be called at the appropriate time.
     // If NULL, then the Joker does not have an effect associated with this time.
     // Some Jokers have effects at several times so we need several callbacks
-    JokerEffectFunc on_card_scored;
-    JokerEffectFunc on_card_held;
-    JokerEffectFunc on_joker_scored;
-    JokerEffectFunc on_card_discarded;
-    JokerEffectFunc on_blind_selected;
-    JokerEffectFunc round_end; // usually for money, Jokers expiring or reset their state
-    JokerEffectFunc special_effect;
+    JokerEffectFunc joker_effect;
 } JokerInfo;
 const JokerInfo* get_joker_registry_entry(int joker_id);
 size_t get_joker_registry_size(void);
