@@ -56,6 +56,13 @@ enum PlayState
     PLAY_ENDED
 };
 
+enum ScoreState
+{
+    SCORING_CARDS,
+    SCORING_HELD,
+    SCORING_JOKERS
+};
+
 // Hand types
 enum HandType
 {

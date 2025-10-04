@@ -32,14 +32,16 @@
 #define LEGENDARY_JOKER 3
 
 // When does the Joker callback take place?
-// These are just the common ones. Special Joker behaviour will be check on a
-// Joker per Joker basis (see if it's there, then do something)
-#define JOKER_CALLBACK_ON_CARD_SCORED    0 // Triggers when a played card scores (e.g. Walkie Talkie, Fibonnacci...)
-#define JOKER_CALLBACK_ON_CARD_HELD      1 // Triggers when considering cards held in hand (e.g. Baron, Shoot the Moon...)
-#define JOKER_CALLBACK_INDEPENDANT       2 // Joker will trigger normally, when Jokers are scored (e.g. base Joker)
-#define JOKER_CALLBACK_ON_HAND_DISCARDED 3 // Triggers when discarding a hand
-#define JOKER_CALLBACK_ON_ROUND_END      4 // Triggers at the end of the round (e.g. Rocket)
-#define JOKER_CALLBACK_ON_BLIND_SELECTED 5 // Triggers when selecting a blind (e.g. Dagger, Riff Raff, Madness..)
+// These are just the common ones. Special Joker behaviour will be checked on a
+// Joker per Joker basis (see if it's there, then do something, e.g. Pareidolia, Baseball Card)
+#define JOKER_CALLBACK_ON_CARD_SCORED     0 // Triggers when a played card scores (e.g. Walkie Talkie, Fibonnacci...)
+#define JOKER_CALLBACK_ON_CARD_SCORED_END 1 // Triggers after the card has finishd scoring (e.g. retrigger Jokers)
+#define JOKER_CALLBACK_ON_CARD_HELD       2 // Triggers when considering cards held in hand (e.g. Baron, Shoot the Moon...)
+#define JOKER_CALLBACK_INDEPENDANT        3 // Joker will trigger normally, when Jokers are scored (e.g. base Joker)
+#define JOKER_CALLBACK_ON_HAND_SCORED_END 5 // Triggers when entire hand has finished scoring (e.g. food Jokers)
+#define JOKER_CALLBACK_ON_HAND_DISCARDED  6 // Triggers when discarding a hand
+#define JOKER_CALLBACK_ON_ROUND_END       7 // Triggers at the end of the round (e.g. Rocket)
+#define JOKER_CALLBACK_ON_BLIND_SELECTED  8 // Triggers when selecting a blind (e.g. Dagger, Riff Raff, Madness..)
 
 #define MAX_JOKER_OBJECTS 32 // The maximum number of joker objects that can be created at once
 
@@ -56,7 +58,7 @@ typedef struct
     u8 value;
     u8 rarity;
     int scaling; // General purpose value that is interpreted differently for each Joker. Jokers scaling with run stats will not use it
-    bool processed;
+    int data; // used to keep certain things in mind, interpreted differently for each Joker
 } Joker;
 
 typedef struct JokerObject
@@ -71,7 +73,8 @@ typedef struct  // These jokers are triggered after the played hand has finished
     int mult;
     int xmult;
     int money;
-    bool retrigger; // Retrigger played hand (e.g. "Dusk" joker, even though on the wiki it says "On Scored" it makes more sense to have it here)
+    int retrigger; // Retrigger played hand (e.g. "Dusk" joker, even though on the wiki it says "On Scored" it makes more sense to have it here)
+    char message[8]; // Used to send custom messages e.g. "Extinct" or "-1" (Bananas and food Jokers)
 } JokerEffect;
 
 typedef JokerEffect (*JokerEffectFunc)(Joker *joker, Card *scored_card, int scored_when);
@@ -100,7 +103,7 @@ JokerObject *joker_object_new(Joker *joker);
 void joker_object_destroy(JokerObject **joker_object);
 void joker_object_update(JokerObject *joker_object);
 void joker_object_shake(JokerObject *joker_object, mm_word sound_id); // This doesn't actually score anything, it just performs an animation and plays a sound effect
-bool joker_object_score(JokerObject *joker_object, Card* scored_card, int scored_when, int *chips, int *mult, int *xmult, int *money, bool *retrigger); // This scores the joker and returns true if it was scored successfully (Card = NULL means the joker is independent and not scored by a card)
+bool joker_object_score(JokerObject *joker_object, Card* scored_card, int scored_when, int *chips, int *mult, int *xmult, int *money, int *retrigger); // This scores the joker and returns true if it was scored successfully (Card = NULL means the joker is independent and not scored by a card)
 
 void joker_object_set_selected(JokerObject* joker_object, bool selected);
 bool joker_object_is_selected(JokerObject* joker_object);

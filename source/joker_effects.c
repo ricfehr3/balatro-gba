@@ -5,24 +5,30 @@
 #include "list.h"
 #include <stdlib.h>
 
+
+#define SCORE_ON_CARD_SCORED_ONLY if (scored_when != JOKER_CALLBACK_ON_CARD_SCORED || !scored_card) { return effect; }
+#define SCORE_ON_CARD_HELD_ONLY   if (scored_when != JOKER_CALLBACK_ON_CARD_HELD   || !scored_card) { return effect; }
+#define SCORE_INDEPENDANT_ONLY    if (scored_when != JOKER_CALLBACK_INDEPENDANT)                    { return effect; }
+
+
 static JokerEffect default_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT) {
-        return effect;
-    }
-    if (scored_card == NULL) {
-        effect.mult = 4;
-    }
+
+    SCORE_INDEPENDANT_ONLY
+
+    effect.mult = 4;
     return effect;
 }
 
 static JokerEffect sinful_joker_effect(Card *scored_card, u8 sinful_suit, int scored_when) {
     JokerEffect effect = {0};
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT) {
-        return effect;
-    }
-    if (scored_card != NULL && scored_card->suit == sinful_suit)
+
+    SCORE_ON_CARD_SCORED_ONLY
+
+    if (scored_card->suit == sinful_suit) {
         effect.mult = 3;
+    }
+
     return effect;
 }
 
@@ -44,13 +50,10 @@ static JokerEffect gluttonous_joker_effect(Joker *joker, Card *scored_card, int 
 
 static JokerEffect jolly_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    // this Joker scores in an independant manner
-    // if card != null, we are not at the end-phase of scoring yet
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
 
+    SCORE_INDEPENDANT_ONLY
+
+    // this Joker scores in an independant manner
     // This is really inefficient but the only way at the moment to check for whole-hand conditions
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -58,35 +61,30 @@ static JokerEffect jolly_joker_effect(Joker *joker, Card *scored_card, int score
 
     if (hand_contains_n_of_a_kind(ranks) >= 2)
         effect.mult = 8;
+
     return effect;
 }
 
 static JokerEffect zany_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    // this Joker scores in an independant manner
-    // if card != null, we are not at the end-phase of scoring yet
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
 
+    SCORE_INDEPENDANT_ONLY
+
+    // This is really inefficient but the only way at the moment to check for whole-hand conditions
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
     get_played_distribution(ranks, suits);
 
     if (hand_contains_n_of_a_kind(ranks) >= 3)
         effect.mult = 12;
+
     return effect;
 }
 
 static JokerEffect mad_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    // this Joker scores in an independant manner
-    // if card != null, we are not at the end-phase of scoring yet
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
+
+    SCORE_INDEPENDANT_ONLY
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -94,17 +92,14 @@ static JokerEffect mad_joker_effect(Joker *joker, Card *scored_card, int scored_
 
     if (hand_contains_two_pair(ranks))
         effect.mult = 10;
+
     return effect;
 }
 
 static JokerEffect crazy_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    // this Joker scores in an independant manner
-    // if card != null, we are not at the end-phase of scoring yet
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
+
+    SCORE_INDEPENDANT_ONLY
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -112,17 +107,14 @@ static JokerEffect crazy_joker_effect(Joker *joker, Card *scored_card, int score
 
     if (hand_contains_straight(ranks))
         effect.mult = 12;
+
     return effect;
 }
 
 static JokerEffect droll_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    // this Joker scores in an independant manner
-    // if card != null, we are not at the end-phase of scoring yet
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
+
+    SCORE_INDEPENDANT_ONLY
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -130,17 +122,14 @@ static JokerEffect droll_joker_effect(Joker *joker, Card *scored_card, int score
 
     if (hand_contains_flush(suits))
         effect.mult = 10;
+
     return effect;
 }
 
 static JokerEffect sly_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    // this Joker scores in an independant manner
-    // if card != null, we are not at the end-phase of scoring yet
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
+
+    SCORE_INDEPENDANT_ONLY
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -148,17 +137,14 @@ static JokerEffect sly_joker_effect(Joker *joker, Card *scored_card, int scored_
 
     if (hand_contains_n_of_a_kind(ranks) >= 2)
         effect.chips = 50;
+
     return effect;
 }
 
 static JokerEffect wily_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    // this Joker scores in an independant manner
-    // if card != null, we are not at the end-phase of scoring yet
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
+
+    SCORE_INDEPENDANT_ONLY
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -166,17 +152,14 @@ static JokerEffect wily_joker_effect(Joker *joker, Card *scored_card, int scored
 
     if (hand_contains_n_of_a_kind(ranks) >= 3)
         effect.chips = 100;
+
     return effect;
 }
 
 static JokerEffect clever_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    // this Joker scores in an independant manner
-    // if card != null, we are not at the end-phase of scoring yet
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
+
+    SCORE_INDEPENDANT_ONLY
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -184,17 +167,14 @@ static JokerEffect clever_joker_effect(Joker *joker, Card *scored_card, int scor
 
     if (hand_contains_two_pair(ranks))
         effect.chips = 80;
+
     return effect;
 }
 
 static JokerEffect devious_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    // this Joker scores in an independant manner
-    // if card != null, we are not at the end-phase of scoring yet
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
+
+    SCORE_INDEPENDANT_ONLY
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -202,17 +182,14 @@ static JokerEffect devious_joker_effect(Joker *joker, Card *scored_card, int sco
 
     if (hand_contains_straight(ranks))
         effect.chips = 100;
+
     return effect;
 }
 
 static JokerEffect crafty_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    // this Joker scores in an independant manner
-    // if card != null, we are not at the end-phase of scoring yet
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
+
+    SCORE_INDEPENDANT_ONLY
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -220,17 +197,14 @@ static JokerEffect crafty_joker_effect(Joker *joker, Card *scored_card, int scor
 
     if (hand_contains_flush(suits))
         effect.chips = 80;
+
     return effect;
 }
 
 static JokerEffect half_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    // this Joker scores in an independant manner
-    // if card != null, we are not at the end-phase of scoring yet
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
+
+    SCORE_INDEPENDANT_ONLY
 
     int played_size = get_played_top() + 1;
     if (played_size <= 3) 
@@ -241,12 +215,8 @@ static JokerEffect half_joker_effect(Joker *joker, Card *scored_card, int scored
 
 static JokerEffect joker_stencil_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    // this Joker scores in an independant manner
-    // if card != null, we are not at the end-phase of scoring yet
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
+
+    SCORE_INDEPENDANT_ONLY
 
     List* jokers = get_jokers();
 
@@ -270,12 +240,8 @@ static JokerEffect joker_stencil_effect(Joker *joker, Card *scored_card, int sco
 #define MISPRINT_MAX_MULT 23
 static JokerEffect misprint_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    // this Joker scores in an independant manner
-    // if card != null, we are not at the end-phase of scoring yet
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
+
+    SCORE_INDEPENDANT_ONLY
 
     effect.mult = random() % (MISPRINT_MAX_MULT + 1);
 
@@ -284,32 +250,28 @@ static JokerEffect misprint_joker_effect(Joker *joker, Card *scored_card, int sc
 
 static JokerEffect walkie_talkie_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    // this Joker scores when a card scores
-    if (scored_when != JOKER_CALLBACK_ON_CARD_SCORED) {
-        return effect;
-    }
-    if (scored_card == NULL)
-        return effect;
 
-    if (scored_card->rank == TEN || scored_card->rank == FOUR) {
-            effect.chips = 10;
-            effect.mult = 4;
-    }
+    SCORE_ON_CARD_SCORED_ONLY
 
+    if (scored_card && (scored_card->rank == TEN || scored_card->rank == FOUR)) {
+        effect.chips = 10;
+        effect.mult = 4;
+    }
+    
     return effect;
 }
 
 static JokerEffect fibonnaci_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    // this Joker scores when a card scores
-    if (scored_when != JOKER_CALLBACK_ON_CARD_SCORED) {
-        return effect;
-    }
-    if (scored_card == NULL)
-        return effect;
+
+    SCORE_ON_CARD_SCORED_ONLY
 
     switch (scored_card->rank) {
-        case ACE: case TWO: case THREE: case FIVE: case EIGHT:
+        case ACE:
+        case TWO:
+        case THREE:
+        case FIVE:
+        case EIGHT:
             effect.mult = 8;
         default:
             break;
@@ -320,10 +282,8 @@ static JokerEffect fibonnaci_joker_effect(Joker *joker, Card *scored_card, int s
 
 static JokerEffect banner_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
+
+    SCORE_INDEPENDANT_ONLY
 
     effect.chips = 30 * get_num_discards_remaining();
 
@@ -332,23 +292,20 @@ static JokerEffect banner_joker_effect(Joker *joker, Card *scored_card, int scor
 
 static JokerEffect mystic_summit_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
 
-    if (get_num_discards_remaining() == 0)
+    SCORE_INDEPENDANT_ONLY
+
+    if (get_num_discards_remaining() == 0) {
         effect.mult = 15;
+    }
 
     return effect;
 }
 
 static JokerEffect blackboard_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
+
+    SCORE_INDEPENDANT_ONLY
 
     bool all_cards_are_spades_or_clubs = true;
     CardObject** hand = get_hand_array();
@@ -370,10 +327,8 @@ static JokerEffect blackboard_joker_effect(Joker *joker, Card *scored_card, int 
 
 static JokerEffect blue_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL) {
-        return effect;
-    }
+
+    SCORE_INDEPENDANT_ONLY
 
     effect.chips = (get_deck_top() + 1) * 2;
 
@@ -383,13 +338,10 @@ static JokerEffect blue_joker_effect(Joker *joker, Card *scored_card, int scored
 // Using __attribute__((unused)) for jokers with no sprites yet to avoid warning
 // Remove the attribute once they have sprites
 __attribute__((unused))
-static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card, int scored_when) 
-{
+static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    // This Joker scores on held cards
-    if (scored_when != JOKER_CALLBACK_ON_CARD_HELD
-     || scored_card != NULL)
-        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    SCORE_ON_CARD_HELD_ONLY
 
     // Find the lowest rank card in hand
     // Aces are always considered high value, even in an ace-low straight
@@ -412,9 +364,8 @@ static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card, int
 __attribute__((unused))
 static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    if (scored_when != JOKER_CALLBACK_ON_CARD_HELD
-     || scored_card != NULL)
-        return effect;
+
+    SCORE_ON_CARD_HELD_ONLY
 
     CardObject** hand = get_hand_array();
     int hand_size = hand_get_size();
@@ -430,9 +381,8 @@ static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card
 
 static JokerEffect business_card_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    if (scored_when != JOKER_CALLBACK_ON_CARD_SCORED
-     || scored_card == NULL)
-        return effect;
+
+    SCORE_ON_CARD_HELD_ONLY
 
     if ((random() % 2 == 0) && card_is_face(scored_card)) {
         effect.money = 2;
@@ -443,9 +393,8 @@ static JokerEffect business_card_joker_effect(Joker *joker, Card *scored_card, i
 
 static JokerEffect scholar_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    if (scored_when != JOKER_CALLBACK_ON_CARD_SCORED
-     || scored_card == NULL)
-        return effect;
+
+    SCORE_ON_CARD_SCORED_ONLY
 
     if (scored_card->rank == ACE) {
         effect.chips = 20;
@@ -457,9 +406,8 @@ static JokerEffect scholar_joker_effect(Joker *joker, Card *scored_card, int sco
 
 static JokerEffect scary_face_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    if (scored_when != JOKER_CALLBACK_ON_CARD_SCORED
-     || scored_card == NULL)
-        return effect;
+
+    SCORE_ON_CARD_SCORED_ONLY
 
     if (card_is_face(scored_card)) {
         effect.chips = 30;
@@ -471,9 +419,8 @@ static JokerEffect scary_face_joker_effect(Joker *joker, Card *scored_card, int 
  __attribute__((unused))
 static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL)
-        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    SCORE_INDEPENDANT_ONLY
 
     // +1 xmult per occupied joker slot
     int num_jokers = list_get_size(get_jokers());
@@ -485,10 +432,9 @@ static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card, int sc
 __attribute__((unused))
 static JokerEffect bull_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card != NULL)
-        return effect; // if card != null, we are not at the end-phase of scoring yet
 
+    SCORE_INDEPENDANT_ONLY
+    
     effect.chips = get_money() * 2;
 
     return effect;
@@ -496,8 +442,8 @@ static JokerEffect bull_joker_effect(Joker *joker, Card *scored_card, int scored
 
 static JokerEffect smiley_face_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    if (scored_card == NULL)
-        return effect;
+
+    SCORE_ON_CARD_SCORED_ONLY
 
     if (card_is_face(scored_card)) {
         effect.mult = 5;
@@ -508,17 +454,18 @@ static JokerEffect smiley_face_joker_effect(Joker *joker, Card *scored_card, int
 
 static JokerEffect even_steven_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    if (scored_when != JOKER_CALLBACK_ON_CARD_SCORED
-     || scored_card == NULL)
-        return effect;
 
-    if (card_get_value(scored_card) % 2 == 0) {
-        switch (scored_card->rank) {
-            case KING: case QUEEN: case JACK:
-                break;
-            default:
+    SCORE_ON_CARD_SCORED_ONLY
+
+    switch (scored_card->rank) {
+        case KING:
+        case QUEEN:
+        case JACK:
+            break;
+        default:
+            if (card_get_value(scored_card) % 2 == 0) {
                 effect.mult = 4;
-        }
+            }
     }
 
     return effect;
@@ -526,12 +473,12 @@ static JokerEffect even_steven_joker_effect(Joker *joker, Card *scored_card, int
 
 static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    if (scored_when != JOKER_CALLBACK_ON_CARD_SCORED
-     || scored_card == NULL)
-        return effect;
 
-    if (card_get_value(scored_card) % 2 == 1) // todo test ace
+    SCORE_ON_CARD_SCORED_ONLY
+
+    if (card_get_value(scored_card) % 2 == 1) { // todo test ace
         effect.chips = 31;
+    }
 
     return effect;
 }
@@ -539,10 +486,9 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card, int sc
 __attribute__((unused))
 static JokerEffect acrobat_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
-    if (scored_when != JOKER_CALLBACK_INDEPENDANT
-     || scored_card == NULL)
-        return effect;
 
+    SCORE_INDEPENDANT_ONLY
+    
     // 0 remaining hands mean we're scoring the last hand
     if (get_num_hands_remaining() == 0) {
         effect.xmult = 3;
