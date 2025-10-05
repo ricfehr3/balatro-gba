@@ -108,6 +108,7 @@ int             get_hand_top(void);
 int             hand_get_size(void);
 CardObject**    get_played_array(void);
 int             get_played_top(void);
+int             get_scored_card_index(void);
 List*           get_jokers(void);
 bool            is_joker_present(int joker_id);
 bool            card_is_face(Card *card);

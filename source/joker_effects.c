@@ -273,6 +273,7 @@ static JokerEffect fibonnaci_joker_effect(Joker *joker, Card *scored_card, int s
         case FIVE:
         case EIGHT:
             effect.mult = 8;
+            break;
         default:
             break;
     }
@@ -466,6 +467,7 @@ static JokerEffect even_steven_joker_effect(Joker *joker, Card *scored_card, int
             if (card_get_value(scored_card) % 2 == 0) {
                 effect.mult = 4;
             }
+            break;
     }
 
     return effect;
@@ -492,6 +494,167 @@ static JokerEffect acrobat_joker_effect(Joker *joker, Card *scored_card, int sco
     // 0 remaining hands mean we're scoring the last hand
     if (get_num_hands_remaining() == 0) {
         effect.xmult = 3;
+    }
+
+    return effect;
+}
+
+__attribute__((unused))
+static JokerEffect hanging_chad_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
+    JokerEffect effect = {0};
+
+    switch (scored_when) {
+        case JOKER_CALLBACK_ON_HAND_SCORED_END:
+            joker->data = 2;
+            break;
+        // No need to check if this is the first card scored or not
+        // joker->data will always reach 0 on the first card, then retrigger
+        // will be false and scoring will go onto the next card
+        case JOKER_CALLBACK_ON_CARD_SCORED:
+            effect.retrigger = (joker->data > 0);
+            joker->data -= 1;
+            break;
+    }
+
+    return effect;
+}
+
+__attribute__((unused))
+static JokerEffect mime_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
+    JokerEffect effect = {0};
+
+    switch (scored_when) {
+        case JOKER_CALLBACK_ON_HAND_SCORED_END:
+            joker->data = -1;
+            break;
+        
+        case JOKER_CALLBACK_ON_CARD_HELD:
+            // data is index of previously retriggered held card
+            // Only retrigger current card if it's striclty after the last one we retriggered
+            effect.retrigger = (joker->data < get_scored_card_index());
+            joker->data = get_scored_card_index();
+            break;
+    }
+
+    return effect;
+}
+
+__attribute__((unused))
+static JokerEffect photograph_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
+    JokerEffect effect = {0};
+
+    switch (scored_when) {
+        case JOKER_CALLBACK_ON_HAND_SCORED_END:
+            joker->data = -1;
+            break;
+        
+        case JOKER_CALLBACK_ON_CARD_SCORED:
+            // has a face card been encountered already, and if not, is the current scoring card a face card?
+            if (joker->data < 0 && card_is_face(scored_card)) {
+                joker->data = get_scored_card_index();
+            }
+            // if we have a face card index saved, check against it and give mult accordingly
+            // Doing this now will trigger the effect the first time we encounter the face card,
+            // and we will catch potential retriggers
+            if (joker->data == get_scored_card_index()) {
+                effect.xmult = 2;
+            }
+            break;
+    }
+
+    return effect;
+}
+
+__attribute__((unused))
+static JokerEffect dusk_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
+    JokerEffect effect = {0};
+
+    switch (scored_when) {
+        case JOKER_CALLBACK_ON_HAND_SCORED_END:
+            joker->data = -1;
+            break;
+        
+        case JOKER_CALLBACK_ON_CARD_SCORED:
+            // Works the same way as Mime, but for played cards and only the last hand
+            if (get_num_hands_remaining() == 0) {
+                effect.retrigger = (joker->data < get_scored_card_index());
+                joker->data = get_scored_card_index();
+            }
+            
+            break;
+    }
+
+    return effect;
+}
+
+__attribute__((unused))
+static JokerEffect hack_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
+    JokerEffect effect = {0};
+
+    switch (scored_when) {
+        case JOKER_CALLBACK_ON_HAND_SCORED_END:
+            joker->data = -1;
+            break;
+        
+        case JOKER_CALLBACK_ON_CARD_SCORED:
+            // Works the same way as Mime, but for played cards and check what rank the card is
+            switch (scored_card->rank) {
+                case TWO:
+                case THREE:
+                case FOUR:
+                case FIVE:
+                    effect.retrigger = (joker->data < get_scored_card_index());
+                    joker->data = get_scored_card_index();
+            }
+            
+            break;
+    }
+
+    return effect;
+}
+
+__attribute__((unused))
+static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
+    JokerEffect effect = {0};
+
+    switch (scored_when) {
+        case JOKER_CALLBACK_ON_HAND_SCORED_END:
+            joker->data   = -1;
+            joker->data2 -=  1;
+            if (joker->data2 <= 0) {
+                effect.expire = true;
+                snprintf(effect.message, 8, "Expire!");
+            } else {
+                snprintf(effect.message, 3, "-1");
+            }
+            break;
+        
+        case JOKER_CALLBACK_ON_CARD_SCORED:
+            // Works the same way as Mime, but for played cards and if it can still trigger
+            if (joker->data2 > 0) {
+                effect.retrigger = (joker->data < get_scored_card_index());
+                joker->data = get_scored_card_index();
+            } 
+            break;
+    }
+
+    return effect;
+}
+
+__attribute__((unused))
+static JokerEffect sock_and_buskin_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
+    JokerEffect effect = {0};
+
+    switch (scored_when) {
+        case JOKER_CALLBACK_ON_HAND_SCORED_END:
+            joker->data = -1;
+            break;
+        
+        case JOKER_CALLBACK_ON_CARD_SCORED:
+            // Works the same way as Mime, but for played face cards
+            effect.retrigger = (joker->data < get_scored_card_index() && card_is_face(scored_card));
+            joker->data = get_scored_card_index();
+            break;
     }
 
     return effect;
@@ -542,12 +705,19 @@ const JokerInfo joker_registry[] = {
     // The following jokers don't have sprites yet, 
     // uncomment them when their sprites are added.
 #if 0
-    { COMMON_JOKER, 5, raised_fist_joker_effect },
-    { COMMON_JOKER, 6, reserved_parking_joker_effect },
-
-    { COMMON_JOKER, 4, abstract_joker_effect },
+    { COMMON_JOKER,   4, hanging_chad_joker_effect },
+    { COMMON_JOKER,   5, raised_fist_joker_effect },
+    { COMMON_JOKER,   6, reserved_parking_joker_effect },
+    { UNCOMMON_JOKER, 5, dusk_joker_effect },
+    { UNCOMMON_JOKER, 6, hack_joker_effect },
     { UNCOMMON_JOKER, 6, bull_joker_effect},
+
+    { COMMON_JOKER,   5, photograph_joker_effect },
+    { COMMON_JOKER,   4, abstract_joker_effect },
     { UNCOMMON_JOKER, 6, acrobat_joker_effect },
+    { UNCOMMON_JOKER, 5, mime_joker_effect },
+    { UNCOMMON_JOKER, 6, seltzer_joker_effect },
+    { UNCOMMON_JOKER, 6, sock_and_buskin_joker_effect },
 #endif
 };
 

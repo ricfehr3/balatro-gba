@@ -69,20 +69,18 @@ static FIXED lerped_temp_score = 0;
 
 static int chips = 0;
 static int mult = 0;
-static int retrigger = 0;
+static bool retrigger = false;
 
 static int hand_size = 8; // Default hand size is 8
 static int cards_drawn = 0;
 static int hand_selections = 0;
 
 // Keeping track of cards scored
-static int scored_played_card = 0;
-static int scored_held_card = 0;
+static int scored_card_index = 0;
 
 // Keeping track of what Jokers are scored at each step
 static int score_state = SCORING_CARDS;
 static int joker_scored_index = 0;
-static int joker_retrigger_index = 0;
 static int joker_round_end_index = 0;
 static int last_joker_scored_rarity = -1; // Baseball Card exclusive
 
@@ -169,6 +167,10 @@ int get_played_top(void) {
     return played_top;
 }
 
+int get_scored_card_index(void) {
+    return scored_card_index;
+}
+
 List *get_jokers(void) {
     return jokers;
 }
@@ -212,11 +214,9 @@ int get_money(void) {
 }
 
 static void reset_scoring_indices() {
-    scored_played_card = 0;
-    scored_held_card = 0;
+    scored_card_index = 0;
     score_state = SCORING_CARDS;
     joker_scored_index = 0;
-    joker_retrigger_index = 0;
     joker_round_end_index = 0;
     last_joker_scored_rarity = -1;
 }
@@ -1826,13 +1826,22 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                             }
                         }
 
+                        // We are about to score played and held Cards, and Jokers.
+                        // If we need to retrigger, then we have scored a card previously
+                        // (be it a played or held one) and thus have incremented scored_card_index by 1.
+                        // Take out this increment to score the previous card again
+                        if (retrigger) {
+                            retrigger = false;
+                            scored_card_index -= 1;
+                        }
+
                         switch (score_state)
                         {
                             // Score cards and trigger Jokers accordingly
                             case SCORING_CARDS:
                                 
-                                // So pretend "played_selections" is now called "scored_played_card" and it counts the number of cards that have been scored
-                                for (int j = scored_played_card; j <= played_top+1; j++) // allow past played_top to score jokers for last played card
+                                // So pretend "played_selections" is now called "scored_card_index" and it counts the number of cards that have been scored
+                                for (int j = scored_card_index; j <= played_top+1; j++) // allow past played_top to score jokers for last played card
                                 {
                                     tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
 
@@ -1859,7 +1868,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                                     // Score card
 
-                                    scored_played_card += 1; // Count the number of cards that have been scored
+                                    scored_card_index += 1; // Count the number of cards that have been scored
 
                                     if (j <= played_top && card_object_is_selected(played[j]))
                                     {
@@ -1871,7 +1880,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                         snprintf(score_buffer, sizeof(score_buffer), "+%d", card_get_value(played[j]->card));
                                         tte_write(score_buffer);
 
-                                        *played_selections = scored_played_card;
+                                        *played_selections = scored_card_index;
                                         card_object_shake(played[j], SFX_CARD_SELECT);
 
                                         // Relocated card scoring logic here
@@ -1889,6 +1898,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                 //score_state = SCORING_HELD;
                                 score_state = SCORING_JOKERS; // scoring held still TODO, jumping to scoring Jokers
                                 joker_scored_index = 0;
+                                scored_card_index = 0; // reuse this variable for held cards
                                 return;
                             
                             // TODO : Score cards held in hand
@@ -1918,14 +1928,14 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                     }
                                 }
 
-                                // Trigger round end effect for all jokers once they are done scoring
+                                // Trigger hand end effect for all jokers once they are done scoring
                                 for (int k = joker_round_end_index; k <= list_get_size(jokers); k++)
                                 {
                                     // Reset the joker's processed state for the next round and process round end effects
                                     // The only thing that could need displaying is money
                                     joker_round_end_index += 1;
                                     JokerObject *joker = list_get(jokers, k);
-                                    if (joker_object_score(joker, NULL, JOKER_CALLBACK_ON_ROUND_END, &chips, &mult, NULL, &money, &retrigger))
+                                    if (joker_object_score(joker, NULL, JOKER_CALLBACK_ON_HAND_SCORED_END, &chips, &mult, NULL, &money, &retrigger))
                                     {
                                         // don't know which ones are really necessary so here they all are
                                         display_chips(chips);

@@ -143,8 +143,39 @@ Joker *joker_new(u8 id)
     joker->modifier = BASE_EDITION; // TODO: Make this a parameter
     joker->value = jinfo->base_value + edition_price_lut[joker->modifier];
     joker->rarity = jinfo->rarity;
-    joker->scaling = 0;
     joker->data = 0;
+    joker->data2 = 0;
+
+    // Implement scaling Jokers and retriggers
+    switch (id)
+    {
+        // in-scope Jokers
+        case HANGING_CHAD_ID:
+            joker->data = 2; // retriggers left, reset to 2 at round end
+            break;
+        case DUSK_ID:
+            joker->data = -1; // previously retriggered card index
+            break;
+        case HACK_ID:
+            joker->data = -1; // previously retriggered card index
+            break;
+        case PHOTOGRAPH_ID:
+            joker->data = -1; // First scoring face card index
+            break;
+        case SOCK_AND_BUSKIN_JOKER_ID:
+            joker->data = -1; // previously retriggered face card index
+
+        // out-of-scope Jokers
+        case MIME_ID:
+            joker->data = -1; // previously retriggered held card index
+            break;
+        case SELTZER_ID:
+            joker->data  = -1; // previously retriggered card index
+            joker->data2 = 10; // remaining retriggered hands
+            break;
+        default:
+            break;
+    }
 
     return joker;
 }
@@ -249,7 +280,7 @@ void joker_object_shake(JokerObject *joker_object, mm_word sound_id)
     sprite_object_shake(joker_object->sprite_object, sound_id);
 }
 
-bool joker_object_score(JokerObject *joker_object, Card* scored_card, int scored_when, int *chips, int *mult, int *xmult, int *money, int *retrigger)
+bool joker_object_score(JokerObject *joker_object, Card* scored_card, int scored_when, int *chips, int *mult, int *xmult, int *money, bool *retrigger)
 {
     JokerEffect joker_effect = joker_get_score_effect(joker_object->joker, scored_card, scored_when);
 
@@ -309,6 +340,7 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, int scored
         tte_write(score_buffer);
         cursorPosX += joker_score_display_offset_px;
     }
+    // custom message for Jokers + retriggers will say "Again!"
     if (joker_effect.message[0] != '\0') // Message is not empty
     {
         tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
@@ -316,8 +348,9 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, int scored
         tte_write(joker_effect.message);
         cursorPosX += joker_score_display_offset_px;
     }
-
-    // TODO custom message per Joker + retriggers saying "Again!"
+    if (joker_effect.expire) {
+        // TODO make Jokers expire
+    }
 
     joker_object_shake(joker_object, SFX_CARD_SELECT); // TODO: Add a sound effect for scoring the joker
 
