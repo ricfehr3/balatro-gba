@@ -304,9 +304,6 @@ static JokerEffect blue_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-// Using __attribute__((unused)) for jokers with no sprites yet to avoid warning
-// Remove the attribute once they have sprites
-__attribute__((unused))
 static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card) 
 {
     JokerEffect effect = {0};
@@ -331,7 +328,6 @@ static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card)
     return effect;
 } 
 
-__attribute__((unused))
 static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -397,7 +393,6 @@ static JokerEffect scary_face_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
- __attribute__((unused))
 static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -410,7 +405,6 @@ static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-__attribute__((unused))
 static JokerEffect bull_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -464,7 +458,6 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
- __attribute__((unused))
  static JokerEffect the_duo_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -480,9 +473,6 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
  }
 
-
-// graphics available from @MathisMartin31
-  __attribute__((unused))
  static JokerEffect the_trio_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -498,8 +488,6 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
  }
 
-// graphics available from @MathisMartin31
-   __attribute__((unused))
  static JokerEffect the_family_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -515,8 +503,6 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
  }
 
-// graphics available from @MathisMartin31
-   __attribute__((unused))
  static JokerEffect the_order_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -531,8 +517,6 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-// graphics available from @MathisMartin31
-   __attribute__((unused))
  static JokerEffect the_tribe_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -547,7 +531,8 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-
+// Using __attribute__((unused)) for jokers with no sprites yet to avoid warning
+// Remove the attribute once they have sprites
 // graphics available from @MathisMartin31
    __attribute__((unused))
 static JokerEffect bootstraps_joker_effect(Joker *joker, Card *scored_card) {
@@ -639,22 +624,20 @@ const JokerInfo joker_registry[] = {
     // Business card should be paired with Shortcut for palette optimization when it's added
     { COMMON_JOKER, 4, scary_face_joker_effect },       // 28
     { COMMON_JOKER, 4, smiley_face_joker_effect },      // 29
+    { COMMON_JOKER, 5, raised_fist_joker_effect },      // 30
+    { COMMON_JOKER, 6, reserved_parking_joker_effect }, // 31
+    { COMMON_JOKER, 4, abstract_joker_effect },         // 32
+    { UNCOMMON_JOKER, 6, bull_joker_effect},            // 33
+    { RARE_JOKER, 8, the_duo_joker_effect},             // 34
+    { RARE_JOKER, 8, the_trio_joker_effect},            // 35
+    { RARE_JOKER, 8, the_family_joker_effect},          // 36
+    { RARE_JOKER, 8, the_order_joker_effect},           // 37
+    { RARE_JOKER, 8, the_tribe_joker_effect},           // 38
 
     // The following jokers don't have sprites yet, 
     // uncomment them when their sprites are added.
-
 #if 0
-    { COMMON_JOKER, 5, raised_fist_joker_effect },
-    { COMMON_JOKER, 6, reserved_parking_joker_effect },
-
-    { COMMON_JOKER, 4, abstract_joker_effect },
-    { UNCOMMON_JOKER, 6, bull_joker_effect},
-    { RARE_JOKER, 8, the_duo_joker_effect},
-    { RARE_JOKER, 8, the_trio_joker_effect},
-    { RARE_JOKER, 8, the_family_joker_effect},
-    { RARE_JOKER, 8, the_order_joker_effect},
-    { RARE_JOKER, 8, the_tribe_joker_effect},
-    { UNCOMMON_JOKER, 7, bootstraps_joker_effect},
+    { UNCOMMON_JOKER, 7, bootstraps_joker_effect},   
     { COMMON_JOKER, 5, shoot_the_moon_joker_effect},
 #endif
 };
