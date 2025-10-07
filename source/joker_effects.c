@@ -571,13 +571,10 @@ static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card) 
     int hand_size = hand_get_size();
     for (int i = 0; i < hand_size; i++ )
     {
-        switch (hand[i]->card->rank) {
-            case QUEEN:
-            
-                    effect.mult += 13;
-            default:
-                break;
-        }
+        if (hand[i]->card->rank == QUEEN)
+        {
+             effect.mult += 13;
+        } 
     }
 
     return effect;
