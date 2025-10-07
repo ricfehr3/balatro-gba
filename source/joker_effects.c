@@ -304,9 +304,6 @@ static JokerEffect blue_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-// Using __attribute__((unused)) for jokers with no sprites yet to avoid warning
-// Remove the attribute once they have sprites
-__attribute__((unused))
 static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card) 
 {
     JokerEffect effect = {0};
@@ -331,7 +328,6 @@ static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card)
     return effect;
 } 
 
-__attribute__((unused))
 static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -397,7 +393,6 @@ static JokerEffect scary_face_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
- __attribute__((unused))
 static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -410,7 +405,6 @@ static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-__attribute__((unused))
 static JokerEffect bull_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -537,7 +531,8 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-
+// Using __attribute__((unused)) for jokers with no sprites yet to avoid warning
+// Remove the attribute once they have sprites
 // graphics available from @MathisMartin31
    __attribute__((unused))
 static JokerEffect bootstraps_joker_effect(Joker *joker, Card *scored_card) {
