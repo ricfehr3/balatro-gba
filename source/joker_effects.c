@@ -639,14 +639,12 @@ const JokerInfo joker_registry[] = {
     // Business card should be paired with Shortcut for palette optimization when it's added
     { COMMON_JOKER, 4, scary_face_joker_effect },       // 28
     { COMMON_JOKER, 4, smiley_face_joker_effect },      // 29
+    { COMMON_JOKER, 5, raised_fist_joker_effect },      // 30
+    { COMMON_JOKER, 6, reserved_parking_joker_effect }, // 31
 
     // The following jokers don't have sprites yet, 
     // uncomment them when their sprites are added.
-
 #if 0
-    { COMMON_JOKER, 5, raised_fist_joker_effect },
-    { COMMON_JOKER, 6, reserved_parking_joker_effect },
-
     { COMMON_JOKER, 4, abstract_joker_effect },
     { UNCOMMON_JOKER, 6, bull_joker_effect},
     { RARE_JOKER, 8, the_duo_joker_effect},
