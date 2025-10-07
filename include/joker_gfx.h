@@ -18,5 +18,8 @@
 #include "joker_gfx14.h"
 #include "joker_gfx15.h"
 #include "joker_gfx16.h"
+#include "joker_gfx17.h"
+#include "joker_gfx18.h"
+#include "joker_gfx19.h"
 
 #endif
