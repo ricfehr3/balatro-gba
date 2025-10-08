@@ -495,7 +495,7 @@ static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card) {
     JokerObject* first_joker = list_get(jokers, 0);
 
     // JOKER_BRAINSTORM_ID (joker.h) will need to be updated
-    if (first_joker->joker->id != JOKER_BRAINSTORM_ID) {
+    if (first_joker != NULL && first_joker->joker->id != JOKER_BRAINSTORM_ID) {
         // manually flip this to avoid infinite blueprint + brainstorm loops
         joker->processed = true;
         effect = joker_get_score_effect(first_joker->joker, scored_card);
