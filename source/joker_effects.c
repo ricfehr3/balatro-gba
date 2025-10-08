@@ -520,6 +520,102 @@ static JokerEffect hanging_chad_joker_effect(Joker *joker, Card *scored_card, in
 }
 
 __attribute__((unused))
+static JokerEffect the_duo_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+    
+     // This is really inefficient but the only way at the moment to check for whole-hand conditions
+    u8 suits[NUM_SUITS];
+    u8 ranks[NUM_RANKS];
+    get_played_distribution(ranks, suits);
+
+    if (hand_contains_n_of_a_kind(ranks) >= 2)
+        effect.xmult = 2;
+    return effect;
+ }
+
+
+// graphics available from @MathisMartin31
+__attribute__((unused))
+static JokerEffect the_trio_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+    
+     // This is really inefficient but the only way at the moment to check for whole-hand conditions
+    u8 suits[NUM_SUITS];
+    u8 ranks[NUM_RANKS];
+    get_played_distribution(ranks, suits);
+
+    if (hand_contains_n_of_a_kind(ranks) >= 3)
+        effect.xmult = 3;
+    return effect;
+ }
+
+// graphics available from @MathisMartin31
+__attribute__((unused))
+static JokerEffect the_family_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+    
+     // This is really inefficient but the only way at the moment to check for whole-hand conditions
+    u8 suits[NUM_SUITS];
+    u8 ranks[NUM_RANKS];
+    get_played_distribution(ranks, suits);
+
+    if (hand_contains_n_of_a_kind(ranks) >= 4)
+        effect.xmult = 4;
+    return effect;
+ }
+
+// graphics available from @MathisMartin31
+__attribute__((unused))
+static JokerEffect the_order_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    u8 suits[NUM_SUITS];
+    u8 ranks[NUM_RANKS];
+    get_played_distribution(ranks, suits);
+
+    if (hand_contains_straight(ranks))
+        effect.xmult = 3;
+    return effect;
+}
+
+// graphics available from @MathisMartin31
+__attribute__((unused))
+static JokerEffect the_tribe_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    u8 suits[NUM_SUITS];
+    u8 ranks[NUM_RANKS];
+    get_played_distribution(ranks, suits);
+
+    if (hand_contains_flush(suits))
+        effect.xmult = 2;
+    return effect;
+}
+
+
+// graphics available from @MathisMartin31
+   __attribute__((unused))
+static JokerEffect bootstraps_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    effect.mult = (get_money() / 5) * 2;
+
+    return effect;
+}
+
+__attribute__((unused))
 static JokerEffect mime_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
 
@@ -534,6 +630,26 @@ static JokerEffect mime_joker_effect(Joker *joker, Card *scored_card, int scored
             effect.retrigger = (joker->data < get_scored_card_index());
             joker->data = get_scored_card_index();
             break;
+    }
+
+    return effect;
+}
+            
+// no graphics available but ready to be used if wanted when graphics available
+__attribute__((unused))
+static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+        
+    CardObject** hand = get_hand_array();
+    int hand_size = hand_get_size();
+    for (int i = 0; i < hand_size; i++ )
+    {
+        if (hand[i]->card->rank == QUEEN)
+        {
+             effect.mult += 13;
+        }
     }
 
     return effect;
@@ -559,6 +675,22 @@ static JokerEffect photograph_joker_effect(Joker *joker, Card *scored_card, int 
             if (joker->data == get_scored_card_index()) {
                 effect.xmult = 2;
             }
+    }
+
+    return effect;
+}
+
+// no graphics available but ready to be used if wanted when graphics available
+__attribute__((unused))
+static JokerEffect triboulet_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
+    JokerEffect effect = {0};
+    if (scored_card == NULL)
+        return effect;
+
+    switch (scored_card->rank) {
+        case KING: case QUEEN:
+            effect.xmult = 2;
+        default:
             break;
     }
 
@@ -701,9 +833,11 @@ const JokerInfo joker_registry[] = {
     // Business card should be paired with Shortcut for palette optimization when it's added
     { COMMON_JOKER,   4, scary_face_joker_effect },       // 28
     { COMMON_JOKER,   4, smiley_face_joker_effect },      // 29
+    { UNCOMMON_JOKER, 5, NULL /* Pareidolia */ },         // 30
 
     // The following jokers don't have sprites yet, 
     // uncomment them when their sprites are added.
+
 #if 0
     { COMMON_JOKER,   4, hanging_chad_joker_effect },
     { COMMON_JOKER,   5, raised_fist_joker_effect },
@@ -718,6 +852,14 @@ const JokerInfo joker_registry[] = {
     { UNCOMMON_JOKER, 5, mime_joker_effect },
     { UNCOMMON_JOKER, 6, seltzer_joker_effect },
     { UNCOMMON_JOKER, 6, sock_and_buskin_joker_effect },
+
+    { RARE_JOKER, 8, the_duo_joker_effect},
+    { RARE_JOKER, 8, the_trio_joker_effect},
+    { RARE_JOKER, 8, the_family_joker_effect},
+    { RARE_JOKER, 8, the_order_joker_effect},
+    { RARE_JOKER, 8, the_tribe_joker_effect},
+    { UNCOMMON_JOKER, 7, bootstraps_joker_effect},
+    { COMMON_JOKER, 5, shoot_the_moon_joker_effect},
 #endif
 };
 

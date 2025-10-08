@@ -175,7 +175,7 @@ List *get_jokers(void) {
     return jokers;
 }
 
-bool is_joker_present(int joker_id) {
+bool is_joker_owned(int joker_id) {
     for (int k = 0; k < list_get_size(jokers); k++)
     {
         JokerObject *joker = list_get(jokers, k);
@@ -197,19 +197,23 @@ void remove_held_joker(int joker_idx)
     list_remove_by_idx(jokers, joker_idx);
 }
 
-int get_deck_top(void) {
+int get_deck_top(void)
+{
     return deck_top;
 }
 
-int get_num_discards_remaining(void) {
+int get_num_discards_remaining(void)
+{
     return discards;
 }
 
-int get_num_hands_remaining(void) {
+int get_num_hands_remaining(void)
+{
     return hands;
 }
 
-int get_money(void) {
+int get_money(void)
+{
     return money;
 }
 
@@ -468,7 +472,7 @@ bool card_is_face(Card *card) {
         card->rank == JACK  ||
         card->rank == QUEEN ||
         card->rank == KING  ||
-        is_joker_present(PAREIDOLIA_JOKER_ID)
+        is_joker_owned(PAREIDOLIA_JOKER_ID)
     );
 }
 
@@ -900,8 +904,21 @@ void card_draw()
 
 void hand_set_focus(int index)
 {
-    if (index < 0 || index > hand_top || hand_state != HAND_SELECT) return;
-    selection_x = index;
+    if (hand_state != HAND_SELECT) return;
+
+    // Wrap around to the other side of the hand when going out of bounds on either side
+    if (index < 0)
+    {
+        selection_x = hand_top;
+    }
+    else if (index > hand_top)
+    {
+        selection_x = 0;
+    }
+    else
+    {
+        selection_x = index;
+    }
 
     play_sfx(SFX_CARD_FOCUS, MM_BASE_PITCH_RATE + rand() % 512);
 }

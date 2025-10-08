@@ -49,6 +49,7 @@
 #define DEFAULT_JOKER_ID 0
 #define GREEDY_JOKER_ID 1
 #define JOKER_STENCIL_ID 16
+#define PAREIDOLIA_JOKER_ID 30
 #define HANGING_CHAD_ID 33
 #define DUSK_ID 36
 #define HACK_ID 37
@@ -56,7 +57,6 @@
 
 // outside of scope for now
 #define PHOTOGRAPH_ID 40
-#define PAREIDOLIA_JOKER_ID 41
 #define SOCK_AND_BUSKIN_JOKER_ID 42
 
 // no planned ID yet, start from MAX_UINT8
