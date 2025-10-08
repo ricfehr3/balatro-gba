@@ -678,12 +678,6 @@ const JokerInfo joker_registry[] = {
     // The following jokers don't have sprites yet, 
     // uncomment them when their sprites are added.
 #if 0
-    { COMMON_JOKER, 5, raised_fist_joker_effect },
-    { COMMON_JOKER, 6, reserved_parking_joker_effect },
-
-    { COMMON_JOKER, 4, abstract_joker_effect },
-    { UNCOMMON_JOKER, 6, bull_joker_effect},
-
     { RARE_JOKER, 10, blueprint_joker_effect },
     { RARE_JOKER, 10, brainstorm_joker_effect },
     { UNCOMMON_JOKER, 7, bootstraps_joker_effect},   
