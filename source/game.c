@@ -305,6 +305,10 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 #define SCORED_CARD_TEXT_Y 48
 
 #define HIGHLIGHT_COLOR 0xFFFF
+#define SHOP_LIGHTS_1_CLR 0xFFFF
+#define SHOP_LIGHTS_2_CLR 0x32BE
+#define SHOP_LIGHTS_3_CLR 0x4B5F
+#define SHOP_LIGHTS_4_CLR 0x5F9F
 
 #define PITCH_STEP_DISCARD_SFX      (-64)
 #define PITCH_STEP_DRAW_SFX         24
@@ -614,10 +618,10 @@ void change_background(int id)
         memset16(&pal_bg_mem[SHOP_BOTTOM_PANEL_BORDER_PID], 0x213D, 1);
         memset16(&pal_bg_mem[SHOP_PANEL_SHADOW_PID], 0x10B4, 1);
         
-        memset16(&pal_bg_mem[SHOP_LIGHTS_2_PID], 0x32BE, 1); // Reset the shop lights to correct colors
-        memset16(&pal_bg_mem[SHOP_LIGHTS_3_PID], 0x4B5F, 1);
-        memset16(&pal_bg_mem[SHOP_LIGHTS_4_PID], 0x5F9F, 1);
-        memset16(&pal_bg_mem[SHOP_LIGHTS_1_PID], HIGHLIGHT_COLOR, 1);
+        memset16(&pal_bg_mem[SHOP_LIGHTS_2_PID], SHOP_LIGHTS_2_CLR, 1); // Reset the shop lights to correct colors
+        memset16(&pal_bg_mem[SHOP_LIGHTS_3_PID], SHOP_LIGHTS_3_CLR, 1);
+        memset16(&pal_bg_mem[SHOP_LIGHTS_4_PID], SHOP_LIGHTS_4_CLR, 1);
+        memset16(&pal_bg_mem[SHOP_LIGHTS_1_PID], SHOP_LIGHTS_1_CLR, 1);
 
         memcpy16(&pal_bg_mem[REROLL_BTN_SELECTED_BORDER_PID], &pal_bg_mem[REROLL_BTN_PID], 1); // Disable the button highlight colors
         memcpy16(&pal_bg_mem[NEXT_ROUND_BTN_SELECTED_BORDER_PID], &pal_bg_mem[NEXT_ROUND_BTN_PID], 1); 
