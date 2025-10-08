@@ -586,18 +586,15 @@ __attribute__((unused))
 static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     List* jokers = get_jokers();
-    bool trigger_next_joker = false;
-
-    for (int i = 0; i < list_get_size(jokers); i++ ) {
+    int list_size = list_get_size(jokers);
+    
+    for (int i = 0; i < list_size  - 1; i++ ) {
         JokerObject* curr_joker_object = list_get(jokers, i);
-        if (trigger_next_joker) {
-            effect = joker_get_score_effect(curr_joker_object->joker, scored_card);
+        if (curr_joker_object->joker == joker) {
+            JokerObject* next_joker_object = list_get(jokers, i + 1);
+            effect = joker_get_score_effect(next_joker_object->joker, scored_card);
             break;
         }
-
-        // JOKER_BLUEPRINT_ID (joker.h) will need to be updated
-        if (curr_joker_object->joker == joker)
-            trigger_next_joker = true;
     }
 
     return effect;
