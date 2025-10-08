@@ -759,9 +759,9 @@ static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, int sco
 
     switch (scored_when) {
         case JOKER_CALLBACK_ON_HAND_SCORED_END:
-            joker->data   = -1;
-            joker->data2 -=  1;
-            if (joker->data2 <= 0) {
+            joker->halves.data0  = -1;
+            joker->halves.data1 -=  1;
+            if (joker->halves.data1 <= 0) {
                 effect.expire = true;
                 snprintf(effect.message, 8, "Expire!");
             } else {
@@ -771,9 +771,9 @@ static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, int sco
         
         case JOKER_CALLBACK_ON_CARD_SCORED:
             // Works the same way as Mime, but for played cards and if it can still trigger
-            if (joker->data2 > 0) {
-                effect.retrigger = (joker->data < get_scored_card_index());
-                joker->data = get_scored_card_index();
+            if (joker->halves.data1 > 0) {
+                effect.retrigger = (joker->halves.data0 < get_scored_card_index());
+                joker->halves.data0 = get_scored_card_index();
             } 
             break;
     }
@@ -860,14 +860,13 @@ const JokerInfo joker_registry[] = {
     { UNCOMMON_JOKER, 5, mime_joker_effect },
     { UNCOMMON_JOKER, 6, seltzer_joker_effect },
     { UNCOMMON_JOKER, 6, sock_and_buskin_joker_effect },
-
-    { RARE_JOKER, 8, the_duo_joker_effect},
-    { RARE_JOKER, 8, the_trio_joker_effect},
-    { RARE_JOKER, 8, the_family_joker_effect},
-    { RARE_JOKER, 8, the_order_joker_effect},
-    { RARE_JOKER, 8, the_tribe_joker_effect},
+    { RARE_JOKER,     8, the_duo_joker_effect},
+    { RARE_JOKER,     8, the_trio_joker_effect},
+    { RARE_JOKER,     8, the_family_joker_effect},
+    { RARE_JOKER,     8, the_order_joker_effect},
+    { RARE_JOKER,     8, the_tribe_joker_effect},
     { UNCOMMON_JOKER, 7, bootstraps_joker_effect},
-    { COMMON_JOKER, 5, shoot_the_moon_joker_effect},
+    { COMMON_JOKER,   5, shoot_the_moon_joker_effect},
 #endif
 };
 

@@ -34,14 +34,16 @@
 // When does the Joker callback take place?
 // These are just the common ones. Special Joker behaviour will be checked on a
 // Joker per Joker basis (see if it's there, then do something, e.g. Pareidolia, Baseball Card)
-#define JOKER_CALLBACK_ON_CARD_SCORED     0 // Triggers when a played card scores (e.g. Walkie Talkie, Fibonnacci...)
-#define JOKER_CALLBACK_ON_CARD_SCORED_END 1 // Triggers after the card has finishd scoring (e.g. retrigger Jokers)
-#define JOKER_CALLBACK_ON_CARD_HELD       2 // Triggers when considering cards held in hand (e.g. Baron, Shoot the Moon...)
-#define JOKER_CALLBACK_INDEPENDANT        3 // Joker will trigger normally, when Jokers are scored (e.g. base Joker)
-#define JOKER_CALLBACK_ON_HAND_SCORED_END 5 // Triggers when entire hand has finished scoring (e.g. food Jokers)
-#define JOKER_CALLBACK_ON_HAND_DISCARDED  6 // Triggers when discarding a hand
-#define JOKER_CALLBACK_ON_ROUND_END       7 // Triggers at the end of the round (e.g. Rocket)
-#define JOKER_CALLBACK_ON_BLIND_SELECTED  8 // Triggers when selecting a blind (e.g. Dagger, Riff Raff, Madness..)
+enum JokerCallback {
+    JOKER_CALLBACK_ON_CARD_SCORED,     // Triggers when a played card scores (e.g. Walkie Talkie, Fibonnacci...)
+    JOKER_CALLBACK_ON_CARD_SCORED_END, // Triggers after the card has finishd scoring (e.g. retrigger Jokers)
+    JOKER_CALLBACK_ON_CARD_HELD,       // Triggers when considering cards held in hand (e.g. Baron, Shoot the Moon...)
+    JOKER_CALLBACK_INDEPENDANT,        // Joker will trigger normally, when Jokers are scored (e.g. base Joker)
+    JOKER_CALLBACK_ON_HAND_SCORED_END, // Triggers when entire hand has finished scoring (e.g. food Jokers)
+    JOKER_CALLBACK_ON_HAND_DISCARDED,  // Triggers when discarding a hand
+    JOKER_CALLBACK_ON_ROUND_END,       // Triggers at the end of the round (e.g. Rocket)
+    JOKER_CALLBACK_ON_BLIND_SELECTED,  // Triggers when selecting a blind (e.g. Dagger, Riff Raff, Madness..)
+};
 
 #define MAX_JOKER_OBJECTS 32 // The maximum number of joker objects that can be created at once
 
@@ -63,15 +65,30 @@
 #define MIME_ID 255
 #define SELTZER_ID 254
 
+union GenericData {
+    int32_t data;   
+    struct {
+        int16_t data0;
+        int16_t data1;
+    } halves;  
+    char bytes[4];
+};
+
 typedef struct 
 {
     u8 id; // Unique ID for the joker, used to identify different jokers
     u8 modifier; // base, foil, holo, poly, negative
     u8 value;
     u8 rarity;
-    // General purpose values that is interpreted differently for each Joker (scaling, last retriggered card, etc...)
-    int data;
-    int data2;
+    // General purpose values that are interpreted differently for each Joker (scaling, last retriggered card, etc...)
+    union
+    {
+        int32_t data;
+        struct {
+            int16_t data0;
+            int16_t data1;
+        } halves;
+    };
 } Joker;
 
 typedef struct JokerObject

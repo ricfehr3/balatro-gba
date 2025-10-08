@@ -83,7 +83,7 @@ enum HandType
 };
 
 // Run Stats
-typedef struct {
+typedef struct RunStats {
     unsigned int hand_type_level [13]; // There are 13 different hand types, all start at level 1
     unsigned int hand_type_played[13]; // How many times has a hand type been played
     unsigned int used_planets;
