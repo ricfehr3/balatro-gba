@@ -478,7 +478,7 @@ static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card) {
         }
 
         // JOKER_BLUEPRINT_ID (joker.h) will need to be updated
-        if (joker_object->joker->id == JOKER_BLUEPRINT_ID)
+        if (curr_joker_object->joke == joker)
             trigger_next_joker = true;
     }
 
