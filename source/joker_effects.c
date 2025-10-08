@@ -471,7 +471,7 @@ static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card) {
     bool trigger_next_joker = false;
 
     for (int i = 0; i < list_get_size(jokers); i++ ) {
-        JokerObject* joker_object = list_get(jokers, i);
+        JokerObject* curr_joker_object = list_get(jokers, i);
         if (trigger_next_joker) {
             effect = joker_get_score_effect(joker_object->joker, scored_card);
             break;
