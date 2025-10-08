@@ -559,7 +559,7 @@ static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card) 
         if (hand[i]->card->rank == QUEEN)
         {
              effect.mult += 13;
-        } 
+        }
     }
 
     return effect;
@@ -582,6 +582,41 @@ static JokerEffect triboulet_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
+static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    List* jokers = get_jokers();
+    int list_size = list_get_size(jokers);
+    
+    for (int i = 0; i < list_size  - 1; i++ ) {
+        JokerObject* curr_joker_object = list_get(jokers, i);
+        if (curr_joker_object->joker == joker) {
+            JokerObject* next_joker_object = list_get(jokers, i + 1);
+            effect = joker_get_score_effect(next_joker_object->joker, scored_card);
+            break;
+        }
+    }
+
+    return effect;
+}
+
+static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    static bool in_brainstorm = false;
+    if (in_brainstorm)
+        return effect;
+
+    List* jokers = get_jokers();
+    JokerObject* first_joker = list_get(jokers, 0);
+
+    if (first_joker != NULL && first_joker->joker->id != JOKER_BRAINSTORM_ID) {
+        // Static var to avoid infinite blueprint + brainstorm loops
+        in_brainstorm = true;
+        effect = joker_get_score_effect(first_joker->joker, scored_card);
+        in_brainstorm = false;
+    }
+
+    return effect;
+}
 
 /* The index of a joker in the registry matches its ID.
  * The joker sprites are matched by ID so the position in the registry
@@ -633,6 +668,8 @@ const JokerInfo joker_registry[] = {
     { RARE_JOKER, 8, the_family_joker_effect},          // 36
     { RARE_JOKER, 8, the_order_joker_effect},           // 37
     { RARE_JOKER, 8, the_tribe_joker_effect},           // 38
+    { RARE_JOKER, 10, blueprint_joker_effect },         // 39
+    { RARE_JOKER, 10, brainstorm_joker_effect },        // 40
 
     // The following jokers don't have sprites yet, 
     // uncomment them when their sprites are added.
