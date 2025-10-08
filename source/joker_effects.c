@@ -458,22 +458,6 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-__attribute__((unused))
-static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card) {
-    JokerEffect effect = {0};
-    List* jokers = get_jokers();
-    bool trigger_next_joker = false;
-
-    for (int i = 0; i < list_get_size(jokers); i++ ) {
-        JokerObject* curr_joker_object = list_get(jokers, i);
-        if (trigger_next_joker) {
-            effect = joker_get_score_effect(joker_object->joker, scored_card);
-            break;
-        }
-
-        // JOKER_BLUEPRINT_ID (joker.h) will need to be updated
-        if (curr_joker_object->joke == joker)
-            trigger_next_joker = true;
  static JokerEffect the_duo_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -575,7 +559,45 @@ static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card) 
         if (hand[i]->card->rank == QUEEN)
         {
              effect.mult += 13;
-        } 
+        }
+    }
+
+    return effect;
+}
+
+// no graphics available but ready to be used if wanted when graphics available
+__attribute__((unused))
+static JokerEffect triboulet_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card == NULL)
+        return effect;
+
+    switch (scored_card->rank) {
+        case KING: case QUEEN:
+            effect.xmult = 2;
+        default:
+            break;
+    }
+
+    return effect;
+}
+
+__attribute__((unused))
+static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    List* jokers = get_jokers();
+    bool trigger_next_joker = false;
+
+    for (int i = 0; i < list_get_size(jokers); i++ ) {
+        JokerObject* curr_joker_object = list_get(jokers, i);
+        if (trigger_next_joker) {
+            effect = joker_get_score_effect(joker_object->joker, scored_card);
+            break;
+        }
+
+        // JOKER_BLUEPRINT_ID (joker.h) will need to be updated
+        if (curr_joker_object->joke == joker)
+            trigger_next_joker = true;
     }
 
     return effect;
@@ -596,23 +618,10 @@ static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card) {
         joker->processed = true;
         effect = joker_get_score_effect(first_joker->joker, scored_card);
         joker->processed = false;
-// no graphics available but ready to be used if wanted when graphics available
-__attribute__((unused))
-static JokerEffect triboulet_joker_effect(Joker *joker, Card *scored_card) {
-    JokerEffect effect = {0};
-    if (scored_card == NULL)
-        return effect;
-
-    switch (scored_card->rank) {
-        case KING: case QUEEN:
-            effect.xmult = 2;
-        default:
-            break;
     }
 
     return effect;
 }
-
 
 /* The index of a joker in the registry matches its ID.
  * The joker sprites are matched by ID so the position in the registry
