@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "tonc_memdef.h"
 #include "tonc_memmap.h"
 #include "util.h"
 #include "sprite.h"
@@ -29,39 +30,6 @@
 #include "soundbank.h"
 
 #include "list.h"
-
-// This could go in game.h or some other header somewhere
-// but it's essentially private to this file, so might as well
-// leave it.
-typedef enum
-{
-    PLAY_HAND_BTN_SELECTED_BORDER = 1,
-    BOSS_BLIND_PRIMARY = 1,
-    BLIND_BG_SHADOW = 2,
-    MAIN_MENU_PLAY_BUTTON_OUTLINE = 2,
-    REROLL_BTN = 3,
-    BLIND_BG_SECONDARY = 5,
-    BLIND_SKIP_BTN = 5, // 5, in the blind select, is the score multiplier and deck PID index also. In shop it's the next round selected border.
-    MAIN_MENU_PLAY_BUTTON_MAIN_COLOR = 5,
-    NEXT_ROUND_BTN_SELECTED_BORDER = 5,
-    SHOP_PANEL_SHADOW = 6,
-    BOSS_BLIND_SHADOW = 7,
-    PLAY_HAND_BTN = 7,
-    REROLL_BTN_SELECTED_BORDER = 7,
-    SHOP_LIGHTS_1 = 8,
-    DISCARD_BTN_SELECTED_BORDER = 9,
-    BLIND_SKIP_BTN_SELECTED_BORDER = 10,
-    DISCARD_BTN = 12, // 12 appears to also be the score multiplier, discard button, and deck PID index
-    SHOP_LIGHTS_2 = 14,
-    BLIND_SELECT_BTN = 15,
-    NEXT_ROUND_BTN = 16, // 16, in shop, is the next round button, multiplier, and deck PID.
-    SHOP_LIGHTS_3 = 17,
-    BLIND_SELECT_BTN_SELECTED_BORDER = 18,
-    BLIND_BG_PRIMARY = 19,
-    REWARD_PANEL_BORDER = 19,
-    SHOP_LIGHTS_4 = 22,
-    SHOP_BOTTOM_PANEL_BORDER = 26
-} _UIElementPID;
 
 typedef enum
 {
@@ -319,6 +287,11 @@ static const Rect GAME_WIN_MSG_TEXT_RECT    = {112,      72,     UNDEFINED, UNDE
 
 static const BG_POINT HELD_JOKERS_POS       = {108,     10};
 static const BG_POINT JOKER_DISCARD_TARGET  = {240,     30};
+static const BG_POINT CARD_DRAW_POS         = {208,     110};
+static const BG_POINT CUR_BLIND_TOKEN_POS   = {8,       18};
+static const BG_POINT CARD_DISCARD_PNT      = {240,     70};
+static const BG_POINT HAND_START_POS        = {120,     90};
+static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 
 #define ITEM_SHOP_Y 71 // TODO: Needs to be a rect?
 
@@ -341,51 +314,9 @@ static const BG_POINT JOKER_DISCARD_TARGET  = {240,     30};
 #define TEN_K 10000
 #define ONE_K 1000
 
-#define CARD_DRAW_POS_X 208
-#define CARD_DRAW_POS_Y 110
-#define CUR_BLIND_TOKEN_POS_X 8
-#define CUR_BLIND_TOKEN_POS_Y 18
-#define MAIN_MENU_ACE_TX 88
-#define MAIN_MENU_ACE_TY 26 
-#define CARD_DISCARD_PNT_X 240
-#define CARD_DISCARD_PNT_Y 70
-#define HAND_START_POS_X 120
-#define HAND_START_POS_Y 90
 #define CARD_FOCUSED_UNSEL_Y 10
 #define CARD_UNFOCUSED_SEL_Y 15
 #define CARD_FOCUSED_SEL_Y 20
-
-// Hand chip value def
-#define HIGH_CARD_CHIPS 5
-#define PAIR_CHIPS 10
-#define TWO_PAIR_CHIPS 20
-#define THREE_OAK_CHIPS 30
-#define STRAIGHT_CHIPS 30
-#define FLUSH_CHIPS 35
-#define FULL_HOUSE_CHIPS 40
-#define FOUR_OAK_CHIPS 60
-#define STRAIGHT_FLUSH_CHIPS 100
-#define ROYAL_FLUSH_CHIPS 100
-#define FIVE_OAK_CHIPS 120
-#define FLUSH_HOUSE_CHIPS 140
-#define FLUSH_FIVE_CHIPS 160
-#define NONE_CHIPS 0
-
-// Hand mult value defs
-#define HIGH_CARD_MULT 1
-#define PAIR_MULT 2
-#define TWO_PAIR_MULT 2
-#define THREE_OAK_MULT 3
-#define STRAIGHT_MULT 4
-#define FLUSH_MULT 4 
-#define FULL_HOUSE_MULT 4
-#define FOUR_OAK_MULT 7
-#define STRAIGHT_FLUSH_MULT 8
-#define ROYAL_FLUSH_MULT 8
-#define FIVE_OAK_MULT 12
-#define FLUSH_HOUSE_MULT 14
-#define FLUSH_FIVE_MULT 16
-#define NONE_MULT 0
 
 // Timer defs
 #define TM_ZERO 0
@@ -406,6 +337,35 @@ static const BG_POINT JOKER_DISCARD_TARGET  = {240,     30};
 #define TM_DISP_BLIND_PANEL_START 1
 #define TM_BLIND_SELECT_START 1
 #define TM_END_ANIM_SEQ 12
+
+// Palette IDs
+#define PLAY_HAND_BTN_SELECTED_BORDER_PID 1
+#define BOSS_BLIND_PRIMARY_PID 1
+#define BLIND_BG_SHADOW_PID 2
+#define MAIN_MENU_PLAY_BUTTON_OUTLINE_PID 2
+#define REROLL_BTN_PID 3
+#define BLIND_BG_SECONDARY_PID 5
+#define BLIND_SKIP_BTN_PID 5 
+#define MAIN_MENU_PLAY_BUTTON_MAIN_COLOR_PID 5
+#define NEXT_ROUND_BTN_SELECTED_BORDER_PID 5
+#define SHOP_PANEL_SHADOW_PID 6
+#define BOSS_BLIND_SHADOW_PID 7
+#define PLAY_HAND_BTN_PID 7
+#define REROLL_BTN_SELECTED_BORDER_PID 7
+#define SHOP_LIGHTS_1_PID 8
+#define DISCARD_BTN_SELECTED_BORDER_PID 9
+#define BLIND_SKIP_BTN_SELECTED_BORDER_PID 10
+#define DISCARD_BTN_PID 12 
+#define SHOP_LIGHTS_2_PID 14
+#define BLIND_SELECT_BTN_PID 15
+#define NEXT_ROUND_BTN_PID 16 
+#define SHOP_LIGHTS_3_PID 17
+#define BLIND_SELECT_BTN_SELECTED_BORDER_PID 18
+#define BLIND_BG_PRIMARY_PID 19
+#define REWARD_PANEL_BORDER_PID 19
+#define SHOP_LIGHTS_4_PID 22
+#define SHOP_BOTTOM_PANEL_BORDER_PID 26
+
 
 // Naming the stage where cards return from the discard pile to the deck "undiscard"
 
@@ -602,13 +562,13 @@ void change_background(int id)
             bg_copy_current_item_to_top_left_panel();
 
             // This would change the palette of the background to match the blind, but the backgroun doesn't use the blind token's exact colors so a different approach is required
-            memset16(&pal_bg_mem[BLIND_BG_PRIMARY], blind_get_color(current_blind, BLIND_BACKGROUND_MAIN_COLOR_INDEX), 1);
-            memset16(&pal_bg_mem[BLIND_BG_SECONDARY], blind_get_color(current_blind, BLIND_BACKGROUND_SECONDARY_COLOR_INDEX), 1);
-            memset16(&pal_bg_mem[BLIND_BG_SHADOW], blind_get_color(current_blind, BLIND_BACKGROUND_SHADOW_COLOR_INDEX), 1);
+            memset16(&pal_bg_mem[BLIND_BG_PRIMARY_PID], blind_get_color(current_blind, BLIND_BACKGROUND_MAIN_COLOR_INDEX), 1);
+            memset16(&pal_bg_mem[BLIND_BG_SECONDARY_PID], blind_get_color(current_blind, BLIND_BACKGROUND_SECONDARY_COLOR_INDEX), 1);
+            memset16(&pal_bg_mem[BLIND_BG_SHADOW_PID], blind_get_color(current_blind, BLIND_BACKGROUND_SHADOW_COLOR_INDEX), 1);
 
             // Copy the Play Hand and Discard button colors to their selection highlights
-            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER], &pal_bg_mem[PLAY_HAND_BTN], 1);
-            memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER], &pal_bg_mem[DISCARD_BTN], 1);
+            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1);
+            memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
         }
     }
     else if (id == BG_ID_CARD_PLAYING)
@@ -651,16 +611,16 @@ void change_background(int id)
         GRIT_CPY(&se_mem[MAIN_BG_SBB], background_shop_gfxMap);
 
         // Set the outline colors for the shop background. This is used for the alternate shop palettes when opening packs
-        memset16(&pal_bg_mem[SHOP_BOTTOM_PANEL_BORDER], 0x213D, 1);
-        memset16(&pal_bg_mem[SHOP_PANEL_SHADOW], 0x10B4, 1);
+        memset16(&pal_bg_mem[SHOP_BOTTOM_PANEL_BORDER_PID], 0x213D, 1);
+        memset16(&pal_bg_mem[SHOP_PANEL_SHADOW_PID], 0x10B4, 1);
         
-        memset16(&pal_bg_mem[SHOP_LIGHTS_2], 0x32BE, 1); // Reset the shop lights to correct colors
-        memset16(&pal_bg_mem[SHOP_LIGHTS_3], 0x4B5F, 1);
-        memset16(&pal_bg_mem[SHOP_LIGHTS_4], 0x5F9F, 1);
-        memset16(&pal_bg_mem[SHOP_LIGHTS_1], 0xFFFF, 1);
+        memset16(&pal_bg_mem[SHOP_LIGHTS_2_PID], 0x32BE, 1); // Reset the shop lights to correct colors
+        memset16(&pal_bg_mem[SHOP_LIGHTS_3_PID], 0x4B5F, 1);
+        memset16(&pal_bg_mem[SHOP_LIGHTS_4_PID], 0x5F9F, 1);
+        memset16(&pal_bg_mem[SHOP_LIGHTS_1_PID], HIGHLIGHT_COLOR, 1);
 
-        memcpy16(&pal_bg_mem[REROLL_BTN_SELECTED_BORDER], &pal_bg_mem[REROLL_BTN], 1); // Disable the button highlight colors
-        memcpy16(&pal_bg_mem[NEXT_ROUND_BTN_SELECTED_BORDER], &pal_bg_mem[NEXT_ROUND_BTN], 1); 
+        memcpy16(&pal_bg_mem[REROLL_BTN_SELECTED_BORDER_PID], &pal_bg_mem[REROLL_BTN_PID], 1); // Disable the button highlight colors
+        memcpy16(&pal_bg_mem[NEXT_ROUND_BTN_SELECTED_BORDER_PID], &pal_bg_mem[NEXT_ROUND_BTN_PID], 1); 
     }
     else if (id == BG_ID_BLIND_SELECT)
     {
@@ -680,17 +640,17 @@ void change_background(int id)
         GRIT_CPY(&se_mem[MAIN_BG_SBB], background_blind_select_gfxMap);
 
         // Copy boss blind colors to blind select palette
-        memset16(&pal_bg_mem[BOSS_BLIND_PRIMARY], blind_get_color(BOSS_BLIND, BLIND_BACKGROUND_MAIN_COLOR_INDEX), 1);
-        memset16(&pal_bg_mem[BOSS_BLIND_SHADOW], blind_get_color(BOSS_BLIND, BLIND_BACKGROUND_SHADOW_COLOR_INDEX), 1);
+        memset16(&pal_bg_mem[BOSS_BLIND_PRIMARY_PID], blind_get_color(BOSS_BLIND, BLIND_BACKGROUND_MAIN_COLOR_INDEX), 1);
+        memset16(&pal_bg_mem[BOSS_BLIND_SHADOW_PID], blind_get_color(BOSS_BLIND, BLIND_BACKGROUND_SHADOW_COLOR_INDEX), 1);
 
         // Disable the button highlight colors
         // Select button PID is 15 and the outline is 18
-        memcpy16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER], &pal_bg_mem[BLIND_SELECT_BTN], 1);
+        memcpy16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER_PID], &pal_bg_mem[BLIND_SELECT_BTN_PID], 1);
 		// It seems the skip button (and score multiplier and deck) PB idx is
 		// actually 5, not 10. 10 is the selected border color
 		// Setting this palette value though doesn't seem to have an 
 		// effect.
-        memcpy16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER], &pal_bg_mem[BLIND_SKIP_BTN], 1);
+        memcpy16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER_PID], &pal_bg_mem[BLIND_SKIP_BTN_PID], 1);
 
         for (int i = 0; i < MAX_BLINDS; i++)
         {
@@ -785,7 +745,7 @@ void change_background(int id)
         GRIT_CPY(&se_mem[MAIN_BG_SBB], background_main_menu_gfxMap);
 
         // Disable the button highlight colors
-        memcpy16(&pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE], &pal_bg_mem[MAIN_MENU_PLAY_BUTTON_MAIN_COLOR], 1);
+        memcpy16(&pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE_PID], &pal_bg_mem[MAIN_MENU_PLAY_BUTTON_MAIN_COLOR_PID], 1);
     }
     else
     {
@@ -890,72 +850,72 @@ void set_hand()
     {
     case HIGH_CARD:
         print_hand_type("HIGH C");
-        chips = HIGH_CARD_CHIPS;
-        mult = HIGH_CARD_MULT;
+        chips = 5;
+        mult = 1;
         break;
     case PAIR:
         print_hand_type("PAIR");
-        chips = PAIR_CHIPS;
-        mult = PAIR_MULT;
+        chips = 10;
+        mult = 2;
         break;
     case TWO_PAIR:
         print_hand_type("2 PAIR");
-        chips = TWO_PAIR_CHIPS;
-        mult = TWO_PAIR_MULT;
+        chips = 20;
+        mult = 2;
         break;
     case THREE_OF_A_KIND:
         print_hand_type("3 OAK");
-        chips = THREE_OAK_CHIPS;
-        mult = THREE_OAK_MULT;
+        chips = 30;
+        mult = 3;
         break;
     case STRAIGHT:
         print_hand_type("STRT");
-        chips = STRAIGHT_FLUSH_CHIPS;
-        mult = STRAIGHT_MULT;
+        chips = 30;
+        mult = 4;
         break;
     case FLUSH:
         print_hand_type("FLUSH");
-        chips = FLUSH_CHIPS;
-        mult = FLUSH_MULT;
+        chips = 35;
+        mult = 4;
         break;
     case FULL_HOUSE:
         print_hand_type("FULL H");
-        chips = FULL_HOUSE_CHIPS;
-        mult = FULL_HOUSE_MULT;
+        chips = 40;
+        mult = 4;
         break;
     case FOUR_OF_A_KIND:
         print_hand_type("4 OAK");
-        chips = FOUR_OAK_CHIPS;
-        mult = FOUR_OAK_MULT;
+        chips = 60;
+        mult = 7;
         break;
     case STRAIGHT_FLUSH:
         print_hand_type("STRT F");
-        chips = STRAIGHT_FLUSH_CHIPS;
-        mult = STRAIGHT_FLUSH_MULT;
+        chips = 100;
+        mult = 8;
         break;
     case ROYAL_FLUSH:
         print_hand_type("ROYAL F");
-        chips = ROYAL_FLUSH_CHIPS;
-        mult = ROYAL_FLUSH_MULT;
+        chips = 100;
+        mult = 8;
         break;
     case FIVE_OF_A_KIND:
         print_hand_type("5 OAK");
-        chips = FIVE_OAK_CHIPS;
-        mult = FIVE_OAK_MULT;
+        chips = 120;
+        mult = 12;
         break;
     case FLUSH_HOUSE:
         print_hand_type("FLUSH H");
-        chips = FLUSH_HOUSE_CHIPS;
-        mult = FLUSH_HOUSE_MULT;
+        chips = 140;
+        mult = 14;
         break;
     case FLUSH_FIVE:
         print_hand_type("FLUSH 5");
-        chips = FLUSH_FIVE_CHIPS;
-        mult = FLUSH_FIVE_MULT;
+        chips = 160;
+        mult = 16;
         break;
     case NONE:
-        chips = NONE_CHIPS;
-        mult = NONE_MULT;
+        chips = 0;
+        mult = 0;
         break;
     }
 
@@ -969,8 +929,8 @@ void card_draw()
 
     CardObject *card_object = card_object_new(deck_pop());
 
-    const FIXED deck_x = int2fx(CARD_DRAW_POS_X);
-    const FIXED deck_y = int2fx(CARD_DRAW_POS_Y);
+    const FIXED deck_x = int2fx(CARD_DRAW_POS.x);
+    const FIXED deck_y = int2fx(CARD_DRAW_POS.y);
 
     card_object->sprite_object->x = deck_x;
     card_object->sprite_object->y = deck_y;
@@ -1095,7 +1055,7 @@ static void game_round_init()
     cards_drawn = 0;
     hand_selections = 0;
 
-    playing_blind_token = blind_token_new(current_blind, 8, 18, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 1); // Create the blind token sprite at the top left corner
+    playing_blind_token = blind_token_new(current_blind, CUR_BLIND_TOKEN_POS.x, CUR_BLIND_TOKEN_POS.y, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 1); // Create the blind token sprite at the top left corner
     // TODO: Hide blind token and display it after sliding blind rect animation
     //if (playing_blind_token != NULL)
     //{
@@ -1145,9 +1105,9 @@ static void game_main_menu_init()
     main_menu_ace = card_object_new(card_new(SPADES, ACE));
     card_object_set_sprite(main_menu_ace, 0); // Set the sprite for the ace of spades
     main_menu_ace->sprite_object->sprite->obj->attr0 |= ATTR0_AFF_DBL; // Make the sprite double sized
-    main_menu_ace->sprite_object->tx = int2fx(MAIN_MENU_ACE_TX);
+    main_menu_ace->sprite_object->tx = int2fx(MAIN_MENU_ACE_T.x);
     main_menu_ace->sprite_object->x = main_menu_ace->sprite_object->tx;
-    main_menu_ace->sprite_object->ty = int2fx(MAIN_MENU_ACE_TY);
+    main_menu_ace->sprite_object->ty = int2fx(MAIN_MENU_ACE_T.y);
     main_menu_ace->sprite_object->y = main_menu_ace->sprite_object->ty;
     main_menu_ace->sprite_object->tscale = float2fx(0.8f);
 }
@@ -1238,9 +1198,9 @@ void game_init()
     hands = max_hands;
     discards = max_discards;
 
-    blind_select_tokens[SMALL_BLIND] = blind_token_new(SMALL_BLIND, 8, 18, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 3);
-    blind_select_tokens[BIG_BLIND] = blind_token_new(BIG_BLIND, 8, 18, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 4);
-    blind_select_tokens[BOSS_BLIND] = blind_token_new(BOSS_BLIND, 8, 18, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 5);
+    blind_select_tokens[SMALL_BLIND] = blind_token_new(SMALL_BLIND, CUR_BLIND_TOKEN_POS.x, CUR_BLIND_TOKEN_POS.y, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 3);
+    blind_select_tokens[BIG_BLIND] = blind_token_new(BIG_BLIND, CUR_BLIND_TOKEN_POS.x, CUR_BLIND_TOKEN_POS.y, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 4);
+    blind_select_tokens[BOSS_BLIND] = blind_token_new(BOSS_BLIND, CUR_BLIND_TOKEN_POS.x, CUR_BLIND_TOKEN_POS.y, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 5);
 
     obj_hide(blind_select_tokens[SMALL_BLIND]->obj);
     obj_hide(blind_select_tokens[BIG_BLIND]->obj);
@@ -1340,8 +1300,8 @@ static void game_playing_process_hand_select_input()
     {
         if (discard_button_highlighted == false) // Play button logic
         {
-            memset16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER], 0xFFFF, 1);
-            memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER], &pal_bg_mem[DISCARD_BTN], 1);
+            memset16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER_PID], HIGHLIGHT_COLOR, 1);
+            memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
 
             if (key_hit(SELECT_CARD) && hands > 0 && hand_play())
             {
@@ -1354,8 +1314,8 @@ static void game_playing_process_hand_select_input()
         else // Discard button logic
         {
 			// 7 is score and play hand button color
-            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER], &pal_bg_mem[PLAY_HAND_BTN], 1);
-            memset16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER], 0xFFFF, 1);
+            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1);
+            memset16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER_PID], HIGHLIGHT_COLOR, 1);
 
             if (key_hit(SELECT_CARD) && discards > 0 && hand_discard())
             {
@@ -1371,8 +1331,8 @@ static void game_playing_process_hand_select_input()
 
     if (selection_y == 0) // On row of cards
     {
-        memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER], &pal_bg_mem[PLAY_HAND_BTN], 1); // Play button highlight color
-        memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER], &pal_bg_mem[DISCARD_BTN], 1); // Discard button highlight color
+        memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1); // Play button highlight color
+        memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1); // Discard button highlight color
         
         if (key_hit(SELECT_CARD))
         {
@@ -1554,8 +1514,8 @@ void card_in_hand_loop_handle_discard_and_shuffling(int card_idx, bool* discarde
     {
         if (!*discarded_card)
         {
-            *hand_x = int2fx(CARD_DISCARD_PNT_X);
-            *hand_y = int2fx(CARD_DISCARD_PNT_Y);
+            *hand_x = int2fx(CARD_DISCARD_PNT.x);
+            *hand_y = int2fx(CARD_DISCARD_PNT.y);
 
             if (!*sound_played)
             {
@@ -1617,8 +1577,8 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
     {
         if (hand[i] != NULL)
         {
-            FIXED hand_x = int2fx(HAND_START_POS_X);
-            FIXED hand_y = int2fx(HAND_START_POS_Y);
+            FIXED hand_x = int2fx(HAND_START_POS.x);
+            FIXED hand_y = int2fx(HAND_START_POS.y);
 
             switch (hand_state)
             {
@@ -2242,24 +2202,24 @@ void game_round_end()
                 if (timer == 1) // Copied from shop. Feels slightly too niche of a function for me personally to make one.
                 {
                     int y = 6;
-                    memset16(&se_mem[MAIN_BG_SBB][32 * (y - 1)], 0x0006, 1);
-                    memset16(&se_mem[MAIN_BG_SBB][1 + 32 * (y - 1)], 0x0007, 2);
-                    memset16(&se_mem[MAIN_BG_SBB][3 + 32 * (y - 1)], 0x0008, 1);
-                    memset16(&se_mem[MAIN_BG_SBB][4 + 32 * (y - 1)], 0x0009, 4);
-                    memset16(&se_mem[MAIN_BG_SBB][7 + 32 * (y - 1)], 0x000A, 1);
-                    memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], SE_HORIZONTAL_FLIP | 0x0006, 1);
+                    memset16(&se_mat[MAIN_BG_SBB][y - 1][0], 0x0006, 1);
+                    memset16(&se_mat[MAIN_BG_SBB][y - 1][1], 0x0007, 2);
+                    memset16(&se_mat[MAIN_BG_SBB][y - 1][3], 0x0008, 1);
+                    memset16(&se_mat[MAIN_BG_SBB][y - 1][4], 0x0009, 4);
+                    memset16(&se_mat[MAIN_BG_SBB][y - 1][7], 0x000A, 1);
+                    memset16(&se_mat[MAIN_BG_SBB][y - 1][8], SE_HFLIP | 0x0006, 1);
                 }
                 else if (timer == 2)
                 {
                     int y = 5;
-                    memset16(&se_mem[MAIN_BG_SBB][32 * (y - 1)], 0x0001, 1);
-                    memset16(&se_mem[MAIN_BG_SBB][1 + 32 * (y - 1)], 0x0002, 7);
-                    memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], SE_HORIZONTAL_FLIP | 0x0001, 1); 
+                    memset16(&se_mat[MAIN_BG_SBB][y - 1][0], 0x0001, 1);
+                    memset16(&se_mat[MAIN_BG_SBB][y - 1][1], 0x0002, 7);
+                    memset16(&se_mat[MAIN_BG_SBB][y - 1][8], SE_HFLIP | 0x0001, 1); 
                 }
             }   
             else if (timer > FRAMES(20))
             {
-                memset16(&pal_bg_mem[REWARD_PANEL_BORDER], 0x1483, 1);
+                memset16(&pal_bg_mem[REWARD_PANEL_BORDER_PID], 0x1483, 1);
                 state = DISPLAY_REWARDS;
                 timer = TM_ZERO;
             }
@@ -2609,7 +2569,7 @@ static void shop_top_row_on_key_hit(SelectionGrid* selection_grid, Selection* se
         timer = TM_ZERO; // Reset the timer
         reroll_cost = REROLL_BASE_COST;
 
-        memcpy16(&pal_bg_mem[NEXT_ROUND_BTN_SELECTED_BORDER], &pal_bg_mem[SHOP_PANEL_SHADOW], 1);
+        memcpy16(&pal_bg_mem[NEXT_ROUND_BTN_SELECTED_BORDER_PID], &pal_bg_mem[SHOP_PANEL_SHADOW_PID], 1);
 
         // memcpy16(&pal_bg_mem[16], &pal_bg_mem[6], 1); 
         // This changes the color of the button to a dark red.
@@ -2644,7 +2604,7 @@ static void shop_top_row_on_selection_changed(SelectionGrid* selection_grid, int
         if (prev_selection->x == NEXT_ROUND_BTN_SEL_X)
         {
             // Remove next round button highlight
-            memcpy16(&pal_bg_mem[NEXT_ROUND_BTN_SELECTED_BORDER], &pal_bg_mem[NEXT_ROUND_BTN], 1);
+            memcpy16(&pal_bg_mem[NEXT_ROUND_BTN_SELECTED_BORDER_PID], &pal_bg_mem[NEXT_ROUND_BTN_PID], 1);
         }
         else 
         {
@@ -2659,7 +2619,7 @@ static void shop_top_row_on_selection_changed(SelectionGrid* selection_grid, int
         if (new_selection->x == NEXT_ROUND_BTN_SEL_X)
         {
             // Highlight next round button
-            memset16(&pal_bg_mem[NEXT_ROUND_BTN_SELECTED_BORDER], HIGHLIGHT_COLOR, 1);
+            memset16(&pal_bg_mem[NEXT_ROUND_BTN_SELECTED_BORDER_PID], HIGHLIGHT_COLOR, 1);
         }
         else 
         {
@@ -2680,11 +2640,11 @@ static void shop_reroll_row_on_selection_changed(SelectionGrid* selection_grid, 
     if (row_idx == prev_selection->y)
     {
         // Remove highlight
-        memcpy16(&pal_bg_mem[REROLL_BTN_SELECTED_BORDER], &pal_bg_mem[REROLL_BTN], 1);
+        memcpy16(&pal_bg_mem[REROLL_BTN_SELECTED_BORDER_PID], &pal_bg_mem[REROLL_BTN_PID], 1);
     }
     else if (row_idx == new_selection->y)
     {
-        memset16(&pal_bg_mem[REROLL_BTN_SELECTED_BORDER], HIGHLIGHT_COLOR, 1);
+        memset16(&pal_bg_mem[REROLL_BTN_SELECTED_BORDER_PID], HIGHLIGHT_COLOR, 1);
     }
 }
 
@@ -2727,10 +2687,10 @@ static void game_shop_lights_anim_frame()
 {
     // Shift palette around the border of the shop icon
     COLOR shifted_palette[4];
-    memcpy16(&shifted_palette[0], &pal_bg_mem[SHOP_LIGHTS_2], 1);
-    memcpy16(&shifted_palette[1], &pal_bg_mem[SHOP_LIGHTS_3], 1);
-    memcpy16(&shifted_palette[2], &pal_bg_mem[SHOP_LIGHTS_4], 1);
-    memcpy16(&shifted_palette[3], &pal_bg_mem[SHOP_LIGHTS_1], 1);
+    memcpy16(&shifted_palette[0], &pal_bg_mem[SHOP_LIGHTS_2_PID], 1);
+    memcpy16(&shifted_palette[1], &pal_bg_mem[SHOP_LIGHTS_3_PID], 1);
+    memcpy16(&shifted_palette[2], &pal_bg_mem[SHOP_LIGHTS_4_PID], 1);
+    memcpy16(&shifted_palette[3], &pal_bg_mem[SHOP_LIGHTS_1_PID], 1);
 
     // Circularly shift the palette
     int last = shifted_palette[3];
@@ -2742,10 +2702,10 @@ static void game_shop_lights_anim_frame()
 
     shifted_palette[0] = last;
 
-    memcpy16(&pal_bg_mem[SHOP_LIGHTS_2], &shifted_palette[0], 1); // Copy the shifted palette to the next 4 slots
-    memcpy16(&pal_bg_mem[SHOP_LIGHTS_3], &shifted_palette[1], 1);
-    memcpy16(&pal_bg_mem[SHOP_LIGHTS_4], &shifted_palette[2], 1);
-    memcpy16(&pal_bg_mem[SHOP_LIGHTS_1], &shifted_palette[3], 1);
+    memcpy16(&pal_bg_mem[SHOP_LIGHTS_2_PID], &shifted_palette[0], 1); // Copy the shifted palette to the next 4 slots
+    memcpy16(&pal_bg_mem[SHOP_LIGHTS_3_PID], &shifted_palette[1], 1);
+    memcpy16(&pal_bg_mem[SHOP_LIGHTS_4_PID], &shifted_palette[2], 1);
+    memcpy16(&pal_bg_mem[SHOP_LIGHTS_1_PID], &shifted_palette[3], 1);
 }
 
 // Outro sequence (menu and shop icon going out of frame)
@@ -2772,19 +2732,19 @@ static void game_shop_outro()
         }
 
         int y = 6;
-        memset16(&se_mem[MAIN_BG_SBB][32 * (y - 1)], 0x0006, 1);
-        memset16(&se_mem[MAIN_BG_SBB][1 + 32 * (y - 1)], 0x0007, 2);
-        memset16(&se_mem[MAIN_BG_SBB][3 + 32 * (y - 1)], 0x0008, 1);
-        memset16(&se_mem[MAIN_BG_SBB][4 + 32 * (y - 1)], 0x0009, 4);
-        memset16(&se_mem[MAIN_BG_SBB][7 + 32 * (y - 1)], 0x000A, 1);
-        memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], SE_HORIZONTAL_FLIP | 0x0006, 1);
+        memset16(&se_mat[MAIN_BG_SBB][y - 1][0], 0x0006, 1);
+        memset16(&se_mat[MAIN_BG_SBB][y - 1][1], 0x0007, 2);
+        memset16(&se_mat[MAIN_BG_SBB][y - 1][3], 0x0008, 1);
+        memset16(&se_mat[MAIN_BG_SBB][y - 1][4], 0x0009, 4);
+        memset16(&se_mat[MAIN_BG_SBB][y - 1][7], 0x000A, 1);
+        memset16(&se_mat[MAIN_BG_SBB][y - 1][8], SE_HFLIP | 0x0006, 1);
     }
     else if (timer == 2)
     {
         int y = 5;
-        memset16(&se_mem[MAIN_BG_SBB][32 * (y - 1)], 0x0001, 1);
-        memset16(&se_mem[MAIN_BG_SBB][1 + 32 * (y - 1)], 0x0002, 7);
-        memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], SE_HORIZONTAL_FLIP | 0x0001, 1);
+        memset16(&se_mat[MAIN_BG_SBB][y - 1][0], 0x0001, 1);
+        memset16(&se_mat[MAIN_BG_SBB][y - 1][1], 0x0002, 7);
+        memset16(&se_mat[MAIN_BG_SBB][y - 1][8], SE_HFLIP | 0x0001, 1);
     }
 
     if (timer >= MENU_POP_OUT_ANIM_FRAMES)
@@ -2926,14 +2886,13 @@ void game_blind_select()
             if (selection_y == 0)
             {
 				// 5 is the multiplier palette color and the skip button color
-                memset16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER], 0xFFFF, 1);
-                memcpy16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER], &pal_bg_mem[BLIND_SKIP_BTN], 1);
+                memset16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER_PID], HIGHLIGHT_COLOR, 1);
+                memcpy16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER_PID], &pal_bg_mem[BLIND_SKIP_BTN_PID], 1);
             }
             else
             {
-				// 15 is the select button color
-                memcpy16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER], &pal_bg_mem[BLIND_SELECT_BTN], 1);
-                memset16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER], 0xFFFF, 1);
+                memcpy16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER_PID], &pal_bg_mem[BLIND_SELECT_BTN_PID], 1);
+                memset16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER_PID], HIGHLIGHT_COLOR, 1);
             }
 
             break;
@@ -2989,12 +2948,12 @@ void game_blind_select()
                 }
             
                 int y = 6;
-                memset16(&se_mem[MAIN_BG_SBB][32 * (y - 1)], 0x0006, 1);
-                memset16(&se_mem[MAIN_BG_SBB][1 + 32 * (y - 1)], 0x0007, 2);
-                memset16(&se_mem[MAIN_BG_SBB][3 + 32 * (y - 1)], 0x0008, 1);
-                memset16(&se_mem[MAIN_BG_SBB][4 + 32 * (y - 1)], 0x0009, 4);
-                memset16(&se_mem[MAIN_BG_SBB][7 + 32 * (y - 1)], 0x000A, 1);
-                memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], SE_HORIZONTAL_FLIP | 0x0006, 1); 
+                memset16(&se_mat[MAIN_BG_SBB][y - 1][0], 0x0006, 1);
+                memset16(&se_mat[MAIN_BG_SBB][y - 1][1], 0x0007, 2);
+                memset16(&se_mat[MAIN_BG_SBB][y - 1][3], 0x0008, 1);
+                memset16(&se_mat[MAIN_BG_SBB][y - 1][4], 0x0009, 4);
+                memset16(&se_mat[MAIN_BG_SBB][y - 1][7], 0x000A, 1);
+                memset16(&se_mat[MAIN_BG_SBB][y - 1][8], SE_HFLIP | 0x0006, 1); 
             }
             
             for (int y = 0; y < timer; y++) // Shift the blind panel down onto screen
@@ -3053,7 +3012,7 @@ void game_main_menu()
     if (selection_x == 0) // Play button
     {   
         // Select button PID is 5 and the outline is 3
-        memset16(&pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE], HIGHLIGHT_COLOR, 1);
+        memset16(&pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE_PID], HIGHLIGHT_COLOR, 1);
 
         if (key_hit(KEY_A))
         {
@@ -3064,7 +3023,7 @@ void game_main_menu()
     else
     {
         // Select button PID is 5 and the outline is 3
-        memcpy16(&pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE], &pal_bg_mem[MAIN_MENU_PLAY_BUTTON_MAIN_COLOR], 1);
+        memcpy16(&pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE_PID], &pal_bg_mem[MAIN_MENU_PLAY_BUTTON_MAIN_COLOR_PID], 1);
     }
 }
 
