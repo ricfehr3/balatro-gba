@@ -591,12 +591,12 @@ static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card) {
     for (int i = 0; i < list_get_size(jokers); i++ ) {
         JokerObject* curr_joker_object = list_get(jokers, i);
         if (trigger_next_joker) {
-            effect = joker_get_score_effect(joker_object->joker, scored_card);
+            effect = joker_get_score_effect(curr_joker_object->joker, scored_card);
             break;
         }
 
         // JOKER_BLUEPRINT_ID (joker.h) will need to be updated
-        if (curr_joker_object->joke == joker)
+        if (curr_joker_object->joker == joker)
             trigger_next_joker = true;
     }
 
@@ -606,7 +606,8 @@ static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card) {
 __attribute__((unused))
 static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
-    if (joker->processed)
+    static bool in_brainstorm = false;
+    if (in_brainstorm)
         return effect;
 
     List* jokers = get_jokers();
@@ -615,9 +616,9 @@ static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card) {
     // JOKER_BRAINSTORM_ID (joker.h) will need to be updated
     if (first_joker != NULL && first_joker->joker->id != JOKER_BRAINSTORM_ID) {
         // manually flip this to avoid infinite blueprint + brainstorm loops
-        joker->processed = true;
+        in_brainstorm = true;
         effect = joker_get_score_effect(first_joker->joker, scored_card);
-        joker->processed = false;
+        in_brainstorm = false;
     }
 
     return effect;
