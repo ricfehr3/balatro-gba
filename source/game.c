@@ -161,7 +161,7 @@ List *get_jokers(void) {
     return jokers;
 }
 
-bool is_joker_present(int joker_id) {
+bool is_joker_owned(int joker_id) {
     for (int k = 0; k < list_get_size(jokers); k++)
     {
         JokerObject *joker = list_get(jokers, k);
@@ -183,19 +183,23 @@ void remove_held_joker(int joker_idx)
     list_remove_by_idx(jokers, joker_idx);
 }
 
-int get_deck_top(void) {
+int get_deck_top(void)
+{
     return deck_top;
 }
 
-int get_num_discards_remaining(void) {
+int get_num_discards_remaining(void)
+{
     return discards;
 }
 
-int get_num_hands_remaining(void) {
+int get_num_hands_remaining(void)
+{
     return hands;
 }
 
-int get_money(void) {
+int get_money(void)
+{
     return money;
 }
 
@@ -446,7 +450,7 @@ bool card_is_face(Card *card) {
         card->rank == JACK  ||
         card->rank == QUEEN ||
         card->rank == KING  ||
-        is_joker_present(PAREIDOLIA_JOKER_ID)
+        is_joker_owned(PAREIDOLIA_JOKER_ID)
     );
 }
 
