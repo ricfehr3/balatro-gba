@@ -98,7 +98,6 @@ void sprite_init()
 
 void sprite_draw()
 {
-    obj_copy(obj_mem, obj_buffer, MAX_SPRITES);
     obj_aff_copy(obj_aff_mem, obj_aff_buffer, MAX_AFFINES);
     oam_copy(oam_mem, obj_buffer, MAX_SPRITES);
 }

@@ -304,9 +304,6 @@ static JokerEffect blue_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-// Using __attribute__((unused)) for jokers with no sprites yet to avoid warning
-// Remove the attribute once they have sprites
-__attribute__((unused))
 static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card) 
 {
     JokerEffect effect = {0};
@@ -331,7 +328,6 @@ static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card)
     return effect;
 } 
 
-__attribute__((unused))
 static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -397,7 +393,6 @@ static JokerEffect scary_face_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
- __attribute__((unused))
 static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -410,7 +405,6 @@ static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-__attribute__((unused))
 static JokerEffect bull_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -480,6 +474,108 @@ static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card) {
         // JOKER_BLUEPRINT_ID (joker.h) will need to be updated
         if (curr_joker_object->joke == joker)
             trigger_next_joker = true;
+ static JokerEffect the_duo_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+    
+     // This is really inefficient but the only way at the moment to check for whole-hand conditions
+    u8 suits[NUM_SUITS];
+    u8 ranks[NUM_RANKS];
+    get_played_distribution(ranks, suits);
+
+    if (hand_contains_n_of_a_kind(ranks) >= 2)
+        effect.xmult = 2;
+    return effect;
+ }
+
+ static JokerEffect the_trio_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+    
+     // This is really inefficient but the only way at the moment to check for whole-hand conditions
+    u8 suits[NUM_SUITS];
+    u8 ranks[NUM_RANKS];
+    get_played_distribution(ranks, suits);
+
+    if (hand_contains_n_of_a_kind(ranks) >= 3)
+        effect.xmult = 3;
+    return effect;
+ }
+
+ static JokerEffect the_family_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+    
+     // This is really inefficient but the only way at the moment to check for whole-hand conditions
+    u8 suits[NUM_SUITS];
+    u8 ranks[NUM_RANKS];
+    get_played_distribution(ranks, suits);
+
+    if (hand_contains_n_of_a_kind(ranks) >= 4)
+        effect.xmult = 4;
+    return effect;
+ }
+
+ static JokerEffect the_order_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    u8 suits[NUM_SUITS];
+    u8 ranks[NUM_RANKS];
+    get_played_distribution(ranks, suits);
+
+    if (hand_contains_straight(ranks))
+        effect.xmult = 3;
+    return effect;
+}
+
+ static JokerEffect the_tribe_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    u8 suits[NUM_SUITS];
+    u8 ranks[NUM_RANKS];
+    get_played_distribution(ranks, suits);
+
+    if (hand_contains_flush(suits))
+        effect.xmult = 2;
+    return effect;
+}
+
+// Using __attribute__((unused)) for jokers with no sprites yet to avoid warning
+// Remove the attribute once they have sprites
+// graphics available from @MathisMartin31
+   __attribute__((unused))
+static JokerEffect bootstraps_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    effect.mult = (get_money() / 5) * 2;
+
+    return effect;
+}
+
+// no graphics available but ready to be used if wanted when graphics available
+__attribute__((unused))
+static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+        
+    CardObject** hand = get_hand_array();
+    int hand_size = hand_get_size();
+    for (int i = 0; i < hand_size; i++ )
+    {
+        if (hand[i]->card->rank == QUEEN)
+        {
+             effect.mult += 13;
+        } 
     }
 
     return effect;
@@ -500,10 +596,23 @@ static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card) {
         joker->processed = true;
         effect = joker_get_score_effect(first_joker->joker, scored_card);
         joker->processed = false;
+// no graphics available but ready to be used if wanted when graphics available
+__attribute__((unused))
+static JokerEffect triboulet_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card == NULL)
+        return effect;
+
+    switch (scored_card->rank) {
+        case KING: case QUEEN:
+            effect.xmult = 2;
+        default:
+            break;
     }
 
     return effect;
 }
+
 
 /* The index of a joker in the registry matches its ID.
  * The joker sprites are matched by ID so the position in the registry
@@ -546,6 +655,15 @@ const JokerInfo joker_registry[] = {
     // Business card should be paired with Shortcut for palette optimization when it's added
     { COMMON_JOKER, 4, scary_face_joker_effect },       // 28
     { COMMON_JOKER, 4, smiley_face_joker_effect },      // 29
+    { COMMON_JOKER, 5, raised_fist_joker_effect },      // 30
+    { COMMON_JOKER, 6, reserved_parking_joker_effect }, // 31
+    { COMMON_JOKER, 4, abstract_joker_effect },         // 32
+    { UNCOMMON_JOKER, 6, bull_joker_effect},            // 33
+    { RARE_JOKER, 8, the_duo_joker_effect},             // 34
+    { RARE_JOKER, 8, the_trio_joker_effect},            // 35
+    { RARE_JOKER, 8, the_family_joker_effect},          // 36
+    { RARE_JOKER, 8, the_order_joker_effect},           // 37
+    { RARE_JOKER, 8, the_tribe_joker_effect},           // 38
 
     // The following jokers don't have sprites yet, 
     // uncomment them when their sprites are added.
@@ -558,6 +676,8 @@ const JokerInfo joker_registry[] = {
 
     { RARE_JOKER, 10, blueprint_joker_effect },
     { RARE_JOKER, 10, brainstorm_joker_effect },
+    { UNCOMMON_JOKER, 7, bootstraps_joker_effect},   
+    { COMMON_JOKER, 5, shoot_the_moon_joker_effect},
 #endif
 };
 
