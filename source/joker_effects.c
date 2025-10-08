@@ -582,7 +582,6 @@ static JokerEffect triboulet_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-__attribute__((unused))
 static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     List* jokers = get_jokers();
@@ -600,7 +599,6 @@ static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-__attribute__((unused))
 static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     static bool in_brainstorm = false;
@@ -610,9 +608,8 @@ static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card) {
     List* jokers = get_jokers();
     JokerObject* first_joker = list_get(jokers, 0);
 
-    // JOKER_BRAINSTORM_ID (joker.h) will need to be updated
     if (first_joker != NULL && first_joker->joker->id != JOKER_BRAINSTORM_ID) {
-        // manually flip this to avoid infinite blueprint + brainstorm loops
+        // Static var to avoid infinite blueprint + brainstorm loops
         in_brainstorm = true;
         effect = joker_get_score_effect(first_joker->joker, scored_card);
         in_brainstorm = false;
@@ -671,12 +668,12 @@ const JokerInfo joker_registry[] = {
     { RARE_JOKER, 8, the_family_joker_effect},          // 36
     { RARE_JOKER, 8, the_order_joker_effect},           // 37
     { RARE_JOKER, 8, the_tribe_joker_effect},           // 38
+    { RARE_JOKER, 10, blueprint_joker_effect },         // 39
+    { RARE_JOKER, 10, brainstorm_joker_effect },        // 40
 
     // The following jokers don't have sprites yet, 
     // uncomment them when their sprites are added.
 #if 0
-    { RARE_JOKER, 10, blueprint_joker_effect },
-    { RARE_JOKER, 10, brainstorm_joker_effect },
     { UNCOMMON_JOKER, 7, bootstraps_joker_effect},   
     { COMMON_JOKER, 5, shoot_the_moon_joker_effect},
 #endif
