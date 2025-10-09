@@ -46,7 +46,7 @@ typedef struct
 int list_push_front(ListHead *H, int elem_idx);
 int list_get_new(ListHead H, int elem_idx);
 void list_remove(ListHead *H, LinkNode *N);
-void list_remove_idx(ListHead H, int elem_idx);
+void list_remove_idx(ListHead* H, int elem_idx);
 int list_size_new(ListHead H);
 
 #endif

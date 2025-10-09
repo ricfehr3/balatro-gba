@@ -158,16 +158,16 @@ void list_remove(ListHead *H, LinkNode *N)
     POOL_FREE(LinkNode, N);
 }
 
-void list_remove_idx(ListHead H, int elem_idx) {
+void list_remove_idx(ListHead* H, int elem_idx) {
     int len = 0;
-    LinkNode* current_node = (H.head >= 0) ?
-        POOL_AT(LinkNode, H.head) :
+    LinkNode* current_node = (H->head >= 0) ?
+        POOL_AT(LinkNode, H->head) :
         NULL;
     while (current_node != NULL)
     {
         if(elem_idx == len++)
         {
-            list_remove(&H, current_node);
+            list_remove(H, current_node);
             return;
         };
         current_node = (current_node->next >= 0) ?

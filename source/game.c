@@ -2469,6 +2469,12 @@ void game_sell_joker(int joker_idx)
     if (joker_idx < 0 || joker_idx > list_size_new(jokerlist))
         return;
     
+    // TODO: This is all wrong here. For one, the idx will be backwards now since we are pushing to
+    // the front, and it's super confusing here to track down wtf index you mean??
+    //
+    // Come back here and take it from the top, going to be a lot larger of a refactor, but
+    // it will (hopefully) be worth it
+    // 
     //JokerObject *joker_object = list_get(jokers, joker_idx);
     JokerObject *joker_object = POOL_AT(JokerObject, list_get_new(jokerlist, joker_idx));
     money += joker_get_sell_value(joker_object->joker);
@@ -2478,7 +2484,7 @@ void game_sell_joker(int joker_idx)
     //remove_held_joker(joker_idx);
     int_list_append(jokers_available_to_shop, (intptr_t)joker_object->joker->id);
 
-    list_remove_idx(jokerlist, joker_idx);
+    list_remove_idx(&jokerlist, joker_idx);
     joker_start_discard_animation(joker_object);
 }
 
