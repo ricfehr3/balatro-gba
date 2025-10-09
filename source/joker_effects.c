@@ -458,7 +458,6 @@ static JokerEffect acrobat_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-__attribute__((unused))
 static JokerEffect the_duo_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -474,8 +473,6 @@ static JokerEffect the_duo_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
  }
 
-// graphics available from @MathisMartin31
-__attribute__((unused))
 static JokerEffect the_trio_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -491,8 +488,6 @@ static JokerEffect the_trio_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
  }
 
-// graphics available from @MathisMartin31
-__attribute__((unused))
 static JokerEffect the_family_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -508,8 +503,6 @@ static JokerEffect the_family_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
  }
 
-// graphics available from @MathisMartin31
-__attribute__((unused))
 static JokerEffect the_order_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -524,8 +517,6 @@ static JokerEffect the_order_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-// graphics available from @MathisMartin31
-__attribute__((unused))
 static JokerEffect the_tribe_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
