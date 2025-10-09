@@ -670,11 +670,11 @@ const JokerInfo joker_registry[] = {
     { RARE_JOKER, 8, the_tribe_joker_effect},           // 38
     { RARE_JOKER, 10, blueprint_joker_effect },         // 39
     { RARE_JOKER, 10, brainstorm_joker_effect },        // 40
-    { UNCOMMON_JOKER, 5, NULL /* Pareidolia */ },       // 41
 
     // The following jokers don't have sprites yet, 
     // uncomment them when their sprites are added.
 #if 0
+    { UNCOMMON_JOKER, 5, NULL /* Pareidolia */ },       // 41
     { UNCOMMON_JOKER, 6, acrobat_joker_effect },
     { UNCOMMON_JOKER, 7, bootstraps_joker_effect},   
     { COMMON_JOKER, 5, shoot_the_moon_joker_effect},
