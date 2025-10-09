@@ -37,6 +37,7 @@
 #define GREEDY_JOKER_ID 1 // This is just an example to show the patern of making joker IDs
 #define JOKER_STENCIL_ID 16
 #define JOKER_BRAINSTORM_ID 40
+#define PAREIDOLIA_JOKER_ID 41
 
 typedef struct 
 {
