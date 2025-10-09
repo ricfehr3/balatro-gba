@@ -2478,6 +2478,7 @@ void game_sell_joker(int joker_idx)
     //remove_held_joker(joker_idx);
     int_list_append(jokers_available_to_shop, (intptr_t)joker_object->joker->id);
 
+    list_remove_idx(jokerlist, joker_idx);
     joker_start_discard_animation(joker_object);
 }
 
