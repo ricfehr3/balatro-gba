@@ -1312,8 +1312,7 @@ static void game_playing_process_hand_select_input()
             discard_button_highlighted = true; // Discard button
         }
     }
-
-    if (selection_y == 1) // On row of play/discard buttons
+    else if (selection_y == 1) // On row of play/discard buttons
     {
         if (discard_button_highlighted == false) // Play button logic
         {
@@ -1345,8 +1344,7 @@ static void game_playing_process_hand_select_input()
             }
         }
     }
-
-    if (selection_y == 0) // On row of cards
+    else if (selection_y == 0) // On row of cards
     {
         memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1); // Play button highlight color
         memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1); // Discard button highlight color
