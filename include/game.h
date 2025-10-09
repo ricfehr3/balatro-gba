@@ -94,7 +94,7 @@ int             hand_get_size(void);
 CardObject**    get_played_array(void);
 int             get_played_top(void);
 List*           get_jokers(void);
-bool            is_joker_present(int joker_id);
+bool            is_joker_owned(int joker_id);
 bool            card_is_face(Card *card);
 
 int get_deck_top(void);
