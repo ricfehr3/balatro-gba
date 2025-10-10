@@ -126,6 +126,7 @@ void list_remove(ListHead *H, LinkNode *N)
     LinkNode* p_prev_node = NULL;
     LinkNode* p_next_node = NULL;
 
+
     if(N->prev >= 0)
     {
         p_prev_node = POOL_AT(LinkNode, N->prev);
@@ -135,6 +136,7 @@ void list_remove(ListHead *H, LinkNode *N)
     {
         p_next_node = POOL_AT(LinkNode, N->next);
     }
+
 
     if(p_prev_node && !p_next_node) // end of list
     {

@@ -58,6 +58,7 @@ int pool_bm_get_free_idx(PoolBitmap *bm);
     }                                                                       \
     type *pool_at_##type(int idx)                                           \
     {                                                                       \
+        if(idx < 0 || idx >= type##_pool.bm.cap) return NULL;               \
         return &type##_pool.objects[idx];                                   \
     }
 

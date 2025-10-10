@@ -1139,7 +1139,8 @@ void game_init()
 
 void game_start()
 {
-    set_seed(rng_seed);
+    //set_seed(rng_seed);
+    set_seed(9); // 9 is a full house
 
     affine_background_change_background(AFFINE_BG_GAME);
 
@@ -2440,16 +2441,20 @@ static void jokers_sel_row_on_selection_changed(SelectionGrid *selection_grid,
     {
         //JokerObject* joker_object = list_get(jokers, prev_selection->x);
         JokerObject* joker_object = POOL_AT(JokerObject, list_get_new(jokerlist, prev_selection->x));
-        erase_price_under_sprite_object(joker_object->sprite_object);
-        sprite_object_set_focus(joker_object->sprite_object, false);
+        if(joker_object != NULL) {
+            erase_price_under_sprite_object(joker_object->sprite_object);
+            sprite_object_set_focus(joker_object->sprite_object, false);
+        }
     }
 
     if (new_selection->y == row_idx)
     {
         //JokerObject* joker_object = list_get(jokers, new_selection->x);
         JokerObject* joker_object = POOL_AT(JokerObject, list_get_new(jokerlist, new_selection->x));
-        sprite_object_set_focus(joker_object->sprite_object, true);
-        print_price_under_sprite_object(joker_object->sprite_object, joker_get_sell_value(joker_object->joker));
+        if(joker_object != NULL) {
+            sprite_object_set_focus(joker_object->sprite_object, true);
+            print_price_under_sprite_object(joker_object->sprite_object, joker_get_sell_value(joker_object->joker));
+        }
     }
 }
 
@@ -2476,15 +2481,19 @@ void game_sell_joker(int joker_idx)
     // it will (hopefully) be worth it
     // 
     //JokerObject *joker_object = list_get(jokers, joker_idx);
-    JokerObject *joker_object = POOL_AT(JokerObject, list_get_new(jokerlist, joker_idx));
+    //int size = list_size_new(jokerlist);
+    // THE OFFSET IN THE POOL
+    int list_offset = list_get_new(jokerlist, joker_idx);
+    JokerObject *joker_object = POOL_AT(JokerObject, list_offset);
     money += joker_get_sell_value(joker_object->joker);
     display_money(money);
     erase_price_under_sprite_object(joker_object->sprite_object);
 
     //remove_held_joker(joker_idx);
+    list_remove_idx(&jokerlist, joker_idx);
     int_list_append(jokers_available_to_shop, (intptr_t)joker_object->joker->id);
 
-    list_remove_idx(&jokerlist, joker_idx);
+    //list_remove_idx(&jokerlist, list_offset);
     joker_start_discard_animation(joker_object);
 }
 
@@ -2994,7 +3003,7 @@ void game_main_menu()
 static void _discard_joker_thing()
 {
     LinkNode* current_node = (discarded_jokers_list.head >= 0) ?
-        POOL_AT(LinkNode, jokerlist.head) :
+        POOL_AT(LinkNode, discarded_jokers_list.head) :
         NULL;
     while (current_node != NULL)
     {
