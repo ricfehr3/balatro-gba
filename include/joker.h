@@ -35,6 +35,7 @@
 // These are just the common ones. Special Joker behaviour will be checked on a
 // Joker per Joker basis (see if it's there, then do something, e.g. Pareidolia, Baseball Card)
 enum JokerCallback {
+    JOKER_CALLBACK_ON_HAND_PLAYED,     // Triggers only once when the hand is played
     JOKER_CALLBACK_ON_CARD_SCORED,     // Triggers when a played card scores (e.g. Walkie Talkie, Fibonnacci...)
     JOKER_CALLBACK_ON_CARD_SCORED_END, // Triggers after the card has finishd scoring (e.g. retrigger Jokers)
     JOKER_CALLBACK_ON_CARD_HELD,       // Triggers when considering cards held in hand (e.g. Baron, Shoot the Moon...)
@@ -47,32 +48,22 @@ enum JokerCallback {
 
 #define MAX_JOKER_OBJECTS 32 // The maximum number of joker objects that can be created at once
 
-// in-scope Jokers
+// Jokers in the game
 #define DEFAULT_JOKER_ID 0
 #define GREEDY_JOKER_ID 1
 #define JOKER_STENCIL_ID 16
-#define PAREIDOLIA_JOKER_ID 30
-#define HANGING_CHAD_ID 33
-#define DUSK_ID 36
-#define HACK_ID 37
-#define BASEBALL_CARD_ID 39
+#define JOKER_BRAINSTORM_ID 40
 
-// outside of scope for now
-#define PHOTOGRAPH_ID 40
-#define SOCK_AND_BUSKIN_JOKER_ID 42
-
-// no planned ID yet, start from MAX_UINT8
+// not yet in th registry
 #define MIME_ID 255
 #define SELTZER_ID 254
-
-union GenericData {
-    int32_t data;   
-    struct {
-        int16_t data0;
-        int16_t data1;
-    } halves;  
-    char bytes[4];
-};
+#define PHOTOGRAPH_ID 253
+#define SOCK_AND_BUSKIN_JOKER_ID 252
+#define DUSK_ID 251
+#define HACK_ID 250
+#define BASEBALL_CARD_ID 249
+#define PAREIDOLIA_JOKER_ID 248
+#define HANGING_CHAD_ID 247
 
 typedef struct 
 {
