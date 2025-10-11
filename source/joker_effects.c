@@ -198,31 +198,22 @@ static JokerEffect joker_stencil_effect(Joker *joker, Card *scored_card) {
 
     // +1 xmult per empty joker slot...
     //int num_jokers = list_get_size(jokers);
-    int num_jokers = list_size_new(joker_head);
+    int num_jokers = list_get_len(joker_head);
 
     effect.xmult = (MAX_JOKERS_HELD_SIZE) - num_jokers;
 
     // ...and also each stencil_joker adds +1 xmult
-    LinkNode* current_node = (joker_head.head >= 0) ?
-        POOL_AT(LinkNode, joker_head.head) :
+    ListNode* current_node = (joker_head.head >= 0) ?
+        POOL_AT(ListNode, joker_head.head) :
         NULL;
     while (current_node != NULL)
     {
         JokerObject* joker_object = POOL_AT(JokerObject, current_node->elem_idx);
         if (joker_object->joker->id == JOKER_STENCIL_ID) effect.xmult++;
         current_node = (current_node->next >= 0) ?
-                        POOL_AT(LinkNode, current_node->next) :
+                        POOL_AT(ListNode, current_node->next) :
                         NULL;
     }
-
-    /*
-    for (int i = 0; i < num_jokers; i++ )
-    {
-        JokerObject* joker_object = list_get(jokers, i);
-        if (joker_object->joker->id == JOKER_STENCIL_ID)
-            effect.xmult++;
-    }
-    */
 
     return effect;
 }
@@ -415,8 +406,7 @@ static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card) {
         return effect; // if card != null, we are not at the end-phase of scoring yet
 
     // +1 xmult per occupied joker slot
-    //int num_jokers = list_get_size(get_jokers());
-    int num_jokers = list_size_new(get_jokers_list());
+    int num_jokers = list_get_len(get_jokers_list());
     effect.mult = num_jokers * 3;
 
     return effect;

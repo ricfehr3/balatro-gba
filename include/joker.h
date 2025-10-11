@@ -50,7 +50,6 @@ typedef struct
     u8 value;
     u8 rarity;
     bool processed;
-    ListNode list_head;
 } Joker;
 
 typedef struct JokerObject
