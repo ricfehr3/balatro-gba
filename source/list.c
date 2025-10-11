@@ -106,7 +106,7 @@ ListItr list_itr_new(ListHead* p_list)
     ListItr itr =
     {
         .p_list = p_list,
-        .p_current_node = NULL,
+        .p_current_node = !list_empty(*p_list) ? POOL_AT(ListNode, p_list->head) : NULL,
     };
 
     return itr;
@@ -116,13 +116,18 @@ ListNode* list_itr_next(ListItr* p_itr)
 {
     ListNode* ln = p_itr->p_current_node;
     if(!p_itr->p_current_node) { return NULL; };
-    return ln->next >= 0 ? POOL_AT(ListNode, ln->next) : NULL;
+    if(ln->next >= 0)
+    {
+        p_itr->p_current_node = POOL_AT(ListNode, ln->next);
+        return ln;
+    }
+
+    p_itr->p_current_node = NULL;
+    return ln;
 }
 
 void list_remove_at_idx(ListHead* p_list, int elem_idx)
 {
-    int len = 0;
-    /*
     int len = 0;
 
     ListItr itr = list_itr_new(p_list);
@@ -136,8 +141,8 @@ void list_remove_at_idx(ListHead* p_list, int elem_idx)
         }
         ln = list_itr_next(&itr);
     }
-    */
 
+    /*
     ListNode* current_node = (p_list->head >= 0) ?
         POOL_AT(ListNode, p_list->head) :
         NULL;
@@ -153,6 +158,7 @@ void list_remove_at_idx(ListHead* p_list, int elem_idx)
                         POOL_AT(ListNode, current_node->next) :
                         NULL;
     }
+    */
 }
 
 int list_get_len(ListHead list)
