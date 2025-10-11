@@ -13,9 +13,10 @@ ListHead list_new(void)
 
 bool list_empty(ListHead H)
 {
-    return H.head >= 0;
+    return H.head < 0;
 }
 
+// tail not updated?
 int list_push_front(ListHead *p_list, int elem_idx)
 {
     ListNode *p_node = POOL_GET(ListNode);
@@ -75,7 +76,6 @@ void list_remove_node(ListHead *p_list, ListNode *p_node)
     {
         p_next_node = POOL_AT(ListNode, p_node->next);
     }
-
 
     if(p_prev_node && !p_next_node) // end of list
     {
