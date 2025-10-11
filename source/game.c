@@ -188,9 +188,9 @@ int get_game_speed(void)
 }
 
 // for the future when a menu actually lets this variable be changed.
-void set_game_speed(int game_speed)
+void set_game_speed(int game_speed_)
 {
-    game_speed = game_speed;
+    game_speed = game_speed_;
 }
 
 
