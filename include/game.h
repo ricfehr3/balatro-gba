@@ -95,7 +95,6 @@ int             get_hand_top(void);
 int             hand_get_size(void);
 CardObject**    get_played_array(void);
 int             get_played_top(void);
-//List*           get_jokers(void);
 ListHead        get_jokers_list(void);
 
 int get_deck_top(void);
