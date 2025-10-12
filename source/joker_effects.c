@@ -609,10 +609,6 @@ static JokerEffect the_tribe_joker_effect(Joker *joker, Card *scored_card, int s
     return effect;
 }
 
-// Using __attribute__((unused)) for jokers with no sprites yet to avoid warning
-// Remove the attribute once they have sprites
-// graphics available from @MathisMartin31
-   __attribute__((unused))
 static JokerEffect bootstraps_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
 
@@ -643,6 +639,8 @@ static JokerEffect mime_joker_effect(Joker *joker, Card *scored_card, int scored
     return effect;
 }
             
+// Using __attribute__((unused)) for jokers with no sprites yet to avoid warning
+// Remove the attribute once they have sprites
 // no graphics available but ready to be used if wanted when graphics available
 __attribute__((unused))
 static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
@@ -884,8 +882,8 @@ const JokerInfo joker_registry[] = {
     { COMMON_JOKER,   4, business_card_joker_effect },    // 27
     // Business card should be paired with Shortcut for palette optimization when it's added
     { COMMON_JOKER,   4, scary_face_joker_effect },       // 28
-    { COMMON_JOKER,   4, smiley_face_joker_effect },      // 29
-    { COMMON_JOKER,   5, raised_fist_joker_effect },      // 30
+    { UNCOMMON_JOKER, 7, bootstraps_joker_effect},        // 29
+    { UNCOMMON_JOKER, 5, NULL /* Pareidolia */ },         // 30
     { COMMON_JOKER,   6, reserved_parking_joker_effect }, // 31
     { COMMON_JOKER,   4, abstract_joker_effect },         // 32
     { UNCOMMON_JOKER, 6, bull_joker_effect},              // 33
@@ -896,12 +894,12 @@ const JokerInfo joker_registry[] = {
     { RARE_JOKER,     8, the_tribe_joker_effect},         // 38
     { RARE_JOKER,     10, blueprint_joker_effect },       // 39
     { RARE_JOKER,     10, brainstorm_joker_effect },      // 40
-
+    { COMMON_JOKER,   5, raised_fist_joker_effect },      // 41
+    { COMMON_JOKER,   4, smiley_face_joker_effect },      // 42
 
     // The following jokers don't have sprites yet, 
     // uncomment them when their sprites are added.
 #if 0
-    { UNCOMMON_JOKER, 5, NULL /* Pareidolia */ },
     { COMMON_JOKER,   4, hanging_chad_joker_effect },
     { UNCOMMON_JOKER, 5, dusk_joker_effect },
     { UNCOMMON_JOKER, 6, hack_joker_effect },
@@ -910,7 +908,6 @@ const JokerInfo joker_registry[] = {
     { UNCOMMON_JOKER, 6, seltzer_joker_effect },
     { UNCOMMON_JOKER, 6, sock_and_buskin_joker_effect },
     { UNCOMMON_JOKER, 6, acrobat_joker_effect },
-    { UNCOMMON_JOKER, 7, bootstraps_joker_effect},   
     { COMMON_JOKER,   5, shoot_the_moon_joker_effect},
 #endif
 };

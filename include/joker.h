@@ -52,6 +52,7 @@ enum JokerCallback {
 #define DEFAULT_JOKER_ID 0
 #define GREEDY_JOKER_ID 1
 #define JOKER_STENCIL_ID 16
+#define PAREIDOLIA_JOKER_ID 30
 #define JOKER_BRAINSTORM_ID 40
 
 // not yet in th registry
@@ -62,7 +63,6 @@ enum JokerCallback {
 #define DUSK_ID 251
 #define HACK_ID 250
 #define BASEBALL_CARD_ID 249
-#define PAREIDOLIA_JOKER_ID 248
 #define HANGING_CHAD_ID 247
 
 typedef struct 
