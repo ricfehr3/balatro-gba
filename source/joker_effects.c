@@ -339,25 +339,37 @@ static JokerEffect blue_joker_effect(Joker *joker, Card *scored_card, int scored
 static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
 
-    SCORE_ON_CARD_HELD_ONLY(scored_card, scored_when, effect)
+    // Correcting Raised Fist logic and preparing it for Held Cards scoring
 
-    // Find the lowest rank card in hand
-    // Aces are always considered high value, even in an ace-low straight
-    u8 lowest_value = IMPOSSIBLY_HIGH_CARD_VALUE;
-    CardObject** hand = get_hand_array();
-    int hand_size = hand_get_size();
-    for (int i = 0; i < hand_size; i++ )
-    {
-        u8 value = card_get_value(hand[i]->card);
-        if (lowest_value > value)
-            lowest_value = value;
+    switch (scored_when) {
+        // Optimization: search for the lowest value card index only once
+        // Resets after hand has finished playing to prepare for the next one
+        case JOKER_CALLBACK_ON_HAND_SCORED_END:
+            joker->data = -1;
+            break;
+        case JOKER_CALLBACK_ON_HAND_PLAYED:
+            CardObject** hand = get_hand_array();
+            int hand_size = hand_get_size();
+            for (int i = 0; i < hand_size; i++) {
+                u8 value = card_get_value(hand[i]->card);
+                // >= instead of > to match Balatro's logic of selecting the
+                // rightmost card among cards of same value
+                if (joker->data == -1 || joker->data >= value) {
+                    joker->data = i;
+                }
+            }
+            break;
+        case JOKER_CALLBACK_ON_CARD_HELD:
+            if (joker->data == get_scored_card_index()) {
+                CardObject** hand = get_hand_array();
+                effect.mult = 2 * card_get_value(hand[joker->data]->card);
+            }
+            break;
+            
     }
 
-    if (lowest_value != IMPOSSIBLY_HIGH_CARD_VALUE)
-        effect.mult = lowest_value * 2;
-
     return effect;
-} 
+}
 
 static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card, int scored_when) {
     JokerEffect effect = {0};
