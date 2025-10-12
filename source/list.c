@@ -4,19 +4,17 @@
 #include "list.h"
 #include "pool.h"
 
-
 ListHead list_new(void)
 {
     ListHead head = { .head = -1, .tail = -1};
     return head;
 }
 
-bool list_empty(ListHead H)
+bool list_empty(ListHead list)
 {
-    return H.head < 0;
+    return list.head < 0;
 }
 
-// tail not updated?
 int list_push_front(ListHead *p_list, int elem_idx)
 {
     ListNode *p_node = POOL_GET(ListNode);
@@ -101,7 +99,7 @@ void list_remove_node(ListHead *p_list, ListNode *p_node)
     POOL_FREE(ListNode, p_node);
 }
 
-ListItr list_itr_new(ListHead* p_list)
+ListItr list_itr_new(const ListHead* p_list)
 {
     ListItr itr =
     {
@@ -129,68 +127,43 @@ ListNode* list_itr_next(ListItr* p_itr)
 void list_remove_at_idx(ListHead* p_list, int elem_idx)
 {
     int len = 0;
-
     ListItr itr = list_itr_new(p_list);
+    ListNode* ln;
 
-    ListNode* ln = list_itr_next(&itr);
-    while(ln) {
+    while((ln = list_itr_next(&itr)))
+    {
         if(elem_idx == len++)
         {
             list_remove_node(p_list, ln);
             return;
         }
-        ln = list_itr_next(&itr);
     }
-
-    /*
-    ListNode* current_node = (p_list->head >= 0) ?
-        POOL_AT(ListNode, p_list->head) :
-        NULL;
-
-    while (current_node != NULL)
-    {
-        if(elem_idx == len++)
-        {
-            list_remove_node(p_list, current_node);
-            return;
-        };
-        current_node = (current_node->next >= 0) ?
-                        POOL_AT(ListNode, current_node->next) :
-                        NULL;
-    }
-    */
 }
 
 int list_get_len(ListHead list)
 {
     int len = 0;
+    ListItr itr = list_itr_new(&list);
+    ListNode* ln;
 
-    ListNode* current_node = (list.head >= 0) ?
-        POOL_AT(ListNode, list.head) :
-        NULL;
-
-    while (current_node != NULL)
+    while((ln = list_itr_next(&itr)))
     {
         len++;
-        current_node = (current_node->next >= 0) ?
-                        POOL_AT(ListNode, current_node->next) :
-                        NULL;
     }
+
     return len;
 }
 
 int list_get_at_idx(ListHead list, int elem_idx)
 {
     int len = 0;
-    ListNode* current_node = (list.head >= 0) ?
-        POOL_AT(ListNode, list.head) :
-        NULL;
-    while (current_node != NULL)
+    ListItr itr = list_itr_new(&list);
+    ListNode* ln;
+
+    while((ln = list_itr_next(&itr)))
     {
-        if(elem_idx == len++) return current_node->elem_idx;
-        current_node = (current_node->next >= 0) ?
-                        POOL_AT(ListNode, current_node->next) :
-                        NULL;
+        if(elem_idx == len++) return ln->elem_idx;
     }
+
     return -1;
 }

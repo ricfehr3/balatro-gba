@@ -19,7 +19,7 @@ typedef struct
 
 typedef struct
 {
-    ListHead *p_list;
+    const ListHead *p_list;
     ListNode *p_current_node;
 } ListItr;
 
@@ -32,6 +32,8 @@ int list_push_front(ListHead *p_list, int elem_idx);
 int list_push_back(ListHead *p_list, int elem_idx);
 int list_get_at_idx(ListHead list, int elem_idx);
 void list_remove_node(ListHead *p_list, ListNode *p_node);
+ListItr list_itr_new(const ListHead* p_list);
+ListNode* list_itr_next(ListItr* p_itr);
 void list_remove_at_idx(ListHead *p_list, int elem_idx);
 int list_get_len(ListHead list);
 
