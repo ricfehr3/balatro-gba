@@ -4,10 +4,6 @@
 #include "blinds_gfx.h"
 #include "graphic_utils.h"
 
-#define SMALL_BLIND_REWARD 3
-#define BIG_BLIND_REWARD   4
-#define BOSS_BLIND_REWARD  5
-
 // +1 is added because we'll actually be indexing at 1, but if something causes you to go to ante 0, there will still be a value there.
 static const int ante_lut[MAX_ANTE + 1] = {100, 300, 800, 2000, 5000, 11000, 20000, 35000, 50000};
 
@@ -19,7 +15,7 @@ static const u16 boss_blind_token_palette[PAL_ROW_LEN] = {0x0000, 0x2CC9, 0x3D0D
 
 static const Blind blindMap[BLIND_TYPE_MAX] =
 {
-#define BLIND_INFO(NAME, name, multi)                    \
+#define BLIND_INFO(NAME, name, multi, _reward)           \
     {                                                    \
         .type = BLIND_TYPE_##NAME ,                      \
         .pal_info =                                      \
@@ -29,7 +25,7 @@ static const Blind blindMap[BLIND_TYPE_MAX] =
             .pb = NAME##_BLIND_PB,                       \
         },                                               \
         .score_req_multipler = multi ,                   \
-        .reward = NAME##_BLIND_REWARD,                   \
+        .reward = _reward ,                              \
     },
     BLIND_INFO_TABLE
 #undef BLIND_INFO
@@ -40,7 +36,7 @@ void blind_init()
     // Blind graphics (fighting grit every step of the way as usual)
     GRIT_CPY(&tile_mem[4][SMALL_BLIND_TID], blinds_gfxTiles);
 
-    for(int i = 0; i < BLIND_TYPE_MAX; i++)
+    for(int i = 0; i < BLIND_COUNT; i++)
     {
         const u16* pal = blindMap[i].pal_info.palette;
 

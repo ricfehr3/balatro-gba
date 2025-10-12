@@ -78,12 +78,12 @@ static CardObject *main_menu_ace = NULL;
 static Sprite *playing_blind_token = NULL; // The sprite that displays the blind when in "GAME_PLAYING/GAME_ROUND_END" state
 static Sprite *round_end_blind_token = NULL; // The sprite that displays the blind when in "GAME_ROUND_END" state
 
-static Sprite *blind_select_tokens[BLIND_TYPE_MAX] = {NULL}; // The sprites that display the blinds when in "GAME_BLIND_SELECT" state
+static Sprite *blind_select_tokens[BLIND_COUNT] = {NULL}; // The sprites that display the blinds when in "GAME_BLIND_SELECT" state
 
 static int current_blind = BLIND_TYPE_SMALL;
 
 // The current state of the blinds, this is used to determine what the game is doing at any given time
-static enum BlindState blinds[BLIND_TYPE_MAX] =
+static enum BlindState blinds[BLIND_COUNT] =
 {
     BLIND_STATE_CURRENT,
     BLIND_STATE_UPCOMING,
@@ -341,7 +341,6 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 #define PITCH_STEP_DRAW_SFX         24
 #define PITCH_STEP_UNDISCARD_SFX    2*PITCH_STEP_DRAW_SFX    
 
-#define BLIND_COUNT 3
 #define TEN_K 10000
 #define ONE_K 1000
 
@@ -1102,7 +1101,7 @@ void deck_shuffle()
 void increment_blind(enum BlindState increment_reason)
 {
     current_blind++;
-    if (current_blind >= BLIND_TYPE_MAX)
+    if (current_blind >= BLIND_COUNT)
     {
         current_blind = 0;
         blinds[0] = BLIND_STATE_CURRENT; // Reset the blinds to the first one
@@ -2902,7 +2901,7 @@ void game_blind_select()
             change_background(BG_ID_BLIND_SELECT);
             main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_UP);
 
-            for (int i = 0; i < BLIND_TYPE_MAX; i++)
+            for (int i = 0; i < BLIND_COUNT; i++)
             {
                 sprite_position(blind_select_tokens[i], blind_select_tokens[i]->pos.x, blind_select_tokens[i]->pos.y - TILE_SIZE);
             }
@@ -2952,7 +2951,7 @@ void game_blind_select()
                         main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_UP);
                     }
 
-                    for (int i = 0; i < BLIND_TYPE_MAX; i++)
+                    for (int i = 0; i < BLIND_COUNT; i++)
                     {
                         sprite_position(blind_select_tokens[i], blind_select_tokens[i]->pos.x, blind_select_tokens[i]->pos.y - (TILE_SIZE * 12));
                     }
@@ -2983,14 +2982,14 @@ void game_blind_select()
                 blinds_rect.top -= 1; // Because of the raised blind
                 main_bg_se_move_rect_1_tile_vert(blinds_rect, SE_DOWN);
 
-                for (int i = 0; i < BLIND_TYPE_MAX; i++)
+                for (int i = 0; i < BLIND_COUNT; i++)
                 {
                     sprite_position(blind_select_tokens[i], blind_select_tokens[i]->pos.x, blind_select_tokens[i]->pos.y + TILE_SIZE);
                 }
             }
             else if (timer >= MENU_POP_OUT_ANIM_FRAMES)
             {
-                for (int i = 0; i < BLIND_TYPE_MAX; i++)
+                for (int i = 0; i < BLIND_COUNT; i++)
                 {
                     obj_hide(blind_select_tokens[i]->obj);
                 }
