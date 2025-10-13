@@ -2312,7 +2312,7 @@ static void game_round_end_panel_exit()
     }   
     else if (timer > FRAMES(20))
     {
-        memset16(&pal_bg_mem[REWARD_PANEL_BORDER], 0x1483, 1);
+        memset16(&pal_bg_mem[REWARD_PANEL_BORDER_PID], 0x1483, 1);
         state_info[game_state].substate = DISPLAY_REWARDS;
         timer = TM_ZERO;
     }
@@ -2970,14 +2970,14 @@ static void game_blind_select_handle_input()
     if (selection_y == 0)
     {
     	// 5 is the multiplier palette color and the skip button color
-        memset16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER], 0xFFFF, 1);
-        memcpy16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER], &pal_bg_mem[BLIND_SKIP_BTN], 1);
+        memset16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER_PID], 0xFFFF, 1);
+        memcpy16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER_PID], &pal_bg_mem[BLIND_SKIP_BTN_PID], 1);
     }
     else
     {
     	// 15 is the select button color
-        memcpy16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER], &pal_bg_mem[BLIND_SELECT_BTN], 1);
-        memset16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER], 0xFFFF, 1);
+        memcpy16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER_PID], &pal_bg_mem[BLIND_SELECT_BTN_PID], 1);
+        memset16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER_PID], 0xFFFF, 1);
     }
 }
 
