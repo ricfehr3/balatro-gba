@@ -337,12 +337,8 @@ static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card
     int hand_size = hand_get_size();
     for (int i = 0; i < hand_size; i++ )
     {
-        switch (hand[i]->card->rank) {
-            case KING: case QUEEN: case JACK:
-                if (random() % 2 == 0)
-                    effect.money += 1;
-            default:
-                break;
+        if ((random() % 2 == 0) && card_is_face(hand[i]->card)) {
+            effect.money += 1;
         }
     }
 
@@ -354,12 +350,8 @@ static JokerEffect business_card_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card == NULL)
         return effect;
 
-    switch (scored_card->rank) {
-        case KING: case QUEEN: case JACK:
-            if (random() % 2 == 0)
-                effect.money = 2;
-        default:
-            break;
+    if ((random() % 2 == 0) && card_is_face(scored_card)) {
+        effect.money = 2;
     }
 
     return effect;
@@ -383,11 +375,8 @@ static JokerEffect scary_face_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card == NULL)
         return effect;
 
-    switch (scored_card->rank) {
-        case KING: case QUEEN: case JACK:
-            effect.chips = 30;
-        default:
-            break;
+    if (card_is_face(scored_card)) {
+        effect.chips = 30;
     }
 
     return effect;
@@ -420,11 +409,8 @@ static JokerEffect smiley_face_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card == NULL)
         return effect;
 
-    switch (scored_card->rank) {
-        case KING: case QUEEN: case JACK:
-            effect.mult = 5;
-        default:
-            break;
+    if (card_is_face(scored_card)) {
+        effect.mult = 5;
     }
 
     return effect;
@@ -458,7 +444,21 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
- static JokerEffect the_duo_joker_effect(Joker *joker, Card *scored_card) {
+__attribute__((unused))
+static JokerEffect acrobat_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card == NULL)
+        return effect;
+
+    // 0 remaining hands mean we're scoring the last hand
+    if (get_num_hands_remaining() == 0) {
+        effect.xmult = 3;
+    }
+
+    return effect;
+}
+
+static JokerEffect the_duo_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
@@ -473,7 +473,7 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
  }
 
- static JokerEffect the_trio_joker_effect(Joker *joker, Card *scored_card) {
+static JokerEffect the_trio_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
@@ -488,7 +488,7 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
  }
 
- static JokerEffect the_family_joker_effect(Joker *joker, Card *scored_card) {
+static JokerEffect the_family_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
@@ -503,7 +503,7 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
  }
 
- static JokerEffect the_order_joker_effect(Joker *joker, Card *scored_card) {
+static JokerEffect the_order_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
@@ -517,7 +517,7 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
- static JokerEffect the_tribe_joker_effect(Joker *joker, Card *scored_card) {
+static JokerEffect the_tribe_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
@@ -531,10 +531,6 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-// Using __attribute__((unused)) for jokers with no sprites yet to avoid warning
-// Remove the attribute once they have sprites
-// graphics available from @MathisMartin31
-   __attribute__((unused))
 static JokerEffect bootstraps_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -545,6 +541,8 @@ static JokerEffect bootstraps_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
+// Using __attribute__((unused)) for jokers with no sprites yet to avoid warning
+// Remove the attribute once they have sprites
 // no graphics available but ready to be used if wanted when graphics available
 __attribute__((unused))
 static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card) {
@@ -658,8 +656,8 @@ const JokerInfo joker_registry[] = {
     { COMMON_JOKER, 4, business_card_joker_effect },    // 27
     // Business card should be paired with Shortcut for palette optimization when it's added
     { COMMON_JOKER, 4, scary_face_joker_effect },       // 28
-    { COMMON_JOKER, 4, smiley_face_joker_effect },      // 29
-    { COMMON_JOKER, 5, raised_fist_joker_effect },      // 30
+    { UNCOMMON_JOKER, 7, bootstraps_joker_effect},      // 29
+    { UNCOMMON_JOKER, 5, NULL /* Pareidolia */ },       // 30
     { COMMON_JOKER, 6, reserved_parking_joker_effect }, // 31
     { COMMON_JOKER, 4, abstract_joker_effect },         // 32
     { UNCOMMON_JOKER, 6, bull_joker_effect},            // 33
@@ -670,11 +668,14 @@ const JokerInfo joker_registry[] = {
     { RARE_JOKER, 8, the_tribe_joker_effect},           // 38
     { RARE_JOKER, 10, blueprint_joker_effect },         // 39
     { RARE_JOKER, 10, brainstorm_joker_effect },        // 40
+    { COMMON_JOKER, 5, raised_fist_joker_effect },      // 41
+    { COMMON_JOKER, 4, smiley_face_joker_effect },      // 42
 
     // The following jokers don't have sprites yet, 
     // uncomment them when their sprites are added.
 #if 0
-    { UNCOMMON_JOKER, 7, bootstraps_joker_effect},   
+
+    { UNCOMMON_JOKER, 6, acrobat_joker_effect },
     { COMMON_JOKER, 5, shoot_the_moon_joker_effect},
 #endif
 };
