@@ -2307,10 +2307,23 @@ static void game_shop_create_items()
 
     for (int i = 0; i < MAX_SHOP_JOKERS; i++)
     {
-        // TODO: weight the random choice by joker rarity
-        int joker_idx = random() % list_get_size(jokers_available_to_shop);
-        intptr_t joker_id = int_list_get(jokers_available_to_shop, joker_idx);
-        list_remove_by_idx(jokers_available_to_shop, joker_idx);
+        int joker_idx = 0;
+        intptr_t joker_id = 0;
+        #ifdef TEST_JOKER_ID // Allow defining an ID for a joker to always appear in shop and be tested
+        if (int_list_exists(jokers_available_to_shop, TEST_JOKER_ID))
+        {
+            joker_id = TEST_JOKER_ID;
+            int_list_remove_by_value(jokers_available_to_shop, joker_id);
+        }
+        else
+        #endif
+        {
+           joker_idx = random() % list_get_size(jokers_available_to_shop);
+           joker_id = int_list_get(jokers_available_to_shop, joker_idx);
+           // TODO: weight the random choice by joker rarity
+            list_remove_by_idx(jokers_available_to_shop, joker_idx);
+        }
+        
         
         JokerObject *joker_object = joker_object_new(joker_new(joker_id));
 
