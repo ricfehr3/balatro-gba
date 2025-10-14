@@ -274,9 +274,9 @@ static inline Card *discard_pop()
     return discard_pile[discard_top--];
 }
 
-// Resets bg tiles after shop or blind panel is dismissed
-// to match the rest of the game panel background.
-static inline void reset_bg_on_panel_dismissed()
+// Resets bottom row bg tiles of the top left panel (shop/blind) after
+// it is dismissed to match the rest of the game panel background.
+static inline void reset_top_left_panel_bottom_row()
 {
     int y = 6;
 
@@ -1299,9 +1299,9 @@ void game_init()
     blind_select_tokens[BLIND_TYPE_BIG] = blind_token_new(BLIND_TYPE_BIG, CUR_BLIND_TOKEN_POS.x, CUR_BLIND_TOKEN_POS.y, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 4);
     blind_select_tokens[BLIND_TYPE_BOSS] = blind_token_new(BLIND_TYPE_BOSS, CUR_BLIND_TOKEN_POS.x, CUR_BLIND_TOKEN_POS.y, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 5);
 
-    obj_hide(blind_select_tokens[SMALL_BLIND]->obj);
-    obj_hide(blind_select_tokens[BIG_BLIND]->obj);
-    obj_hide(blind_select_tokens[BOSS_BLIND]->obj);
+    obj_hide(blind_select_tokens[BLIND_TYPE_SMALL]->obj);
+    obj_hide(blind_select_tokens[BLIND_TYPE_BIG]->obj);
+    obj_hide(blind_select_tokens[BLIND_TYPE_BOSS]->obj);
 }
 
 void game_start()
@@ -2227,7 +2227,7 @@ static void game_round_end_display_finished_blind()
     obj_unhide(round_end_blind_token->obj, 0);
     
     int current_ante = ante;
-    if (current_blind == BOSS_BLIND) current_ante--; // Beating the boss blind increases the ante, so we need to display the previous ante value
+    if (current_blind == BLIND_TYPE_BOSS) current_ante--; // Beating the boss blind increases the ante, so we need to display the previous ante value
     
     Rect blind_req_rect = ROUND_END_BLIND_REQ_RECT;
     int blind_req = blind_get_requirement(current_blind, current_ante);
@@ -2300,7 +2300,7 @@ static void game_round_end_panel_exit()
     
         if (timer == 1) // Copied from shop. Feels slightly too niche of a function for me personally to make one.
         {
-            reset_bg_on_panel_dismissed();
+            reset_top_left_panel_bottom_row();
         }
         else if (timer == 2)
         {
@@ -2823,7 +2823,7 @@ static void game_shop_outro()
             }
         }
 
-        reset_bg_on_panel_dismissed();
+        reset_top_left_panel_bottom_row();
     }
     else if (timer == 2)
     {
@@ -2889,7 +2889,7 @@ static void game_shop_on_exit()
     
     list_destroy(&shop_jokers);
     
-    increment_blind(BLIND_DEFEATED); // TODO: Move to game_round_end()?
+    increment_blind(BLIND_STATE_DEFEATED); // TODO: Move to game_round_end()?
 }
 
 static void game_blind_select_on_update()
@@ -2909,7 +2909,7 @@ static void game_blind_select_start_anim_seq()
     change_background(BG_ID_BLIND_SELECT);
     main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_UP);
     
-    for (int i = 0; i < MAX_BLINDS; i++)
+    for (int i = 0; i < BLIND_TYPE_MAX; i++)
     {
         sprite_position(blind_select_tokens[i], blind_select_tokens[i]->pos.x, blind_select_tokens[i]->pos.y - TILE_SIZE);
     }
@@ -2923,7 +2923,7 @@ static void game_blind_select_start_anim_seq()
 
 static void game_blind_select_handle_input()
 {
-    if (timer == TM_BLIND_SELECT_START && current_blind == BOSS_BLIND)
+    if (timer == TM_BLIND_SELECT_START && current_blind == BLIND_TYPE_BOSS)
     {
         selection_y = 0;
     }
@@ -2933,7 +2933,7 @@ static void game_blind_select_handle_input()
     {
         selection_y = 0;
     }
-    else if (key_hit(KEY_DOWN) && current_blind != BOSS_BLIND)
+    else if (key_hit(KEY_DOWN) && current_blind != BLIND_TYPE_BOSS)
     {
         selection_y = 1;
     }
@@ -2945,9 +2945,9 @@ static void game_blind_select_handle_input()
             timer = TM_ZERO;
             display_round(++round);
         }
-        else if (current_blind != BOSS_BLIND)
+        else if (current_blind != BLIND_TYPE_BOSS)
         {
-            increment_blind(BLIND_SKIPPED);
+            increment_blind(BLIND_STATE_SKIPPED);
             
             background = UNDEFINED; // Force refresh of the background
             change_background(BG_ID_BLIND_SELECT);
@@ -2958,7 +2958,7 @@ static void game_blind_select_handle_input()
                 main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_UP);
             }
     
-            for (int i = 0; i < MAX_BLINDS; i++)
+            for (int i = 0; i < BLIND_TYPE_MAX; i++)
             {
                 sprite_position(blind_select_tokens[i], blind_select_tokens[i]->pos.x, blind_select_tokens[i]->pos.y - (TILE_SIZE * 12));
             }
@@ -2989,14 +2989,14 @@ static void game_blind_select_selected_anim_seq()
         blinds_rect.top -= 1; // Because of the raised blind
         main_bg_se_move_rect_1_tile_vert(blinds_rect, SE_DOWN);
     
-        for (int i = 0; i < MAX_BLINDS; i++)
+        for (int i = 0; i < BLIND_TYPE_MAX; i++)
         {
             sprite_position(blind_select_tokens[i], blind_select_tokens[i]->pos.x, blind_select_tokens[i]->pos.y + TILE_SIZE);
         }
     }
     else if (timer >= MENU_POP_OUT_ANIM_FRAMES)
     {
-        for (int i = 0; i < MAX_BLINDS; i++)
+        for (int i = 0; i < BLIND_TYPE_MAX; i++)
         {
             obj_hide(blind_select_tokens[i]->obj);
         }
@@ -3031,7 +3031,7 @@ static void game_blind_select_display_blind_panel()
             main_bg_se_copy_rect(from, to);
         }
     
-        reset_bg_on_panel_dismissed();
+        reset_top_left_panel_bottom_row();
     }
     
     for (int y = 0; y < timer; y++) // Shift the blind panel down onto screen
@@ -3175,10 +3175,10 @@ static void game_lose_on_update()
 static void game_lose_on_exit()
 {
     timer = TM_ZERO;
-    current_blind = SMALL_BLIND;
-    blinds[0] = BLIND_CURRENT;
-    blinds[1] = BLIND_UPCOMING;
-    blinds[2] = BLIND_UPCOMING;
+    current_blind = BLIND_TYPE_SMALL;
+    blinds[0] = BLIND_STATE_CURRENT;
+    blinds[1] = BLIND_STATE_UPCOMING;
+    blinds[2] = BLIND_STATE_UPCOMING;
     round = 0; 
     ante = 1;
     money = 4;
@@ -3199,9 +3199,9 @@ static void game_lose_on_exit()
     // show up on the next run.
     sprite_destroy(&playing_blind_token);
     sprite_destroy(&round_end_blind_token);
-    sprite_destroy(&blind_select_tokens[SMALL_BLIND]);
-    sprite_destroy(&blind_select_tokens[BIG_BLIND]);
-    sprite_destroy(&blind_select_tokens[BOSS_BLIND]);
+    sprite_destroy(&blind_select_tokens[BLIND_TYPE_SMALL]);
+    sprite_destroy(&blind_select_tokens[BLIND_TYPE_BIG]);
+    sprite_destroy(&blind_select_tokens[BLIND_TYPE_BOSS]);
     list_destroy(&jokers_available_to_shop);
     display_round(round);
     display_score(score);
