@@ -1279,7 +1279,7 @@ static void game_playing_process_input_and_state()
         if (mult > 0)
         {
             temp_score = chips * mult;
-            lerped_temp_score = int2fx(temp_score); // game speed affects how fast the score text increases.
+            lerped_temp_score = int2fx(temp_score);
             lerped_score = int2fx(score);
 
             display_temp_score(temp_score);
