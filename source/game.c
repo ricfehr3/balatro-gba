@@ -92,7 +92,7 @@ static void game_blind_select_on_update();
 static void game_blind_select_on_exit();
 static void game_lose_on_init();
 static void game_lose_on_update();
-static void game_lose_on_exit();
+static void game_over_on_exit();
 static void game_win_on_init();
 static void game_win_on_update();
 static void game_shop_intro();
@@ -1264,6 +1264,7 @@ void game_change_state(enum GameState new_game_state)
 {
     timer = TM_ZERO; // Reset the timer
     
+    state_info[game_state].substate = 0;
     state_info[game_state].on_exit();
     state_info[new_game_state].on_init();
 
@@ -2177,8 +2178,6 @@ static void game_round_end_on_exit()
 {
     // Cleanup blind tokens from this round to avoid accumulating 
     // allocated blind sprites each round
-    timer = TM_ZERO;
-    state_info[game_state].substate = 0;
     blind_reward = 0;
     hand_reward = 0;
     interest_reward = 0;
@@ -2874,8 +2873,6 @@ static void game_shop_on_update()
 
 static void game_shop_on_exit()
 {
-    state_info[game_state].substate = 0; // Reset the state
-    
     for (int i = 0; i < list_get_size(shop_jokers); i++)
     {
         JokerObject* joker_object = list_get(shop_jokers, i);
@@ -3048,8 +3045,6 @@ static void game_blind_select_display_blind_panel()
 
 static void game_blind_select_on_exit()
 {
-    state_info[game_state].substate = 0;
-    timer = 0;
     selection_y = 0;
     background = UNDEFINED;
 }
@@ -3172,7 +3167,7 @@ static void game_lose_on_update()
 // This function isn't set in stone. This is just a placeholder
 // allowing the player to restart the game. Thought it would be nice to have
 // util we decide what we want to do after a game over.
-static void game_lose_on_exit()
+static void game_over_on_exit()
 {
     timer = TM_ZERO;
     current_blind = BLIND_TYPE_SMALL;
@@ -3183,8 +3178,6 @@ static void game_lose_on_exit()
     ante = 1;
     money = 4;
     score = 0;
-    hands = max_hands;
-    discards = max_discards;
     
     for (int i = 0; i < list_get_size(jokers); i ++)
     {
@@ -3234,6 +3227,8 @@ static void game_win_on_update()
     {
         tte_printf("#{P:%d,%d; cx:0x%X000}YOU WIN", GAME_WIN_MSG_TEXT_RECT.left, GAME_WIN_MSG_TEXT_RECT.top, TTE_BLUE_PB);
     }
+
+    if (key_hit(KEY_ANY)) game_change_state(GAME_STATE_BLIND_SELECT);
 }
 
 void game_update()
