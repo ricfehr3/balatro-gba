@@ -1,14 +1,15 @@
 #ifndef GRAPHIC_UTILS_H
 #define GRAPHIC_UTILS_H
 
+#include <tonc_math.h>
 #include <tonc_video.h>
 
-/* This file contains general utils and wrappers that relate to 
+/* This file contains general utils and wrappers that relate to
  * graphics/video/vram and generally displaying things on the screen.
  * Mostly wrappers and defines for using tonc.
- * 
- * Note: the code here assumes we're working with a single screenblock 
- * which should be true for this entire game since a screenblock 
+ *
+ * Note: the code here assumes we're working with a single screenblock
+ * which should be true for this entire game since a screenblock
  * is enough to contain a full screen (and more)
  * and there isn't any scrolling etc.
  */
@@ -17,26 +18,26 @@
  *  Screen Base Block is the base for the screenblock entries i.e. tilemap
  *  Character Base Block is the base for the tiles themselves
  */
-#define MAIN_BG_SBB 31 
-#define MAIN_BG_CBB 1
-#define TTE_SBB 30
-#define TTE_CBB 0
+#define MAIN_BG_SBB   31
+#define MAIN_BG_CBB   1
+#define TTE_SBB       30
+#define TTE_CBB       0
 #define AFFINE_BG_SBB 2
 #define AFFINE_BG_CBB 2
-#define PAL_ROW_LEN 16
-#define NUM_PALETTES 16
+#define PAL_ROW_LEN   16
+#define NUM_PALETTES  16
 
 #define TTE_BIT_UNPACK_OFFSET 14
-#define TTE_BIT_ON_CLR_IDX TTE_BIT_UNPACK_OFFSET + 1
+#define TTE_BIT_ON_CLR_IDX    TTE_BIT_UNPACK_OFFSET + 1
 
-#define TTE_YELLOW_PB   12  // 0xC
-#define TTE_BLUE_PB     13  // 0xD
-#define TTE_RED_PB      14  // 0xE
-#define TTE_WHITE_PB    15  // 0xF
+#define TTE_YELLOW_PB 12 // 0xC
+#define TTE_BLUE_PB   13 // 0xD
+#define TTE_RED_PB    14 // 0xE
+#define TTE_WHITE_PB  15 // 0xF
 
-#define TEXT_CLR_YELLOW RGB15(31, 20, 0)    // 0x029F
-#define TEXT_CLR_BLUE   RGB15(0, 18, 31)    // 0x7E40
-#define TEXT_CLR_RED    RGB15(31, 9, 8)     // 0x213F
+#define TEXT_CLR_YELLOW RGB15(31, 20, 0) // 0x029F
+#define TEXT_CLR_BLUE   RGB15(0, 18, 31) // 0x7E40
+#define TEXT_CLR_RED    RGB15(31, 9, 8)  // 0x213F
 #define TEXT_CLR_WHITE  CLR_WHITE
 
 /* Dimensions for a screenblock.
@@ -49,19 +50,19 @@
 #define SE_COL_LEN 32
 
 // Since y direction goes from the top of the screen to the bottom
-#define SCREEN_UP 	-1
-#define SCREEN_DOWN 1
-#define SCREEN_LEFT -1
+#define SCREEN_UP    -1
+#define SCREEN_DOWN  1
+#define SCREEN_LEFT  -1
 #define SCREEN_RIGHT 1
 
-#define SE_UP	SCREEN_UP
+#define SE_UP   SCREEN_UP
 #define SE_DOWN SCREEN_DOWN
 
-#define OVERFLOW_LEFT	SCREEN_LEFT
-#define OVERFLOW_RIGHT	SCREEN_RIGHT
+#define OVERFLOW_LEFT  SCREEN_LEFT
+#define OVERFLOW_RIGHT SCREEN_RIGHT
 
 // Tile size in pixels, both height and width as tiles are square
-#define TILE_SIZE 8
+#define TILE_SIZE                     8
 #define EFFECT_TEXT_SEPARATION_AMOUNT 32; // If we need to show multiple effects at once
 
 // By default TTE characters occupy a single tile
@@ -80,7 +81,7 @@ INLINE int rect_width(const Rect* rect)
 {
     /* Extra parens to avoid issues in case compiler turns INLINE into macro
      * Not sure if necessary, could be just paranoia
-     */ 
+     */
     return (((rect)->right) - ((rect)->left) + 1);
 }
 
@@ -93,7 +94,7 @@ INLINE int rect_height(const Rect* rect)
  * bg_sbb is the SBB of the background in which to move the rect
  * direction must be either SE_UP or SE_DOWN.
  * se_rect dimensions are in number of tiles.
- * 
+ *
  * NOTE: This does not work with TTE_SBB, probably because it's 4BPP...
  */
 void bg_se_copy_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, int direction);
@@ -121,7 +122,7 @@ void main_bg_se_copy_rect(Rect se_rect, BG_POINT pos);
  */
 void main_bg_se_fill_rect_with_se(SE tile, Rect se_rect);
 
-/* Copies a 3x3 rect into se_rect_dest, the 3x3 rect is stretched to fill se_rect_dest. 
+/* Copies a 3x3 rect into se_rect_dest, the 3x3 rect is stretched to fill se_rect_dest.
  * The corners are copied, the sides are stretched, and the center is filled.
  * The parameter se_rect_src_3x3_top_left points to the top left corner of the source
  * 3x3 rect.
@@ -143,14 +144,14 @@ void tte_erase_rect_wrapper(Rect rect);
 
 /* Changes rect->left so it fits the digits of num exactly when right aligned to rect->right.
  * Assumes num is not negative.
- * 
+ *
  * overflow_direction determines the direction the number will overflow
- * if it's too large to fit inside the rect. 
+ * if it's too large to fit inside the rect.
  * Should be either OVERFLOW_LEFT or OVERFLOW_RIGHT.
- * 
+ *
  * The rect is in number of pixels but should be a multiple of TILE_SIZE
  * so it's a whole number of tiles to fit TTE characters
- * 
+ *
  * Note that both rect->left and rect-right need to be defined, top and bottom don't matter
  */
 void update_text_rect_to_right_align_num(Rect* rect, int num, int overflow_direction);
@@ -159,7 +160,7 @@ void update_text_rect_to_right_align_num(Rect* rect, int num, int overflow_direc
  * This is intended solely for use with tile8/8bpp data for dst and src.
  * The palette offset allows the tiles to use a different location in the palette
  * memory
- * This is useful because  grit always loads the palette to the beginning of 
+ * This is useful because  grit always loads the palette to the beginning of
  * pal_bg_mem[]
  */
 void memcpy16_tile8_with_palette_offset(u16* dst, const u16* src, uint hwcount, u8 palette_offset);
@@ -168,7 +169,7 @@ void memcpy16_tile8_with_palette_offset(u16* dst, const u16* src, uint hwcount, 
  * This is intended solely for use with tile8/8bpp data for dst and src.
  * The palette offset allows the tiles to use a different location in the palette
  * memory
- * This is useful because  grit always loads the palette to the beginning of 
+ * This is useful because  grit always loads the palette to the beginning of
  * pal_bg_mem[]
  */
 void memcpy32_tile8_with_palette_offset(u32* dst, const u32* src, uint wcount, u8 palette_offset);
@@ -179,4 +180,4 @@ void memcpy32_tile8_with_palette_offset(u32* dst, const u32* src, uint wcount, u
  */
 void toggle_windows(bool win0, bool win1);
 
-#endif //GRAPHIC_UTILS_H
+#endif // GRAPHIC_UTILS_H
