@@ -466,6 +466,11 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 #define PITCH_STEP_DRAW_SFX         24
 #define PITCH_STEP_UNDISCARD_SFX    2*PITCH_STEP_DRAW_SFX    
 
+#define STARTING_ROUND 0
+#define STARTING_ANTE 1
+#define STARTING_MONEY 4
+#define STARTING_SCORE 0
+
 #define TEN_K 10000
 #define ONE_K 1000
 
@@ -1295,6 +1300,15 @@ void game_init()
 
     hands = max_hands;
     discards = max_discards;
+    timer = TM_ZERO;
+    current_blind = BLIND_TYPE_SMALL;
+    blinds[0] = BLIND_STATE_CURRENT;
+    blinds[1] = BLIND_STATE_UPCOMING;
+    blinds[2] = BLIND_STATE_UPCOMING;
+    round = STARTING_ROUND; 
+    ante = STARTING_ANTE;
+    money = STARTING_MONEY;
+    score = STARTING_SCORE;
 
     blind_select_tokens[BLIND_TYPE_SMALL] = blind_token_new(BLIND_TYPE_SMALL, CUR_BLIND_TOKEN_POS.x, CUR_BLIND_TOKEN_POS.y, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 3);
     blind_select_tokens[BLIND_TYPE_BIG] = blind_token_new(BLIND_TYPE_BIG, CUR_BLIND_TOKEN_POS.x, CUR_BLIND_TOKEN_POS.y, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 4);
@@ -3169,16 +3183,6 @@ static void game_lose_on_update()
 // util we decide what we want to do after a game over.
 static void game_over_on_exit()
 {
-    timer = TM_ZERO;
-    current_blind = BLIND_TYPE_SMALL;
-    blinds[0] = BLIND_STATE_CURRENT;
-    blinds[1] = BLIND_STATE_UPCOMING;
-    blinds[2] = BLIND_STATE_UPCOMING;
-    round = 0; 
-    ante = 1;
-    money = 4;
-    score = 0;
-    
     for (int i = 0; i < list_get_size(jokers); i ++)
     {
         JokerObject *joker_object = list_get(jokers, i);
@@ -3196,6 +3200,9 @@ static void game_over_on_exit()
     sprite_destroy(&blind_select_tokens[BLIND_TYPE_BIG]);
     sprite_destroy(&blind_select_tokens[BLIND_TYPE_BOSS]);
     list_destroy(&jokers_available_to_shop);
+
+    game_init();
+
     display_round(round);
     display_score(score);
     display_chips(chips);
@@ -3214,7 +3221,6 @@ static void game_over_on_exit()
     ); // Ante
 
     affine_background_load_palette(affine_background_gfxPal);
-    game_init();
 }
 
 static void game_win_on_update()
