@@ -26,16 +26,13 @@
 #define PAUSE_GAME KEY_START // Not implemented
 #define SELL_KEY KEY_L
 
+// Enum value names in ../include/def_state_info_table.h
 enum GameState
 {
-    GAME_SPLASH_SCREEN,
-    GAME_MAIN_MENU,
-    GAME_PLAYING,
-    GAME_ROUND_END,
-    GAME_SHOP,
-    GAME_BLIND_SELECT,
-    GAME_LOSE,
-    GAME_WIN
+#define DEF_STATE_INFO(stateEnum, on_init, on_update, on_exit) stateEnum,
+#include "def_state_info_table.h"
+#undef DEF_STATE_INFO
+    GAME_STATE_MAX
 };
 
 enum HandState
@@ -82,18 +79,18 @@ enum HandType
     FLUSH_FIVE
 };
 
-// Run Stats
-typedef struct RunStats {
-    unsigned int hand_type_level [13]; // There are 13 different hand types, all start at level 1
-    unsigned int hand_type_played[13]; // How many times has a hand type been played
-    unsigned int used_planets;
-    unsigned int used_tarot;
-} RunStats;
+typedef struct 
+{
+    int substate;
+    void (*on_init)();
+    void (*on_update)();
+    void (*on_exit)();
+} StateInfo;
 
 // Game functions
 void game_init();
 void game_update();
-void game_set_state(enum GameState new_game_state);
+void game_change_state(enum GameState new_game_state);
 
 // Forward declaration
 struct List; 
@@ -103,6 +100,7 @@ typedef struct List List;
 typedef struct CardObject CardObject; // forward declaration, actually declared in card.h
 typedef struct Card Card;
 typedef struct JokerObject JokerObject;
+
 CardObject**    get_hand_array(void);
 int             get_hand_top(void);
 int             hand_get_size(void);
@@ -117,5 +115,8 @@ int get_deck_top(void);
 int get_num_discards_remaining(void);
 int get_num_hands_remaining(void);
 int get_money(void);
+
+int get_game_speed(void);
+void set_game_speed(int new_game_speed);
 
 #endif // GAME_H
