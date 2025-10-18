@@ -1,16 +1,16 @@
 #ifndef POOL_H
 #define POOL_H
 
-#include <tonc.h>
+#include <stdint.h>
 
 #define POOL_BITS_PER_WORD 32
-#define POOL_MAX_CAPACITY 128
+#define POOL_BITMAP_BYTES   8
 
 typedef struct PoolBitmap {
-    u32 *w;
-    u32 nbits;
-    u32 nwords;
-    u32 cap;
+    uint32_t *w;
+    uint32_t nbits;
+    uint32_t nwords;
+    uint32_t cap;
 } PoolBitmap;
 
 void pool_bm_clear_idx(PoolBitmap *bm, int idx);
@@ -27,13 +27,13 @@ int pool_bm_get_free_idx(PoolBitmap *bm);
 
 #define POOL_DEFINE_TYPE(type, capacity)                                    \
     static type type##_storage[capacity];                                   \
-    static u32 type##_bitmap_w[sizeof(u32)] = {0};                          \
+    static uint32_t type##_bitmap_w[POOL_BITMAP_BYTES] = {0};               \
     static type##Pool type##_pool =                                         \
     {                                                                       \
         .bm = {                                                             \
             .w = type##_bitmap_w,                                           \
             .nbits = POOL_BITS_PER_WORD,                                    \
-            .nwords = sizeof(u32),                                          \
+            .nwords = POOL_BITMAP_BYTES,                                    \
             .cap = capacity,                                                \
         },                                                                  \
         .objects = type##_storage,                                          \
@@ -56,7 +56,7 @@ int pool_bm_get_free_idx(PoolBitmap *bm);
 
 #define POOL_ENTRY(name, capacity) \
 POOL_DECLARE_TYPE(name);
-#include "pools.def"
+#include POOLS_DEF_FILE
 #undef POOL_ENTRY
 
 #endif // POOL_H

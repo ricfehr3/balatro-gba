@@ -3,17 +3,17 @@
 void pool_bm_clear_idx(PoolBitmap *bm, int idx)
 {
     // Divide by 32 to get the word index
-    u32 i = idx >> 5;
+    uint32_t i = idx >> 5;
     // Get last 5-bits, same as a modulo (% 32) operation on positive numbers
-    u32 b = idx & 0x1F;
-    bm->w[i] &= ~((u32)1 << b);
+    uint32_t b = idx & 0x1F;
+    bm->w[i] &= ~((uint32_t)1 << b);
 }
 
 int pool_bm_get_free_idx(PoolBitmap *bm)
 {
-    for (u32 i = 0; i < bm->nwords; i++)
+    for (uint32_t i = 0; i < bm->nwords; i++)
     {
-        u32 inv = ~bm->w[i];
+        uint32_t inv = ~bm->w[i];
 
         // guard so we don't call `ctz` with 0, since __builtin_ctz(0) is undefined
         // https://gcc.gnu.org/onlinedocs/gcc/Bit-Operation-Builtins.html#index-_005f_005fbuiltin_005fctz
@@ -26,7 +26,7 @@ int pool_bm_get_free_idx(PoolBitmap *bm)
         if (inv)
         {
             int bit = __builtin_ctz(inv);
-            bm->w[i] |= ((u32)1 << bit);
+            bm->w[i] |= ((uint32_t)1 << bit);
             int idx = i * POOL_BITS_PER_WORD + bit;
             return (idx < bm->cap) ? idx : -1;
         }
@@ -38,5 +38,5 @@ int pool_bm_get_free_idx(PoolBitmap *bm)
 
 #define POOL_ENTRY(name, capacity) \
 POOL_DEFINE_TYPE(name, capacity);
-#include "pools.def"
+#include POOLS_DEF_FILE
 #undef POOL_ENTRY

@@ -53,6 +53,9 @@ jobs:
           echo "UID=$(id -u)" >> "$GITHUB_ENV"
           echo "GID=$(id -g)" >> "$GITHUB_ENV"
 
+      - name: Run Tests
+        run: cd tests && ./run_tests.sh
+
       - name: Build the project
         run: docker compose -f docker-compose.yml run --rm balatro sh -c "make -j$(nproc) && ./scripts/get_memory_map.sh"
 

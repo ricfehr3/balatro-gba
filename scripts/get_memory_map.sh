@@ -61,7 +61,6 @@ for name in $(get_pool_names); do
     pool_size="$(cut -d ' ' -f 3 <<< $output_pool)"
     func_size="$(cut -d ' ' -f 3 <<< $output_func)"
     bm_size="$(cut -d ' ' -f 3 <<< $output_bm)"
-    #bm_size=16 #always gonna be 16, 4 * sizeof(u32)
     
     TOTAL_BYTES=$(( TOTAL_BYTES + pool_size + func_size + bm_size ))
 
