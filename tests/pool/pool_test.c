@@ -42,6 +42,7 @@ bool test_fill_and_empty(void)
     for(int itr = TEST_SIZE; itr >= 0; --itr)
     {
         POOL_FREE(ChunkOfData, myPtrs[itr]);
+        myPtrs[itr] = NULL;
     }
 
     return true;
@@ -58,6 +59,7 @@ bool test_fill_and_remove_at_random_and_refill_and_empty(void)
     for(int itr = 0; itr < number_to_remove; itr++)
     {
         POOL_FREE(ChunkOfData, myPtrs[itr]);
+        myPtrs[itr] = NULL;
     }
 
     if(!test_fill(myPtrs, number_to_remove)) return false;
@@ -65,6 +67,7 @@ bool test_fill_and_remove_at_random_and_refill_and_empty(void)
     for(int itr = 0; itr < TEST_SIZE; itr++)
     {
         POOL_FREE(ChunkOfData, myPtrs[itr]);
+        myPtrs[itr] = NULL;
     }
 
     return true;
