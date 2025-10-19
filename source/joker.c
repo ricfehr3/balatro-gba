@@ -15,6 +15,7 @@
 
 #define JOKER_SCORE_TEXT_Y 48
 #define NUM_JOKERS_PER_SPRITESHEET 2
+#define MAX_DEFINABLE_JOKERS 150
 
 static const unsigned int *joker_gfxTiles[] =
 {
@@ -50,7 +51,7 @@ static bool used_layers[MAX_JOKER_OBJECTS] = {false}; // Track used layers for j
 
 // Maps the spritesheet index to the palette bank index allocated to it.
 // Spritesheets that were not allocated are
-static int joker_spritesheet_pb_map[MAX_SPRITES];
+static int joker_spritesheet_pb_map[(MAX_DEFINABLE_JOKERS + 1) / NUM_JOKERS_PER_SPRITESHEET];
 static int joker_pb_num_sprite_users[JOKER_LAST_PB - JOKER_BASE_PB + 1] = { 0 };
 
 static int get_num_spritesheets()

@@ -1,4 +1,6 @@
 #include "pool.h"
+
+#include "util.h"
 #include "test_structures.h"
 
 #include <stdbool.h>
@@ -93,17 +95,17 @@ int main(void)
 {
     // Test it twice to make sure empty works, kinda hacky.
     printf("Testing Pool Fill and Empty 1x.\n");
-    if(!test_fill_and_empty()) return -1;
+    if(!test_fill_and_empty()) return UNDEFINED;
     printf("Testing Pool Fill and Empty 2x.\n");
-    if(!test_fill_and_empty()) return -1;
+    if(!test_fill_and_empty()) return UNDEFINED;
 
     // Similarly here, verify that fill, random num removal, refill, and empty
     // by refilling and emptying again
     printf("Testing Pool Fill, Partial Empty, Refill, Empty.\n");
-    if(!test_fill_and_remove_at_random_and_refill_and_empty()) return -1;
+    if(!test_fill_and_remove_at_random_and_refill_and_empty()) return UNDEFINED;
 
     printf("Testing Pool Fill and Empty.\n");
-    if(!test_fill_and_empty()) return -1;
+    if(!test_fill_and_empty()) return UNDEFINED;
 
     printf("---------------------------------------------------------\n");
     printf("Pool Tests Passed\n");
@@ -139,7 +141,7 @@ int main(void)
     printf("\n");
 
     t1 = get_time();
-    if(!test_fill_and_empty()) return -1;
+    if(!test_fill_and_empty()) return UNDEFINED;
     t2 = get_time();
     printf("Fill and Empty Pool %d times:\n\t", TEST_SIZE);
     print_time_diff(t1, t2);
