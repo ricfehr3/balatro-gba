@@ -39,7 +39,7 @@ bool test_fill_and_empty(void)
     ChunkOfData* myPtrs[TEST_SIZE];
     if(!test_fill(myPtrs, TEST_SIZE)) return false;
 
-    for(int itr = TEST_SIZE; itr >= 0; --itr)
+    for(int itr = (TEST_SIZE - 1); itr >= 0; --itr)
     {
         POOL_FREE(ChunkOfData, myPtrs[itr]);
         myPtrs[itr] = NULL;
