@@ -1,4 +1,4 @@
-POOLS_DEF_FILE := \"test_pools.def\"
+POOLS_DEF_FILE := \"def_test_mempool.h\"
 
 CC := gcc
 CFLAGS := -I../../include -I. \

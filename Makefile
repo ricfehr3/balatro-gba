@@ -32,7 +32,7 @@ INCLUDES       := include
 DATA           :=
 MUSIC          := audio
 GRAPHICS       := graphics
-POOLS_DEF_FILE := \"pools.def\"
+POOLS_DEF_FILE := \"def_balatro_mempool.h\"
 
 #---------------------------------------------------------------------------------
 # options for code generation
