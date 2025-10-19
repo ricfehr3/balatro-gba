@@ -2,15 +2,22 @@
 
 set -euo pipefail
 
-POOL_DEF_FILE='./include/pools.def'
-ELF_FILE="${1-./build/balatro-gba.elf}"
+ELF_FILE="${ELF_FILE-./build/balatro-gba.elf}"
+POOL_DEF_FILE="${POOL_DEF_FILE-./include/def_balatro_mempool.h}"
 READELF="${READELF-/opt/devkitpro/devkitARM/bin/arm-none-eabi-readelf}"
 TOTAL_BYTES=0
 
+if [ ! -f "$POOL_DEF_FILE" ]; then
+    echo "Mempool definition file not found: $POOL_DEF_FILE"
+    echo "You can set your mempool definition file with:"
+    echo "    POOL_DEF_FILE=<mempool-def-file> $(basename $0)"
+    exit 1
+fi
+
 if [ ! -f "$ELF_FILE" ]; then
     echo "elf file not found: $ELF_FILE"
-    echo "You can pass your elf file with:"
-    echo "    $(basename $0) <file>"
+    echo "You can set your elf file with:"
+    echo "    ELF_FILE=<elf-file> $(basename $0)"
     exit 1
 fi
 
