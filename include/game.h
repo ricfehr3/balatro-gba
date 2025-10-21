@@ -29,11 +29,11 @@
 // Enum value names in ../include/def_state_info_table.h
 enum GameState
 {
-    GAME_STATE_UNDEFINED = -1,
 #define DEF_STATE_INFO(stateEnum, on_init, on_update, on_exit) stateEnum,
 #include "def_state_info_table.h"
 #undef DEF_STATE_INFO
-    GAME_STATE_MAX
+    GAME_STATE_MAX,
+    GAME_STATE_UNDEFINED
 };
 
 enum HandState
