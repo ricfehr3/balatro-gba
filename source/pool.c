@@ -3,15 +3,15 @@
 
 void pool_bm_clear_idx(PoolBitmap *bm, int idx)
 {
-    // Divide by 32 to get the word index
-    uint32_t i = idx / 32;
-    // Get last 5-bits, same as a modulo (% 32) operation on positive numbers
-    uint32_t b = idx % 32;
+    uint32_t i = idx / POOL_BITS_PER_WORD;
+    uint32_t b = idx % POOL_BITS_PER_WORD;
 
     // Below are the "fast" forms of the above operations, respectively.
     // These are more efficient, but removed for readability
     // See: https://github.com/cellos51/balatro-gba/pull/132#discussion_r2365966071
+    // Divide by 32 to get the word index
     //uint32_t i = idx >> 5;
+    // Get last 5-bits, same as a modulo (% 32) operation on positive numbers
     //uint32_t b = idx & 0x1F;
     bm->w[i] &= ~((uint32_t)1 << b);
 }
