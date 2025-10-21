@@ -1269,9 +1269,9 @@ void game_change_state(enum GameState new_game_state)
 {
     timer = TM_ZERO; // Reset the timer
     
-    state_info[game_state].substate = 0;
     if (game_state >= 0 && game_state < GAME_STATE_MAX)
     {
+        state_info[game_state].substate = 0;
         state_info[game_state].on_exit();
     }
 
