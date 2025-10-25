@@ -199,8 +199,8 @@ static int hands = 0;
 static int discards = 0;
 
 static int round = 0;
-static int ante = 1;
-static int money = 4;
+static int ante = 0;
+static int money = 0;
 static int score = 0;
 static int temp_score = 0; // This is the score that shows in the same spot as the hand type.
 static FIXED lerped_score = 0;
@@ -2491,10 +2491,18 @@ static void game_shop_create_items()
     {
         int joker_idx = 0;
         intptr_t joker_id = 0;
-        #ifdef TEST_JOKER_ID // Allow defining an ID for a joker to always appear in shop and be tested
-        if (int_list_exists(jokers_available_to_shop, TEST_JOKER_ID))
+        #ifdef TEST_JOKER_ID0 // Allow defining an ID for a joker to always appear in shop and be tested
+        if (int_list_exists(jokers_available_to_shop, TEST_JOKER_ID0))
         {
-            joker_id = TEST_JOKER_ID;
+            joker_id = TEST_JOKER_ID0;
+            int_list_remove_by_value(jokers_available_to_shop, joker_id);
+        }
+        else
+        #endif
+        #ifdef TEST_JOKER_ID1
+        if (int_list_exists(jokers_available_to_shop, TEST_JOKER_ID1))
+        {
+            joker_id = TEST_JOKER_ID1;
             int_list_remove_by_value(jokers_available_to_shop, joker_id);
         }
         else
