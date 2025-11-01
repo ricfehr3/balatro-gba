@@ -53,7 +53,8 @@ enum HandState
 enum PlayState
 {
     PLAY_PLAYING,
-    PLAY_SCORING,
+    PLAY_SCORING_CARDS,
+    PLAY_SCORING_JOKERS,
     PLAY_ENDING,
     PLAY_ENDED
 };
@@ -104,6 +105,7 @@ int             get_hand_top(void);
 int             hand_get_size(void);
 CardObject**    get_played_array(void);
 int             get_played_top(void);
+int             get_scored_card_index(void);
 List*           get_jokers(void);
 bool            is_joker_owned(int joker_id);
 bool            card_is_face(Card *card);
