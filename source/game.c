@@ -644,14 +644,30 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 #define SHOP_LIGHTS_4_PID 22
 #define SHOP_BOTTOM_PANEL_BORDER_PID 26
 
+enum JOKER_TEST {
+    JOKER_TEST_DEFAULT,
+    JOKER_TEST_PAIR_AND_TWO_PAIR,
+    JOKER_TEST_THREE_OF_A_KIND,
+    JOKER_TEST_STRAIGHT_AND_FLUSH,
+    JOKER_TEST_MAX,
+};
+
+
+// Add an array of each JokerTest type above and have it add cards and jokers to the hand
+typedef struct JokerTestCallback {
+    // TODO: This will be replaced with the entire game state, once that is finished
+    void (*generate_plan)(Card* deck, void (*add_to_held_jokers_fnct_ptr(JokerObject* joker_object)));
+} JokerTestCallback;
+
 
 // Naming the stage where cards return from the discard pile to the deck "undiscard"
 
 // General functions
 void set_seed(int seed)
 {
-    rng_seed = seed;
-    srand(rng_seed);
+    //rng_seed = seed;
+    //srand(rng_seed);
+    srand(21);
 }
 
 void sort_hand_by_suit()
@@ -1414,6 +1430,15 @@ void jokers_available_to_shop_init()
     _reset_shop_jokers();
 }
 
+#define ID_1 6
+#define ID_2 11
+#define ID_3 15
+#define ID_4 16
+#define ID_5 15
+
+static void add_to_held_jokers(JokerObject*);
+static u8 test_jokers[MAX_JOKERS_HELD_SIZE] = {ID_1, ID_2, ID_3, ID_4, ID_5};
+static u8 nb_test_jokers = 4;
 void game_init()
 {
     // Initialize all jokers list once
@@ -1442,6 +1467,12 @@ void game_init()
     obj_hide(blind_select_tokens[BLIND_TYPE_SMALL]->obj);
     obj_hide(blind_select_tokens[BLIND_TYPE_BIG]->obj);
     obj_hide(blind_select_tokens[BLIND_TYPE_BOSS]->obj);
+
+    for (u8 i = 0; i < nb_test_jokers; i++)
+    {
+        JokerObject *joker_object = joker_object_new(joker_new(test_jokers[i]));
+        add_to_held_jokers(joker_object);
+    }
 }
 
 void game_start()
@@ -1459,6 +1490,7 @@ void game_start()
     discards = max_discards;
 
     // Fill the deck with all the cards. Later on this can be replaced with a more dynamic system that allows for different decks and card types.
+    /*
     for (int suit = 0; suit < NUM_SUITS; suit++)
     {
         for (int rank = 0; rank < NUM_RANKS; rank++)
@@ -1467,6 +1499,14 @@ void game_start()
             deck_push(card);
         }
     }
+    */
+    deck_push(card_new(0, 6));
+    deck_push(card_new(0, 7));
+    deck_push(card_new(0, 8));
+    deck_push(card_new(0, 9));
+    deck_push(card_new(0, 10));
+    deck_push(card_new(0, 11));
+    deck_push(card_new(0, 12));
 
     change_background(BG_ID_BLIND_SELECT);
 
