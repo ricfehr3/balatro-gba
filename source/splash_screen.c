@@ -1,5 +1,6 @@
 #include "splash_screen.h"
 
+#include "util.h"
 #include "game.h"
 #include "graphic_utils.h"
 #include "maxmod.h"
@@ -16,7 +17,7 @@ void splash_screen_on_init()
 
     tte_printf("#{P:72,8; cx:0xF000}DISCLAIMER");
     tte_printf(
-        "#{P:8,24; cx:0xF000}&^{}|`<>_;"
+        "#{P:8,24; cx:0xF000} 1: " XSTR(FP0) " :Test"
     );
     tte_printf("#{P:8,144; cx:0xF000}(Press any key to skip)");
 }

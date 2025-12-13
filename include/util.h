@@ -41,6 +41,46 @@
 // so it needs at least this number of chars to be able to display any suffixed number
 #define SUFFIXED_NUM_MIN_REQ_CHARS 4
 
+/** @defgroup Decimal Point Fonts
+ *  @brief A set of macros to map the fonts decimal-point values (e.g. ".1")
+ *  to their replaced characters.
+ *
+ *  This is used at compile time directly with the help of libtonc's XSTR() macro
+ *
+ *  For example:
+ *  ```c
+ *  tte_printf("Testing " XSTR(FP0) " Something!");
+ *  ```
+ *
+ *  The map is the following:
+ *
+ *  ```c
+ *  '&' == '.0'
+ *  '^' == '.1'
+ *  '{' == '.2'
+ *  '}' == '.3'
+ *  '|' == '.4'
+ *  '`' == '.5'
+ *  '<' == '.6'
+ *  '>' == '.7'
+ *  '_' == '.8'
+ *  ';' == '.9'
+ *  ```
+ *
+ * @{
+ */
+#define FP0 &
+#define FP1 ^
+#define FP2 {
+#define FP3 }
+#define FP4 |
+#define FP5 `
+#define FP6 <
+#define FP7 >
+#define FP8 _
+#define FP9 ;
+/** @} */
+
 /**
  * @brief Avoid overflow when adding two u32 integers
  *
