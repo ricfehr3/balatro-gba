@@ -442,7 +442,6 @@ static const SubStateActionFn round_end_state_actions[] = {
 static int reroll_cost = REROLL_BASE_COST;
 
 // The current game state, this is used to determine what the game is doing at any given time
-static enum GameState game_state = GAME_STATE_UNDEFINED;
 static enum HandState hand_state = HAND_DRAW;
 static enum PlayState play_state = PLAY_STARTING;
 
@@ -546,6 +545,7 @@ static GameVars game_vars =
     .selection_x = 0,
     .selection_y = 0,
     .state_info = state_info,
+    .game_state = GAME_STATE_UNDEFINED;
 }
 
 GameVars* get_game_vars(void)
@@ -774,24 +774,24 @@ void game_update()
 
     jokers_update_loop();
 
-    state_info[game_state].on_update();
+    state_info[game_vars.game_state].on_update();
 }
 
 void game_change_state(enum GameState new_game_state)
 {
     game_vars.frame = TM_ZERO; // Reset the timer
 
-    if (game_state >= 0 && game_state < GAME_STATE_MAX)
+    if (game_vars.game_state >= 0 && game_vars.game_state < GAME_STATE_MAX)
     {
-        state_info[game_state].substate = 0;
-        state_info[game_state].on_exit();
+        state_info[game_vars.game_state].substate = 0;
+        state_info[game_vars.game_state].on_exit();
     }
 
     if (new_game_state >= 0 && new_game_state < GAME_STATE_MAX)
     {
         state_info[new_game_state].on_init();
 
-        game_state = new_game_state;
+        game_vars.game_state = new_game_state;
     }
 }
 
@@ -3344,13 +3344,13 @@ static void game_round_end_on_exit()
 
 static void game_round_end_on_update()
 {
-    if (state_info[game_state].substate == ROUND_END_EXIT)
+    if (state_info[game_vars.game_state].substate == ROUND_END_EXIT)
     {
         game_change_state(GAME_STATE_SHOP);
         return;
     }
 
-    int substate = state_info[game_state].substate;
+    int substate = state_info[game_vars.game_state].substate;
     round_end_state_actions[substate]();
 }
 
@@ -3360,7 +3360,7 @@ static void game_round_end_start()
     if (game_vars.frame == TM_RESET_STATIC_VARS)
     {
         change_background(BG_ROUND_END); // Change the background to the round end background
-        state_info[game_state].substate = START_EXPAND_POPUP; // Change the state to the next one
+        state_info[game_vars.game_state].substate = START_EXPAND_POPUP; // Change the state to the next one
         game_vars.frame = TM_ZERO;                                      // Reset the timer
         blind_reward = blind_get_reward(current_blind);
         hand_reward = hands;
@@ -3376,7 +3376,7 @@ static void game_round_end_start_expand_popup()
 
     if (game_vars.frame == TM_END_POP_MENU_ANIM)
     {
-        state_info[game_state].substate = DISPLAY_FINISHED_BLIND;
+        state_info[game_vars.game_state].substate = DISPLAY_FINISHED_BLIND;
         game_vars.frame = TM_ZERO;
     }
 }
@@ -3426,7 +3426,7 @@ static void game_round_end_display_finished_blind()
 
     if (game_vars.frame >= TM_END_DISPLAY_FIN_BLIND)
     {
-        state_info[game_state].substate = DISPLAY_SCORE_MIN;
+        state_info[game_vars.game_state].substate = DISPLAY_SCORE_MIN;
         game_vars.frame = TM_ZERO;
     }
 }
@@ -3447,7 +3447,7 @@ static void game_round_end_display_score_min()
 
     if (game_vars.frame >= TM_END_DISPLAY_SCORE_MIN)
     {
-        state_info[game_state].substate = UPDATE_BLIND_REWARD;
+        state_info[game_vars.game_state].substate = UPDATE_BLIND_REWARD;
         game_vars.frame = TM_ZERO;
     }
 }
@@ -3483,7 +3483,7 @@ static void game_round_end_update_blind_reward()
         tte_erase_rect_wrapper(BLIND_REQ_TEXT_RECT);
         obj_hide(playing_blind_token->obj);
         affine_background_load_palette(affine_background_gfxPal);
-        state_info[game_state].substate = BLIND_PANEL_EXIT;
+        state_info[game_vars.game_state].substate = BLIND_PANEL_EXIT;
         game_vars.frame = TM_ZERO;
     }
 }
@@ -3512,7 +3512,7 @@ static void game_round_end_panel_exit()
     else if (game_vars.frame > FRAMES(20))
     {
         memset16(&pal_bg_mem[REWARD_PANEL_BORDER_PID], 0x1483, 1);
-        state_info[game_state].substate = DISPLAY_REWARDS;
+        state_info[game_vars.game_state].substate = DISPLAY_REWARDS;
         game_vars.frame = TM_ZERO;
     }
 }
@@ -3616,7 +3616,7 @@ static void game_round_end_display_rewards()
     if (hand_reward <= 0 && interest_to_count <= 0)
     {
         game_vars.frame = TM_ZERO;
-        state_info[game_state].substate = DISPLAY_CASHOUT;
+        state_info[game_vars.game_state].substate = DISPLAY_CASHOUT;
     }
     else if (game_vars.frame == TM_START_ROUND_END_REWARDS_ANIM)
     {
@@ -3677,7 +3677,7 @@ static void game_round_end_display_cashout()
     {
         game_round_end_cashout();
 
-        state_info[game_state].substate = DISMISS_ROUND_END_PANEL; // Go to the next state
+        state_info[game_vars.game_state].substate = DISMISS_ROUND_END_PANEL; // Go to the next state
         game_vars.frame = TM_ZERO;
 
         obj_hide(round_end_blind_token->obj);          // Hide the blind token object
@@ -3694,7 +3694,7 @@ static void game_round_end_dismiss_round_end_panel()
     if (game_vars.frame >= TM_DISMISS_ROUND_END_TM)
     {
         game_vars.frame = TM_ZERO;
-        state_info[game_state].substate = ROUND_END_EXIT;
+        state_info[game_vars.game_state].substate = ROUND_END_EXIT;
     }
 }
 
@@ -3865,7 +3865,7 @@ static void game_shop_intro()
 
     if (game_vars.frame == TM_END_GAME_SHOP_INTRO)
     {
-        state_info[game_state].substate = GAME_SHOP_ACTIVE;
+        state_info[game_vars.game_state].substate = GAME_SHOP_ACTIVE;
         game_vars.frame = TM_ZERO; // Reset the timer
     }
 }
@@ -4014,7 +4014,7 @@ static void shop_top_row_on_key_transit(SelectionGrid* selection_grid, Selection
         play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
 
         // Go to next blind selection game state
-        state_info[game_state].substate = GAME_SHOP_EXIT; // Go to the outro sequence state
+        state_info[game_vars.game_state].substate = GAME_SHOP_EXIT; // Go to the outro sequence state
         game_vars.frame = TM_ZERO;                                  // Reset the timer
         reroll_cost = REROLL_BASE_COST;
 
@@ -4235,7 +4235,7 @@ static void game_shop_outro()
 
     if (game_vars.frame >= MENU_POP_OUT_ANIM_FRAMES)
     {
-        state_info[game_state].substate = GAME_SHOP_MAX; // Go to the next state
+        state_info[game_vars.game_state].substate = GAME_SHOP_MAX; // Go to the next state
         game_vars.frame = TM_ZERO;                                 // Reset the timer
     }
 }
@@ -4288,13 +4288,13 @@ static void game_shop_on_update()
         game_shop_lights_anim_frame();
     }
 
-    if (state_info[game_state].substate == GAME_SHOP_MAX)
+    if (state_info[game_vars.game_state].substate == GAME_SHOP_MAX)
     {
         game_change_state(GAME_STATE_BLIND_SELECT);
         return;
     }
 
-    int substate = state_info[game_state].substate;
+    int substate = state_info[game_vars.game_state].substate;
 
     shop_state_actions[substate]();
 }

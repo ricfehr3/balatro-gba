@@ -39,6 +39,7 @@ typedef struct
     int selection_x;
     int selection_y;
     StateInfo* state_info;
+    GameState game_state;
 } GameVars;
 
 GameVars* get_game_vars(void);
