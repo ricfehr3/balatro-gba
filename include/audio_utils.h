@@ -40,6 +40,8 @@
  */
 #define SFX_DEFAULT_PAN MM_PAN_CENTER
 
+#define BUTTON_SFX_VOLUME 154 // 60% of MM_FULL_VOLUME
+
 /**
  * @brief Play a sound effect, wrapper for mmEffectEx()
  * See https://maxmod.org/ref/functions/mm_sound_effect.html

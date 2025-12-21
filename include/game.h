@@ -22,6 +22,8 @@
 #define PAUSE_GAME     KEY_START // Not implemented
 #define SELL_KEY       KEY_L
 
+#define HIGHLIGHT_COLOR   0xFFFF
+
 struct List;
 typedef struct List List;
 
@@ -29,6 +31,16 @@ typedef struct List List;
 typedef struct CardObject CardObject;
 typedef struct Card Card;
 typedef struct JokerObject JokerObject;
+
+typedef struct
+{
+    uint frame;    
+    uint rng_seed;
+    int selection_x;
+    int selection_y;
+} GameVars;
+
+GameVars* get_game_vars(void);
 
 enum BackgroundId
 {
@@ -140,5 +152,7 @@ void set_game_speed(int new_game_speed);
 // joker specific functions
 bool is_shortcut_joker_active(void);
 int get_straight_and_flush_size(void);
+
+void change_background(enum BackgroundId id);
 
 #endif // GAME_H
