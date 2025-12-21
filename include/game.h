@@ -38,9 +38,12 @@ typedef struct
     uint rng_seed;
     int selection_x;
     int selection_y;
+    StateInfo* state_info;
 } GameVars;
 
 GameVars* get_game_vars(void);
+
+void game_reset(void);
 
 enum BackgroundId
 {
@@ -115,6 +118,8 @@ typedef struct
     void (*on_exit)();
 } StateInfo;
 
+typedef void (*SubStateActionFn)(void);
+
 // Game functions
 void game_init();
 void game_update();
@@ -154,5 +159,7 @@ bool is_shortcut_joker_active(void);
 int get_straight_and_flush_size(void);
 
 void change_background(enum BackgroundId id);
+
+StateInfo* get_state_info(void);
 
 #endif // GAME_H

@@ -81,8 +81,6 @@
 #define TM_SHIFT_SHOP_ICON_WAIT         7
 #define TM_END_GAME_SHOP_INTRO          12
 #define TM_SHOP_PRC_INPUT_START         1
-#define TM_DISP_BLIND_PANEL_FINISH      7
-#define TM_DISP_BLIND_PANEL_START       1
 #define TM_BLIND_SELECT_START           1
 #define TM_END_ANIM_SEQ                 12
 
@@ -206,10 +204,6 @@ static void game_win_on_update(void);
 static void game_shop_intro(void);
 static void game_shop_process_user_input(void);
 static void game_shop_outro(void);
-static void game_blind_select_start_anim_seq(void);
-static void game_blind_select_handle_input(void);
-static void game_blind_select_selected_anim_seq(void);
-static void game_blind_select_display_blind_panel(void);
 static void game_round_end_start(void);
 static void game_round_end_start_expand_popup(void);
 static void game_round_end_display_finished_blind(void);
@@ -372,12 +366,11 @@ static const BG_POINT HAND_PLAY_POS         = {120,     70};
 
 static uint rng_seed = 0;
 
-typedef void (*SubStateActionFn)(void);
-
 // BY DEFAULT IS SET TO 1, but if changed to 2 or more, should speed up all (or most) of the game
 // aspects that should be sped up by speed, as in the original game.
 static int game_speed = 1;
 static enum BackgroundId background = BG_NONE;
+
 
 static StateInfo state_info[] = {
 #define DEF_STATE_INFO(stateEnum, init_fn, update_fn, exit_fn) \
@@ -546,7 +539,14 @@ static int shortcut_joker_count = 0;
 static int four_fingers_joker_count = 0;
 static int straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
 
-static GameVars game_vars;
+static GameVars game_vars =
+{
+    .frame = TM_ZERO,
+    .rng_seed = 0,
+    .selection_x = 0,
+    .selection_y = 0,
+    .state_info = state_info,
+}
 
 GameVars* get_game_vars(void)
 {
@@ -4319,210 +4319,19 @@ static void game_shop_on_exit()
     increment_blind(BLIND_STATE_DEFEATED); // TODO: Move to game_round_end()?
 }
 
-static void game_blind_select_on_init()
-{
-    change_background(BG_BLIND_SELECT);
-
-    play_sfx(SFX_POP, MM_BASE_PITCH_RATE, SFX_DEFAULT_VOLUME);
-}
-
-static void game_blind_select_on_update()
-{
-    if (state_info[game_state].substate == BLIND_SELECT_MAX)
-    {
-        game_change_state(GAME_STATE_PLAYING);
-        return;
-    }
-
-    int substate = state_info[game_state].substate;
-    blind_select_state_actions[substate]();
-}
-
-static void game_blind_select_start_anim_seq()
-{
-    main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_UP);
-
-    for (int i = 0; i < BLIND_TYPE_MAX; i++)
-    {
-        sprite_position(
-            blind_select_tokens[i],
-            blind_select_tokens[i]->pos.x,
-            blind_select_tokens[i]->pos.y - TILE_SIZE
-        );
-    }
-
-    if (game_vars.frame == TM_END_ANIM_SEQ)
-    {
-        state_info[game_state].substate = BLIND_SELECT;
-        game_vars.frame = TM_ZERO; // Reset the timer
-    }
-}
-
-static void game_blind_select_handle_input()
-{
-    if (game_vars.frame == TM_BLIND_SELECT_START && current_blind == BLIND_TYPE_BOSS)
-    {
-        game_vars.selection_y = 0;
-    }
-
-    // Blind select input logic
-    if (key_hit(KEY_UP))
-    {
-        game_vars.selection_y = 0;
-    }
-    else if (key_hit(KEY_DOWN) && current_blind != BLIND_TYPE_BOSS)
-    {
-        game_vars.selection_y = 1;
-    }
-    else if (key_hit(SELECT_CARD))
-    {
-        if (game_vars.selection_y == 0) // Blind selected
-        {
-            play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
-            state_info[game_state].substate = BLIND_SELECTED_ANIM_SEQ;
-            game_vars.frame = TM_ZERO;
-            display_round(++round);
-        }
-        else if (current_blind != BLIND_TYPE_BOSS)
-        {
-            play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
-            increment_blind(BLIND_STATE_SKIPPED);
-
-            background = UNDEFINED; // Force refresh of the background
-            change_background(BG_BLIND_SELECT);
-
-            // TODO: Create a generic vertical move by any number of tiles to avoid for loops?
-            for (int i = 0; i < 12; i++)
-            {
-                main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_UP);
-            }
-
-            for (int i = 0; i < BLIND_TYPE_MAX; i++)
-            {
-                sprite_position(
-                    blind_select_tokens[i],
-                    blind_select_tokens[i]->pos.x,
-                    blind_select_tokens[i]->pos.y - (TILE_SIZE * 12)
-                );
-            }
-
-            game_vars.frame = TM_ZERO;
-        }
-    }
-
-    if (game_vars.selection_y == 0)
-    {
-        // 5 is the multiplier palette color and the skip button color
-        memset16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER_PID], 0xFFFF, 1);
-        memcpy16(
-            &pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER_PID],
-            &pal_bg_mem[BLIND_SKIP_BTN_PID],
-            1
-        );
-    }
-    else
-    {
-        // 15 is the select button color
-        memcpy16(
-            &pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER_PID],
-            &pal_bg_mem[BLIND_SELECT_BTN_PID],
-            1
-        );
-        memset16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER_PID], 0xFFFF, 1);
-    }
-}
-
-static void game_blind_select_selected_anim_seq()
-{
-    if (game_vars.frame < 15)
-    {
-        Rect blinds_rect = POP_MENU_ANIM_RECT;
-        blinds_rect.top -= 1; // Because of the raised blind
-        main_bg_se_move_rect_1_tile_vert(blinds_rect, SCREEN_DOWN);
-
-        for (int i = 0; i < BLIND_TYPE_MAX; i++)
-        {
-            sprite_position(
-                blind_select_tokens[i],
-                blind_select_tokens[i]->pos.x,
-                blind_select_tokens[i]->pos.y + TILE_SIZE
-            );
-        }
-    }
-    else if (game_vars.frame >= MENU_POP_OUT_ANIM_FRAMES)
-    {
-        for (int i = 0; i < BLIND_TYPE_MAX; i++)
-        {
-            obj_hide(blind_select_tokens[i]->obj);
-        }
-
-        state_info[game_state].substate = DISPLAY_BLIND_PANEL; // Reset the state
-        game_vars.frame = TM_ZERO;                                       // Reset the timer
-    }
-}
-
-static void game_blind_select_display_blind_panel()
-{
-    if (game_vars.frame >= TM_DISP_BLIND_PANEL_FINISH)
-    {
-        state_info[game_state].substate = BLIND_SELECT_MAX;
-        return;
-    }
-
-    // Switches to the selecting background and clears the blind panel area
-    if (game_vars.frame == TM_DISP_BLIND_PANEL_START)
-    {
-        change_background(BG_CARD_SELECTING);
-
-        main_bg_se_clear_rect(ROUND_END_MENU_RECT);
-
-        for (int y = 0; y < 5; y++)
-        {
-            int y_from = 28;
-            int y_to = 0 + y;
-
-            Rect from = {0, y_from, 8, y_from + 1};
-            BG_POINT to = {0, y_to};
-
-            main_bg_se_copy_rect(from, to);
-        }
-
-        reset_top_left_panel_bottom_row();
-    }
-
-    // Shift the blind panel down onto screen
-    for (int y = 0; y < game_vars.frame; y++)
-    {
-        int y_from = 26 + y - game_vars.frame;
-        int y_to = 0 + y;
-
-        Rect from = {0, y_from, 8, y_from};
-        BG_POINT to = {0, y_to};
-
-        main_bg_se_copy_rect(from, to);
-    }
-}
-
-static void game_blind_select_on_exit()
-{
-    game_vars.selection_y = 0;
-    background = UNDEFINED;
-}
-
-static inline void game_start(void)
+void game_reset(void)
 {
     set_seed(rng_seed);
-    // set_seed(9); // 9 is a full house
-
-    affine_background_change_background(AFFINE_BG_GAME);
-
-    // Normally I would just cache these and hide/unhide but I didn't feel like dealing with
-    // defining a layer for it
-    card_destroy(&main_menu_ace->card);
-    card_object_destroy(&main_menu_ace);
 
     hands = max_hands;
     discards = max_discards;
+
+    // make a function to do this? reset_deck()
+    deck_top = -1;
+
+    round = 1;
+    score = 0;
+
 
     // Fill the deck with all the cards. Later on this can be replaced with a more dynamic system
     // that allows for different decks and card types.
@@ -4534,7 +4343,19 @@ static inline void game_start(void)
             deck_push(card);
         }
     }
+}
 
+static inline void game_start(void)
+{
+    /*
+
+    // Normally I would just cache these and hide/unhide but I didn't feel like dealing with
+    // defining a layer for it
+    card_destroy(&main_menu_ace->card);
+    card_object_destroy(&main_menu_ace);
+    */
+
+    affine_background_change_background(AFFINE_BG_GAME);
     change_background(BG_BLIND_SELECT);
 
     // Deck size/max size
