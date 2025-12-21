@@ -11,7 +11,7 @@
 #define SPRITE_FOCUS_RAISE_PX             10
 #define CARD_FOCUS_SFX_PITCH_OFFSET_RANGE 512
 
-typedef struct
+typedef struct Sprite
 {
     OBJ_ATTR* obj;
     OBJ_AFFINE* aff;

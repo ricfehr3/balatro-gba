@@ -20,8 +20,10 @@
 #include "sprite.h"
 #include "tonc_memdef.h"
 #include "util.h"
+#include "timer.h"
 
 #include "main_menu.h"
+#include "blind_select.h"
 
 #include <maxmod.h>
 #include <stdint.h>
@@ -42,7 +44,6 @@
 #define MAIN_MENU_BUTTONS             2
 
 // TODO: Properly define and use
-#define MENU_POP_OUT_ANIM_FRAMES 20
 #define GAME_OVER_ANIM_FRAMES    15
 
 #define SHOP_LIGHTS_1_CLR 0xFFFF
@@ -63,31 +64,9 @@
 #define CARD_UNFOCUSED_SEL_Y 15
 #define CARD_FOCUSED_SEL_Y   20
 
-// Timer defs
-#define TM_ZERO                         0
-#define TM_RESET_STATIC_VARS            30
-#define TM_END_POP_MENU_ANIM            13
-#define TM_START_ROUND_END_REWARDS_ANIM 1
-#define TM_END_DISPLAY_FIN_BLIND        30
-#define TM_END_DISPLAY_SCORE_MIN        4
-#define TM_REWARDS_ELLIPSIS_PRINT_START 2
-#define TM_REWARDS_ELLIPSIS_PRINT_END   16
-#define TM_REWARD_DISPLAY_INTERVAL      15
-#define TM_DISPLAY_REWARDS_CONT_WAIT    (TM_REWARDS_ELLIPSIS_PRINT_END + TM_REWARD_DISPLAY_INTERVAL)
-#define TM_HAND_REWARD_INCR_WAIT        (TM_DISPLAY_REWARDS_CONT_WAIT + TM_REWARD_DISPLAY_INTERVAL)
-#define TM_REWARD_INCREMENT_INTERVAL    20
-#define TM_DISMISS_ROUND_END_TM         20
-#define TM_CREATE_SHOP_ITEMS_WAIT       1
-#define TM_SHIFT_SHOP_ICON_WAIT         7
-#define TM_END_GAME_SHOP_INTRO          12
-#define TM_SHOP_PRC_INPUT_START         1
-#define TM_BLIND_SELECT_START           1
-#define TM_END_ANIM_SEQ                 12
-
 // Palette IDs
 #define BOSS_BLIND_PRIMARY_PID               1
 #define REROLL_BTN_PID                       3
-#define BLIND_SKIP_BTN_PID                   5
 #define NEXT_ROUND_BTN_SELECTED_BORDER_PID   5
 #define BLIND_BG_SHADOW_PID                  5
 #define SHOP_PANEL_SHADOW_PID                6
@@ -97,13 +76,10 @@
 #define REROLL_BTN_SELECTED_BORDER_PID       7
 #define SHOP_LIGHTS_1_PID                    8
 #define DISCARD_BTN_BORDER_PID               8
-#define BLIND_SKIP_BTN_SELECTED_BORDER_PID   10
 #define DISCARD_BTN_PID                      13
 #define SHOP_LIGHTS_2_PID                    14
-#define BLIND_SELECT_BTN_PID                 15
 #define NEXT_ROUND_BTN_PID                   16
 #define SHOP_LIGHTS_3_PID                    17
-#define BLIND_SELECT_BTN_SELECTED_BORDER_PID 18
 #define BLIND_BG_SECONDARY_PID               18
 #define BLIND_BG_PRIMARY_PID                 19
 #define REWARD_PANEL_BORDER_PID              19
@@ -156,15 +132,6 @@ enum GameRoundEndStates
     ROUND_END_EXIT
 };
 
-enum BlindSelectStates
-{
-    START_ANIM_SEQ,
-    BLIND_SELECT,
-    BLIND_SELECTED_ANIM_SEQ,
-    DISPLAY_BLIND_PANEL,
-    BLIND_SELECT_MAX
-};
-
 typedef struct
 {
     u32 chips;
@@ -193,9 +160,6 @@ static void game_round_end_on_update(void);
 static void game_round_end_on_exit(void);
 static void game_shop_on_update(void);
 static void game_shop_on_exit(void);
-static void game_blind_select_on_init(void);
-static void game_blind_select_on_update(void);
-static void game_blind_select_on_exit(void);
 static void game_lose_on_init(void);
 static void game_lose_on_update(void);
 static void game_over_on_exit(void);
@@ -218,7 +182,6 @@ static void sort_cards(void);
 static void display_temp_score(u32 value);
 static void display_score(u32 value);
 static void check_flaming_score(void);
-static void display_round(int value);
 static void display_hands(int value);
 static void display_discards(int value);
 static void set_hand(void);
@@ -226,7 +189,6 @@ static void hand_set_focus(int index);
 static bool hand_can_discard(void);
 static int deck_get_size(void);
 static int deck_get_max_size(void);
-static void increment_blind(enum BlindState increment_reason);
 static void game_over_init(void);
 static bool check_and_score_joker_for_event(
     ListItr* starting_joker_itr,
@@ -271,9 +233,7 @@ static void remove_owned_joker(int owned_joker_idx);
 // disable clang-format here to preserve the organization here
 // Rects                                       left     top     right   bottom
 // Screenblock rects
-static const Rect ROUND_END_MENU_RECT       = {9,       7,      24,     20 }; 
 
-static const Rect POP_MENU_ANIM_RECT        = {9,       7,      24,     31 };
 // The rect for popping menu animations (round end, shop, blinds) 
 // - extends beyond the visible screen to the end of the screenblock
 // It includes both the target and source position rects. 
@@ -420,13 +380,6 @@ static const SubStateActionFn shop_state_actions[] = {
     game_shop_outro
 };
 
-static const SubStateActionFn blind_select_state_actions[] = {
-    game_blind_select_start_anim_seq,
-    game_blind_select_handle_input,
-    game_blind_select_selected_anim_seq,
-    game_blind_select_display_blind_panel
-};
-
 static const SubStateActionFn round_end_state_actions[] = {
     game_round_end_start,
     game_round_end_start_expand_popup,
@@ -447,8 +400,6 @@ static enum PlayState play_state = PLAY_STARTING;
 
 static enum HandType hand_type = NONE;
 
-static CardObject* main_menu_ace = NULL;
-
 // The sprite that displays the blind when in "GAME_PLAYING/GAME_ROUND_END" state
 static Sprite* playing_blind_token = NULL;
 
@@ -457,8 +408,6 @@ static Sprite* round_end_blind_token = NULL;
 
 // The sprites that display the blinds when in "GAME_BLIND_SELECT" state
 static Sprite* blind_select_tokens[BLIND_TYPE_MAX] = {NULL};
-
-static int current_blind = BLIND_TYPE_SMALL;
 
 // The current state of the blinds, this is used to determine what the game is doing at any given
 // time
@@ -481,7 +430,6 @@ static int max_discards = 4;
 static int hands = 0;
 static int discards = 0;
 
-static int round = 0;
 static int ante = 0;
 static int money = 0;
 static u32 score = 0;
@@ -545,8 +493,17 @@ static GameVars game_vars =
     .selection_x = 0,
     .selection_y = 0,
     .state_info = state_info,
-    .game_state = GAME_STATE_UNDEFINED;
-}
+    .game_state = GAME_STATE_UNDEFINED,
+    .ROUND_END_MENU_RECT = { 9, 7, 24, 20 },
+    .POP_MENU_ANIM_RECT = { 9, 7, 24, 31 },
+    .MENU_POP_OUT_ANIM_FRAMES = 20,
+    .BLIND_SELECT_BTN_SELECTED_BORDER_PID = 18,
+    .BLIND_SKIP_BTN_SELECTED_BORDER_PID = 10,
+    .BLIND_SKIP_BTN_PID = 5,
+    .BLIND_SELECT_BTN_PID = 15,
+    .current_blind = BLIND_TYPE_SMALL,
+    .blind_select_tokens = blind_select_tokens,
+};
 
 GameVars* get_game_vars(void)
 {
@@ -646,7 +603,7 @@ void game_init()
     hands = max_hands;
     discards = max_discards;
     game_vars.frame = TM_ZERO;
-    current_blind = BLIND_TYPE_SMALL;
+    game_vars.current_blind = BLIND_TYPE_SMALL;
     blinds[0] = BLIND_STATE_CURRENT;
     blinds[1] = BLIND_STATE_UPCOMING;
     blinds[2] = BLIND_STATE_UPCOMING;
@@ -654,28 +611,28 @@ void game_init()
     money = STARTING_MONEY;
     score = STARTING_SCORE;
 
-    blind_select_tokens[BLIND_TYPE_SMALL] = blind_token_new(
+    game_vars.blind_select_tokens[BLIND_TYPE_SMALL] = blind_token_new(
         BLIND_TYPE_SMALL,
         CUR_BLIND_TOKEN_POS.x,
         CUR_BLIND_TOKEN_POS.y,
         MAX_SELECTION_SIZE + MAX_HAND_SIZE + 3
     );
-    blind_select_tokens[BLIND_TYPE_BIG] = blind_token_new(
+    game_vars.blind_select_tokens[BLIND_TYPE_BIG] = blind_token_new(
         BLIND_TYPE_BIG,
         CUR_BLIND_TOKEN_POS.x,
         CUR_BLIND_TOKEN_POS.y,
         MAX_SELECTION_SIZE + MAX_HAND_SIZE + 4
     );
-    blind_select_tokens[BLIND_TYPE_BOSS] = blind_token_new(
+    game_vars.blind_select_tokens[BLIND_TYPE_BOSS] = blind_token_new(
         BLIND_TYPE_BOSS,
         CUR_BLIND_TOKEN_POS.x,
         CUR_BLIND_TOKEN_POS.y,
         MAX_SELECTION_SIZE + MAX_HAND_SIZE + 5
     );
 
-    obj_hide(blind_select_tokens[BLIND_TYPE_SMALL]->obj);
-    obj_hide(blind_select_tokens[BLIND_TYPE_BIG]->obj);
-    obj_hide(blind_select_tokens[BLIND_TYPE_BOSS]->obj);
+    obj_hide(game_vars.blind_select_tokens[BLIND_TYPE_SMALL]->obj);
+    obj_hide(game_vars.blind_select_tokens[BLIND_TYPE_BIG]->obj);
+    obj_hide(game_vars.blind_select_tokens[BLIND_TYPE_BOSS]->obj);
 }
 
 static inline void discarded_jokers_update_loop(void)
@@ -1179,7 +1136,7 @@ static void bg_copy_current_item_to_top_left_panel(void)
 
 // Resets bottom row bg tiles of the top left panel (shop/blind) after
 // it is dismissed to match the rest of the game panel background.
-static inline void reset_top_left_panel_bottom_row()
+void reset_top_left_panel_bottom_row()
 {
     BG_POINT top_left_panel_bottom_row_pos = TOP_LEFT_PANEL_POINT;
     // Use the source rect height to offset to the bottom row point
@@ -1217,11 +1174,11 @@ void change_background(enum BackgroundId id)
             GRIT_CPY(&tile8_mem[MAIN_BG_CBB], background_gfxTiles);
             GRIT_CPY(&se_mem[MAIN_BG_SBB], background_gfxMap);
 
-            if (current_blind == BLIND_TYPE_BIG) // Change text and palette depending on blind type
+            if (game_vars.current_blind == BLIND_TYPE_BIG) // Change text and palette depending on blind type
             {
                 main_bg_se_copy_rect(BIG_BLIND_TITLE_SRC_RECT, TOP_LEFT_BLIND_TITLE_POINT);
             }
-            else if (current_blind == BLIND_TYPE_BOSS)
+            else if (game_vars.current_blind == BLIND_TYPE_BOSS)
             {
                 main_bg_se_copy_rect(BOSS_BLIND_TITLE_SRC_RECT, TOP_LEFT_BLIND_TITLE_POINT);
 
@@ -1236,17 +1193,17 @@ void change_background(enum BackgroundId id)
             // doesn't use the blind token's exact colors so a different approach is required
             memset16(
                 &pal_bg_mem[BLIND_BG_PRIMARY_PID],
-                blind_get_color(current_blind, BLIND_BACKGROUND_MAIN_COLOR_INDEX),
+                blind_get_color(game_vars.current_blind, BLIND_BACKGROUND_MAIN_COLOR_INDEX),
                 1
             );
             memset16(
                 &pal_bg_mem[BLIND_BG_SECONDARY_PID],
-                blind_get_color(current_blind, BLIND_BACKGROUND_SECONDARY_COLOR_INDEX),
+                blind_get_color(game_vars.current_blind, BLIND_BACKGROUND_SECONDARY_COLOR_INDEX),
                 1
             );
             memset16(
                 &pal_bg_mem[BLIND_BG_SHADOW_PID],
-                blind_get_color(current_blind, BLIND_BACKGROUND_SHADOW_COLOR_INDEX),
+                blind_get_color(game_vars.current_blind, BLIND_BACKGROUND_SHADOW_COLOR_INDEX),
                 1
             );
 
@@ -1284,7 +1241,7 @@ void change_background(enum BackgroundId id)
         // Disable window 0 so it doesn't make the cashout menu transparent
         toggle_windows(false, true);
 
-        main_bg_se_clear_rect(ROUND_END_MENU_RECT);
+        main_bg_se_clear_rect(game_vars.ROUND_END_MENU_RECT);
         tte_erase_rect_wrapper(HAND_SIZE_RECT);
     }
     else if (id == BG_SHOP)
@@ -1318,16 +1275,16 @@ void change_background(enum BackgroundId id)
     {
         for (int i = 0; i < BLIND_TYPE_MAX; i++)
         {
-            obj_unhide(blind_select_tokens[i]->obj, 0);
+            obj_unhide(game_vars.blind_select_tokens[i]->obj, 0);
         }
 
         // Default y position for the blind select tokens. 12 is the amount of tiles the background
         // is shifted down by
         const int default_y = 89 + (TILE_SIZE * 12);
         // TODO refactor magic numbers '80/120/160' into a map to loop with
-        sprite_position(blind_select_tokens[BLIND_TYPE_SMALL], 80, default_y);
-        sprite_position(blind_select_tokens[BLIND_TYPE_BIG], 120, default_y);
-        sprite_position(blind_select_tokens[BLIND_TYPE_BOSS], 160, default_y);
+        sprite_position(game_vars.blind_select_tokens[BLIND_TYPE_SMALL], 80, default_y);
+        sprite_position(game_vars.blind_select_tokens[BLIND_TYPE_BIG], 120, default_y);
+        sprite_position(game_vars.blind_select_tokens[BLIND_TYPE_BOSS], 160, default_y);
 
         toggle_windows(false, true);
 
@@ -1350,8 +1307,8 @@ void change_background(enum BackgroundId id)
         // Disable the button highlight colors
         // Select button PID is 15 and the outline is 18
         memcpy16(
-            &pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER_PID],
-            &pal_bg_mem[BLIND_SELECT_BTN_PID],
+            &pal_bg_mem[game_vars.BLIND_SELECT_BTN_SELECTED_BORDER_PID],
+            &pal_bg_mem[game_vars.BLIND_SELECT_BTN_PID],
             1
         );
         // It seems the skip button (and score multiplier and deck) PB idx is
@@ -1359,8 +1316,8 @@ void change_background(enum BackgroundId id)
         // Setting this palette value though doesn't seem to have an
         // effect.
         memcpy16(
-            &pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER_PID],
-            &pal_bg_mem[BLIND_SKIP_BTN_PID],
+            &pal_bg_mem[game_vars.BLIND_SKIP_BTN_SELECTED_BORDER_PID],
+            &pal_bg_mem[game_vars.BLIND_SKIP_BTN_PID],
             1
         );
 
@@ -1424,9 +1381,9 @@ void change_background(enum BackgroundId id)
 
                     // Move token up by a tile
                     sprite_position(
-                        blind_select_tokens[i],
-                        blind_select_tokens[i]->pos.x,
-                        blind_select_tokens[i]->pos.y - TILE_SIZE
+                        game_vars.blind_select_tokens[i],
+                        game_vars.blind_select_tokens[i]->pos.x,
+                        game_vars.blind_select_tokens[i]->pos.y - TILE_SIZE
                     );
                     break;
                 }
@@ -1496,10 +1453,6 @@ void change_background(enum BackgroundId id)
             1
         );
     }
-    else
-    {
-        return; // Invalid background ID
-    }
 
     background = id;
 }
@@ -1550,7 +1503,7 @@ static void display_score(u32 value)
 static void check_flaming_score(void)
 {
     u32 curr_score = u32_protected_mult(chips, mult);
-    u32 required_score = blind_get_requirement(current_blind, ante);
+    u32 required_score = blind_get_requirement(game_vars.current_blind, ante);
     if (curr_score >= required_score && !score_flames_active)
     {
         // start flaming score
@@ -1570,7 +1523,7 @@ static void check_flaming_score(void)
     }
 }
 
-static void display_round(int value)
+void display_round(int value)
 {
     // tte_erase_rect_wrapper(ROUND_TEXT_RECT);
     tte_printf(
@@ -1578,7 +1531,7 @@ static void display_round(int value)
         ROUND_TEXT_RECT.left,
         ROUND_TEXT_RECT.top,
         TTE_YELLOW_PB,
-        round
+        game_vars.round
     );
 }
 
@@ -1763,20 +1716,20 @@ static int deck_get_max_size(void)
     return hand_top + played_top + deck_top + discard_top + 4;
 }
 
-static void increment_blind(enum BlindState increment_reason)
+void increment_blind(enum BlindState increment_reason)
 {
-    current_blind++;
-    if (current_blind >= BLIND_TYPE_MAX)
+    game_vars.current_blind++;
+    if (game_vars.current_blind >= BLIND_TYPE_MAX)
     {
-        current_blind = 0;
+        game_vars.current_blind = 0;
         blinds[0] = BLIND_STATE_CURRENT;  // Reset the blinds to the first one
         blinds[1] = BLIND_STATE_UPCOMING; // Set the next blind to upcoming
         blinds[2] = BLIND_STATE_UPCOMING; // Set the next blind to upcoming
     }
     else
     {
-        blinds[current_blind] = BLIND_STATE_CURRENT;
-        blinds[current_blind - 1] = increment_reason;
+        blinds[game_vars.current_blind] = BLIND_STATE_CURRENT;
+        blinds[game_vars.current_blind - 1] = increment_reason;
     }
 }
 
@@ -1798,7 +1751,7 @@ static void game_round_on_init()
     hand_selections = 0;
 
     playing_blind_token = blind_token_new(
-        current_blind,
+        game_vars.current_blind,
         CUR_BLIND_TOKEN_POS.x,
         CUR_BLIND_TOKEN_POS.y,
         MAX_SELECTION_SIZE + MAX_HAND_SIZE + 1
@@ -1809,7 +1762,7 @@ static void game_round_on_init()
     //    obj_hide(playing_blind_token->obj); // Hide the blind token sprite for now
     //}
     round_end_blind_token = blind_token_new(
-        current_blind,
+        game_vars.current_blind,
         81,
         86,
         MAX_SELECTION_SIZE + MAX_HAND_SIZE + 2
@@ -1821,7 +1774,7 @@ static void game_round_on_init()
     }
 
     Rect blind_req_text_rect = BLIND_REQ_TEXT_RECT;
-    u32 blind_requirement = blind_get_requirement(current_blind, ante);
+    u32 blind_requirement = blind_get_requirement(game_vars.current_blind, ante);
 
     char blind_req_str_buff[UINT_MAX_DIGITS + 1];
 
@@ -1846,7 +1799,7 @@ static void game_round_on_init()
         BLIND_REWARD_RECT.left,
         BLIND_REWARD_RECT.top,
         TTE_YELLOW_PB,
-        blind_get_reward(current_blind)
+        blind_get_reward(game_vars.current_blind)
     ); // Blind reward
 
     deck_shuffle(); // Shuffle the deck at the start of the round
@@ -1855,7 +1808,7 @@ static void game_round_on_init()
 static void game_over_init(void)
 {
     // Clears the round end menu
-    main_bg_se_clear_rect(POP_MENU_ANIM_RECT);
+    main_bg_se_clear_rect(game_vars.POP_MENU_ANIM_RECT);
     main_bg_se_copy_expand_3x3_rect(GAME_OVER_DIALOG_DEST_RECT, GAME_OVER_SRC_RECT_3X3_POS);
     main_bg_se_copy_rect(NEW_RUN_BTN_SRC_RECT, NEW_RUN_BTN_DEST_POS);
 }
@@ -2175,9 +2128,9 @@ static inline void game_playing_handle_round_over(void)
 {
     enum GameState next_state = GAME_STATE_ROUND_END;
 
-    if (score >= blind_get_requirement(current_blind, ante))
+    if (score >= blind_get_requirement(game_vars.current_blind, ante))
     {
-        if (current_blind == BLIND_TYPE_BOSS)
+        if (game_vars.current_blind == BLIND_TYPE_BOSS)
         {
             if (ante < MAX_ANTE)
             {
@@ -2500,7 +2453,7 @@ static bool check_and_score_joker_for_event(
 
 static inline bool game_round_is_over(void)
 {
-    return hands == 0 || score >= blind_get_requirement(current_blind, ante);
+    return hands == 0 || score >= blind_get_requirement(game_vars.current_blind, ante);
 }
 
 // Basically a copy of HAND_DISCARD
@@ -3362,7 +3315,7 @@ static void game_round_end_start()
         change_background(BG_ROUND_END); // Change the background to the round end background
         state_info[game_vars.game_state].substate = START_EXPAND_POPUP; // Change the state to the next one
         game_vars.frame = TM_ZERO;                                      // Reset the timer
-        blind_reward = blind_get_reward(current_blind);
+        blind_reward = blind_get_reward(game_vars.current_blind);
         hand_reward = hands;
         interest_reward = calculate_interest_reward();
         interest_to_count = interest_reward;
@@ -3372,7 +3325,7 @@ static void game_round_end_start()
 
 static void game_round_end_start_expand_popup()
 {
-    main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_UP);
+    main_bg_se_copy_rect_1_tile_vert(game_vars.POP_MENU_ANIM_RECT, SCREEN_UP);
 
     if (game_vars.frame == TM_END_POP_MENU_ANIM)
     {
@@ -3383,7 +3336,7 @@ static void game_round_end_start_expand_popup()
 
 static void game_round_end_extend_black_panel_down(int black_panel_bottom)
 {
-    Rect single_line_rect = ROUND_END_MENU_RECT;
+    Rect single_line_rect = game_vars.ROUND_END_MENU_RECT;
     single_line_rect.bottom = black_panel_bottom;
     single_line_rect.top = single_line_rect.bottom - 1;
     main_bg_se_copy_rect_1_tile_vert(single_line_rect, SCREEN_DOWN);
@@ -3396,11 +3349,11 @@ static void game_round_end_display_finished_blind()
     int current_ante = ante;
 
     // Beating the boss blind increases the ante, so we need to display the previous ante value
-    if (current_blind == BLIND_TYPE_BOSS)
+    if (game_vars.current_blind == BLIND_TYPE_BOSS)
         current_ante--;
 
     Rect blind_req_rect = ROUND_END_BLIND_REQ_RECT;
-    u32 blind_req = blind_get_requirement(current_blind, current_ante);
+    u32 blind_req = blind_get_requirement(game_vars.current_blind, current_ante);
 
     /* Not bothering to truncate here because there are 8 tiles
      * and the blind requirement will not increase past ante 8
@@ -3474,7 +3427,7 @@ static void game_round_end_update_blind_reward()
             ROUND_END_BLIND_REWARD_RECT.left,
             ROUND_END_BLIND_REWARD_RECT.top,
             TTE_YELLOW_PB,
-            blind_get_reward(current_blind) - blind_reward
+            blind_get_reward(game_vars.current_blind) - blind_reward
         );
     }
     else if (game_vars.frame > FRAMES(20))
@@ -3640,7 +3593,7 @@ static void game_round_end_display_rewards()
 static inline void game_round_end_cashout(void)
 {
     // Reward the player
-    money += hands + blind_get_reward(current_blind) + calculate_interest_reward();
+    money += hands + blind_get_reward(game_vars.current_blind) + calculate_interest_reward();
     display_money();
 
     hands = max_hands;          // Reset the hands to the maximum
@@ -3659,7 +3612,7 @@ static void game_round_end_display_cashout()
         // Put the "cash out" button onto the round end panel
         main_bg_se_copy_expand_3x3_rect(CASHOUT_DEST_RECT, CASHOUT_SRC_3X3_RECT_POS);
 
-        int cashout_amount = hands + blind_get_reward(current_blind) + calculate_interest_reward();
+        int cashout_amount = hands + blind_get_reward(game_vars.current_blind) + calculate_interest_reward();
 
         bool omit_space = cashout_amount >= 10;
         tte_printf(
@@ -3687,7 +3640,7 @@ static void game_round_end_display_cashout()
 
 static void game_round_end_dismiss_round_end_panel()
 {
-    Rect round_end_down = ROUND_END_MENU_RECT;
+    Rect round_end_down = game_vars.ROUND_END_MENU_RECT;
     round_end_down.top--;
     main_bg_se_copy_rect_1_tile_vert(round_end_down, SCREEN_DOWN);
 
@@ -3839,7 +3792,7 @@ static void game_shop_create_items(void)
 // Intro sequence (menu and shop icon coming into frame)
 static void game_shop_intro()
 {
-    main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_UP);
+    main_bg_se_copy_rect_1_tile_vert(game_vars.POP_MENU_ANIM_RECT, SCREEN_UP);
 
     if (game_vars.frame == TM_CREATE_SHOP_ITEMS_WAIT)
     {
@@ -4203,7 +4156,7 @@ static void game_shop_process_user_input()
 static void game_shop_outro()
 {
     // Shift the shop panel
-    main_bg_se_move_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_DOWN);
+    main_bg_se_move_rect_1_tile_vert(game_vars.POP_MENU_ANIM_RECT, SCREEN_DOWN);
 
     main_bg_se_copy_rect_1_tile_vert(TOP_LEFT_PANEL_ANIM_RECT, SCREEN_UP);
 
@@ -4233,7 +4186,7 @@ static void game_shop_outro()
         memset16(&se_mat[MAIN_BG_SBB][y - 1][8], SE_HFLIP | 0x0001, 1);
     }
 
-    if (game_vars.frame >= MENU_POP_OUT_ANIM_FRAMES)
+    if (game_vars.frame >= game_vars.MENU_POP_OUT_ANIM_FRAMES)
     {
         state_info[game_vars.game_state].substate = GAME_SHOP_MAX; // Go to the next state
         game_vars.frame = TM_ZERO;                                 // Reset the timer
@@ -4329,7 +4282,7 @@ void game_reset(void)
     // make a function to do this? reset_deck()
     deck_top = -1;
 
-    round = 1;
+    game_vars.round = 1;
     score = 0;
 
 
@@ -4368,7 +4321,7 @@ static inline void game_start(void)
         deck_get_max_size()
     );
 
-    display_round(round); // Set the round display
+    display_round(game_vars.round); // Set the round display
     display_score(score); // Set the score display
 
     display_chips(); // Set the chips display
@@ -4445,9 +4398,9 @@ static void game_over_on_exit()
     // show up on the next run.
     sprite_destroy(&playing_blind_token);
     sprite_destroy(&round_end_blind_token);
-    sprite_destroy(&blind_select_tokens[BLIND_TYPE_SMALL]);
-    sprite_destroy(&blind_select_tokens[BLIND_TYPE_BIG]);
-    sprite_destroy(&blind_select_tokens[BLIND_TYPE_BOSS]);
+    sprite_destroy(&game_vars.blind_select_tokens[BLIND_TYPE_SMALL]);
+    sprite_destroy(&game_vars.blind_select_tokens[BLIND_TYPE_BIG]);
+    sprite_destroy(&game_vars.blind_select_tokens[BLIND_TYPE_BOSS]);
 
     list_clear(&_owned_jokers_list);
     list_clear(&_discarded_jokers_list);
@@ -4456,7 +4409,7 @@ static void game_over_on_exit()
 
     game_init();
 
-    display_round(round);
+    display_round(game_vars.round);
     display_score(score);
     display_chips();
     display_mult();

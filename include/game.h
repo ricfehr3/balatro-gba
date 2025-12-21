@@ -32,17 +32,6 @@ typedef struct CardObject CardObject;
 typedef struct Card Card;
 typedef struct JokerObject JokerObject;
 
-typedef struct
-{
-    uint frame;    
-    uint rng_seed;
-    int selection_x;
-    int selection_y;
-    StateInfo* state_info;
-    GameState game_state;
-} GameVars;
-
-GameVars* get_game_vars(void);
 
 void game_reset(void);
 
@@ -162,5 +151,35 @@ int get_straight_and_flush_size(void);
 void change_background(enum BackgroundId id);
 
 StateInfo* get_state_info(void);
+
+typedef enum GameState GameState;
+typedef enum BlindState BlindState;
+typedef RECT Rect;
+typedef struct Sprite Sprite;
+
+typedef struct
+{
+    uint frame;    
+    uint rng_seed;
+    int selection_x;
+    int selection_y;
+    StateInfo* state_info;
+    GameState game_state;
+    const Rect ROUND_END_MENU_RECT;
+    const Rect POP_MENU_ANIM_RECT;
+    const int MENU_POP_OUT_ANIM_FRAMES;
+    const int BLIND_SELECT_BTN_SELECTED_BORDER_PID;
+    const int BLIND_SKIP_BTN_SELECTED_BORDER_PID;
+    const int BLIND_SKIP_BTN_PID;
+    const int BLIND_SELECT_BTN_PID;
+    int current_blind;
+    int round;
+    Sprite** blind_select_tokens;
+} GameVars;
+
+GameVars* get_game_vars(void);
+void reset_top_left_panel_bottom_row(void);
+void display_round(int value);
+void increment_blind(enum BlindState increment_reason);
 
 #endif // GAME_H
