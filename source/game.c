@@ -1120,6 +1120,8 @@ static void game_round_on_init(void)
      * otherwise or for the buttons.
      */
     game_playing_selection_grid.selection = GAME_PLAYING_INIT_SEL;
+
+    playing_cards_update_run();
 }
 
 // Playing state functions
@@ -2087,6 +2089,7 @@ static inline void played_cards_update_loop(void)
     // company that published Balatro is called "Playstack" and this is a play stack, but I digress)
     for (int played_idx = 0; played_idx <= played_top; played_idx++)
     {
+        /*
         if (played[played_idx] == NULL)
         {
             continue;
@@ -2173,6 +2176,7 @@ static inline void played_cards_update_loop(void)
             default:
                 break;
         }
+        */
 
         played[played_idx]->sprite_object->tscale = FIX_ONE;
         card_object_update(played[played_idx]);
@@ -2676,4 +2680,9 @@ bool get_discarded_card(void)
 void set_discarded_card(bool foo)
 {
     discarded_card = foo;
+}
+
+int* get_cards_drawn(void)
+{
+    return &cards_drawn;
 }

@@ -10,21 +10,23 @@
 #include "timer.h"
 #include "util.h"
 
+#include <assert.h>
+
 static const BG_POINT HAND_PLAY_POS = {120, 70};
 static const BG_POINT CARD_DISCARD_PNT      = {240,     70};
 static const Rect PLAYED_CARDS_SCORES_RECT  = {72,      48,     240,    56  };
 static const Rect HELD_CARDS_SCORES_RECT    = {72,      108,    240,    116 };
 static const int SCORED_CARD_TEXT_Y = 48;
 
-static void play_starting(void);
-static void play_before_starting(void);
-static void play_scoring_cards(void);
-static void play_scoring_card_jokers(void);
-static void play_scoring_held_cards(void);
-static void play_scoring_independent_jokers(void);
-static void play_scoring_hand_scored_end(void);
-static void play_ending(void);
-static void play_ended(void);
+//static void play_starting(void);
+//static void play_before_starting(void);
+//static void play_scoring_cards(void);
+//static void play_scoring_card_jokers(void);
+//static void play_scoring_held_cards(void);
+//static void play_scoring_independent_jokers(void);
+//static void play_scoring_hand_scored_end(void);
+//static void play_ending(void);
+//static void play_ended(void);
 
 static StateInfo state_info[] = {
     STATE_INFO_UPDATE_FN_ONLY(play_starting),
@@ -40,23 +42,23 @@ static StateInfo state_info[] = {
 
 static StateMachine play_sm = STATE_MACHINE_DEFINE(state_info, PLAY_STATE_MAX);
 
-static void play_starting(void)
+void play_starting(void)
 {
     auto played = get_played_array();
     auto played_top = get_played_top();
-    auto scored_card_index = get_scored_card_index();
 
-    bool card_selected = card_object_is_selected(played[played_top - scored_card_index]);
+    bool card_selected = card_object_is_selected(played[played_top - get_scored_card_index()]);
 
     for (int played_idx = 0; played_idx <= played_top; played_idx++)
     {
         if (played_idx == played_top && (g_game_vars.timer % FRAMES(10) == 0 || !card_selected) &&
             g_game_vars.timer > FRAMES(40))
         {
-            scored_card_index--;
+            set_scored_card_index(get_scored_card_index() - 1);
 
-            if (scored_card_index == 0)
+            if (get_scored_card_index() == 0)
             {
+                assert(0);
                 *joker_scored_itr() = list_itr_create(owned_jokers_list());
                 g_game_vars.timer = TM_ZERO;
                 state_machine_change_state(&play_sm, PLAY_BEFORE_SCORING);
@@ -69,21 +71,21 @@ static void play_starting(void)
         played[played_idx]->sprite_object->ty = int2fx(HAND_PLAY_POS.y);
 
         card_selected = card_object_is_selected(played[played_idx]);
-        if (card_selected && played_top - played_idx >= scored_card_index)
+        if (card_selected && played_top - played_idx >= get_scored_card_index())
         {
             played[played_idx]->sprite_object->ty -= int2fx(10);
         }
     }
 }
 
-static void play_before_starting(void)
+void play_before_starting(void)
 {
     // Activate Jokers with an effect just before the hand is scored
     if (check_and_score_joker_for_event(joker_scored_itr(), NULL, JOKER_EVENT_ON_HAND_PLAYED))
         state_machine_change_state(&play_sm, PLAY_SCORING_CARDS);
 }
 
-static void play_scoring_cards(void)
+void play_scoring_cards(void)
 {
     auto played = get_played_array();
     auto played_top = get_played_top();
@@ -149,7 +151,7 @@ static void play_scoring_cards(void)
     }
 }
 
-static void play_scoring_card_jokers(void)
+void play_scoring_card_jokers(void)
 {
     if (g_game_vars.timer % FRAMES(30) == 0 && g_game_vars.timer > FRAMES(40))
     {
@@ -185,7 +187,7 @@ static void play_scoring_card_jokers(void)
     }
 }
 
-static void play_scoring_held_cards(void)
+void play_scoring_held_cards(void)
 {
     auto played_top = get_played_top();
     for (int played_idx = 0; played_idx <= played_top; played_idx++)
@@ -218,7 +220,7 @@ static void play_scoring_held_cards(void)
         }
     }
 }
-static void play_scoring_independent_jokers(void)
+void play_scoring_independent_jokers(void)
 {
     auto played_top = get_played_top();
     for (int played_idx = 0; played_idx <= played_top; played_idx++)
@@ -239,7 +241,7 @@ static void play_scoring_independent_jokers(void)
         }
     }
 }
-static void play_scoring_hand_scored_end(void)
+void play_scoring_hand_scored_end(void)
 {
     auto played_top = get_played_top();
     for (int played_idx = 0; played_idx <= played_top; played_idx++)
@@ -264,7 +266,7 @@ static void play_scoring_hand_scored_end(void)
     }
 }
 
-static void play_ending(void)
+void play_ending(void)
 {
     auto played_top = get_played_top();
     auto played = get_played_array();
@@ -307,7 +309,7 @@ static inline bool game_round_is_over(void)
            g_game_vars.score >= blind_get_requirement(g_game_vars.current_blind, g_game_vars.ante);
 }
 
-static void play_ended(void)
+void play_ended(void)
 {
     auto played_top = get_played_top();
     auto played = get_played_array();

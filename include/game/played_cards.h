@@ -20,6 +20,16 @@ enum PlayState
     PLAY_STATE_MAX,
 };
 
+void play_starting(void);
+void play_before_starting(void);
+void play_scoring_cards(void);
+void play_scoring_card_jokers(void);
+void play_scoring_held_cards(void);
+void play_scoring_independent_jokers(void);
+void play_scoring_hand_scored_end(void);
+void play_ending(void);
+void play_ended(void);
+
 void playing_cards_update_run(void);
 void playing_cards_update_stop(void);
 
