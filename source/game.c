@@ -32,6 +32,8 @@
 #include "tonc_memdef.h"
 #include "util.h"
 
+#include "game/played_cards.h"
+
 #include <maxmod.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -100,11 +102,6 @@ static void display_temp_score(u32 value);
 static void check_flaming_score(void);
 static int deck_get_size(void);
 static int deck_get_max_size(void);
-static bool check_and_score_joker_for_event(
-    ListItr* starting_joker_itr,
-    CardObject* card_object,
-    enum JokerEvent joker_event
-);
 
 static void game_playing_discard_on_pressed(void);
 static void game_playing_execute_discard(void);
@@ -380,7 +377,7 @@ static inline Card* deck_pop()
     return deck[deck_top--];
 }
 
-static inline void discard_push(Card* card)
+void discard_push(Card* card)
 {
     if (discard_top >= MAX_DECK_SIZE - 1)
         return;
@@ -596,6 +593,11 @@ int get_played_top(void)
 int get_scored_card_index(void)
 {
     return scored_card_index;
+}
+
+void set_scored_card_index(int index)
+{
+    scored_card_index = index;
 }
 
 bool is_joker_owned(int joker_id)
@@ -1729,7 +1731,7 @@ static inline void select_highcard_cards_in_played_hand(void)
 }
 
 // returns true if a joker was scored, false otherwise
-static bool check_and_score_joker_for_event(
+bool check_and_score_joker_for_event(
     ListItr* starting_joker_itr,
     CardObject* card_object,
     enum JokerEvent joker_event
@@ -2166,6 +2168,9 @@ static inline void played_cards_update_loop(void)
                     // to that card again
                     continue;
                 }
+                break;
+                
+            default:
                 break;
         }
 
@@ -2641,4 +2646,34 @@ void game_start(void)
     ); // Ante
 
     game_change_state(GAME_STATE_BLIND_SELECT);
+}
+
+ListItr* joker_scored_itr(void)
+{
+    return &_joker_scored_itr;
+}
+
+ListItr* joker_card_scored_end_itr(void)
+{
+    return &_joker_card_scored_end_itr;
+}
+
+ListItr* joker_round_end_itr(void)
+{
+    return &_joker_round_end_itr;
+}
+
+List* owned_jokers_list(void)
+{
+    return &_owned_jokers_list;
+}
+
+bool get_discarded_card(void)
+{
+    return discarded_card;
+}
+
+void set_discarded_card(bool foo)
+{
+    discarded_card = foo;
 }

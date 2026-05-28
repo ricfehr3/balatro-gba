@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include "bitset.h"
+#include "list.h"
 #include "game/common_ui.h"
 #include "game_variables.h"
 #include "graphic_utils.h"
@@ -48,19 +49,6 @@ enum GameState
 #undef DEF_STATE_INFO
     GAME_STATE_MAX,
     GAME_STATE_UNDEFINED
-};
-
-enum PlayState
-{
-    PLAY_STARTING,
-    PLAY_BEFORE_SCORING,
-    PLAY_SCORING_CARDS,
-    PLAY_SCORING_CARD_JOKERS,
-    PLAY_SCORING_HELD_CARDS,
-    PLAY_SCORING_INDEPENDENT_JOKERS,
-    PLAY_SCORING_HAND_SCORED_END,
-    PLAY_ENDING,
-    PLAY_ENDED
 };
 
 // Game functions
@@ -123,5 +111,22 @@ void reset_background(void);
 void display_hands(void);
 void display_discards(void);
 void display_score(u32 value);
+
+// temporary glue
+typedef enum JokerEvent JokerEvent;
+ListItr* joker_scored_itr(void);
+ListItr* joker_card_scored_end_itr(void);
+ListItr* joker_round_end_itr(void);
+List* owned_jokers_list(void);
+void set_scored_card_index(int index);
+bool check_and_score_joker_for_event(
+    ListItr* starting_joker_itr,
+    CardObject* card_object,
+    enum JokerEvent joker_event
+);
+bool get_discarded_card(void);
+void set_discarded_card(bool foo);
+void discard_push(Card* card);
+int* get_cards_drawn(void);
 
 #endif // GAME_H
