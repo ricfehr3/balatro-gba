@@ -59,6 +59,23 @@ void bitset_clear(Bitset* bitset)
     }
 }
 
+void bitset_set_all(Bitset* bitset)
+{
+    const int bits = 32; // 32 bits in a uint32_t
+    const int full_words = bitset->cap / bits;
+    const int remaining = bitset->cap % bits;
+
+    int i;
+
+    for (i = 0; i < full_words; i++)
+    {
+        bitset->w[i] = ~((uint32_t)0);
+    }
+
+    if (remaining)
+        bitset->w[i] = ~((uint32_t)0) >> (bits - remaining);
+}
+
 bool bitset_is_empty(Bitset* bitset)
 {
     for (int i = 0; i < bitset->nwords; i++)

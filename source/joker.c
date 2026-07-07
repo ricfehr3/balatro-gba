@@ -1,5 +1,6 @@
 #include "joker.h"
 
+#include "bitset.h"
 #include "card.h"
 #include "game/round.h"
 #include "game_variables.h"
@@ -200,6 +201,7 @@ int joker_get_sell_value(const Joker* joker)
 // JokerObject methods
 JokerObject* joker_object_new(Joker* joker)
 {
+    GBAL_RETURN_IF_NULL_RET(joker, NULL);
     JokerObject* joker_object = POOL_GET(JokerObject);
 
     sprite_object_init((SpriteObject*)joker_object);
@@ -334,13 +336,8 @@ static inline bool joker_is_rollable(int joker_id)
 
 void joker_reset_rollable_jokers(void)
 {
-    int num_jokers = get_joker_registry_size();
-
     bitset_clear(&s_rollable_jokers_bitset);
-    for (int i = 0; i < num_jokers; i++)
-    {
-        bitset_set_idx(&s_rollable_jokers_bitset, i, true);
-    }
+    bitset_set_all(&s_rollable_jokers_bitset);
 }
 
 /**
