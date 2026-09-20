@@ -2,6 +2,7 @@
 #define POOL_H
 
 #include "bitset.h"
+#include "util.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -37,16 +38,20 @@
             return NULL;                                                \
         return &type##_pool.objects[free_offset];                       \
     }                                                                   \
+    int pool_idx_##type(type* entry)                                    \
+    {                                                                   \
+        int cap = type##_pool.bitset->cap;                              \
+        if (entry == NULL || entry < &type##_pool.objects[0] ||         \
+            entry >= &type##_pool.objects[cap])                         \
+            return UNDEFINED;                                           \
+        return entry - &type##_pool.objects[0];                         \
+    }                                                                   \
     void pool_free_##type(type* entry)                                  \
     {                                                                   \
-        if (entry == NULL)                                              \
+        if (pool_idx_##type(entry) == UNDEFINED)                        \
             return;                                                     \
         int offset = entry - &type##_pool.objects[0];                   \
         bitset_set_idx(type##_pool.bitset, offset, false);              \
-    }                                                                   \
-    int pool_idx_##type(type* entry)                                    \
-    {                                                                   \
-        return entry - &type##_pool.objects[0];                         \
     }                                                                   \
     type* pool_at_##type(int idx)                                       \
     {                                                                   \
