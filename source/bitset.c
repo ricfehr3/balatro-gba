@@ -43,7 +43,7 @@ int bitset_set_next_free_idx(Bitset* bitset)
         {
             int bit = __builtin_ctz(inv);
             int idx = i * BITSET_BITS_PER_WORD + bit;
-            if(idx < bitset->cap)
+            if (idx < bitset->cap)
             {
                 bitset->w[i] |= ((uint32_t)1 << bit);
                 return idx;
