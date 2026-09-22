@@ -60,7 +60,8 @@ static bool s_used_layers[MAX_JOKER_OBJECTS] = {false}; // Track used layers for
 static int s_joker_spritesheet_pb_map[MAX_NUM_JOKERS_SPRITESHEETS];
 static int s_joker_pb_num_sprite_users[JOKER_LAST_PB - JOKER_BASE_PB + 1] = {0};
 
-BITSET_DEFINE(s_rollable_jokers_bitset, MAX_DEFINABLE_JOKERS)
+// Initialize this to be the max size, it will be resized to the number of jokers at initialization
+BITSET_DEFINE(s_rollable_jokers_bitset, BITSET_MAX_BITS)
 
 // See linked issue for context of maps
 // https://github.com/GBALATRO/balatro-gba/issues/274#issue-3685075538
@@ -115,6 +116,8 @@ static int joker_get_random_rarity(enum RngSequence key);
 
 void joker_init()
 {
+    bitset_clear(&s_rollable_jokers_bitset);
+    s_rollable_jokers_bitset.cap = get_joker_registry_size();
     // This should init once only so no need to free
     int num_spritesheets = s_get_num_spritesheets();
 
@@ -331,7 +334,10 @@ static inline bool no_rollable_jokers(void)
 GBAL_UNUSED
 static inline bool joker_is_rollable(int joker_id)
 {
-    return bitset_get_idx(&s_rollable_jokers_bitset, joker_id);
+    int is_rollable = bitset_get_idx(&s_rollable_jokers_bitset, joker_id);
+    if (is_rollable == UNDEFINED)
+        return false;
+    return is_rollable;
 }
 
 void joker_reset_rollable_jokers(void)

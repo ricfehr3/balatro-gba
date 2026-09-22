@@ -1,9 +1,13 @@
 #include "bitset.h"
 
+#include "mgba_logger.h"
 #include "util.h"
 
 void bitset_set_idx(Bitset* bitset, int idx, bool on)
 {
+    if (!bitset || idx < 0 || idx >= bitset->cap)
+        return;
+
     uint32_t i = idx / BITSET_BITS_PER_WORD;
     uint32_t b = idx % BITSET_BITS_PER_WORD;
 
@@ -61,9 +65,9 @@ void bitset_clear(Bitset* bitset)
 
 void bitset_set_all(Bitset* bitset)
 {
-    const int bits = 32; // 32 bits in a uint32_t
-    const int full_words = bitset->cap / bits;
-    const int remaining = bitset->cap % bits;
+    const int bits_per_word = 32; // 32 bits in a uint32_t
+    const int full_words = bitset->cap / bits_per_word;
+    const int remaining = bitset->cap % bits_per_word;
 
     int i;
 
@@ -73,7 +77,7 @@ void bitset_set_all(Bitset* bitset)
     }
 
     if (remaining)
-        bitset->w[i] = ~((uint32_t)0) >> (bits - remaining);
+        bitset->w[i] = ~((uint32_t)0) >> (bits_per_word - remaining);
 }
 
 bool bitset_is_empty(Bitset* bitset)
@@ -86,8 +90,14 @@ bool bitset_is_empty(Bitset* bitset)
     return true;
 }
 
-bool bitset_get_idx(Bitset* bitset, int idx)
+int bitset_get_idx(Bitset* bitset, int idx)
 {
+    if (!bitset || idx < 0 || idx >= bitset->cap)
+    {
+        MGBA_ERROR("Unable to get bitset value at index");
+        return UNDEFINED;
+    }
+
     uint32_t i = idx / BITSET_BITS_PER_WORD;
     uint32_t b = idx % BITSET_BITS_PER_WORD;
 
@@ -165,6 +175,9 @@ int bitset_itr_next(BitsetItr* itr)
     // __builtin_ctz function as well.
     //
     // The point being, this can be very slow, but it's simple and can be much faster.
+    //
+    // This doesn't check against the capacity. It should never need to because there should be
+    // no set bits outside of the range of the capacity.
     for (; itr->word < itr->bitset->nwords; itr->word++)
     {
         for (; itr->bit < itr->bitset->nbits; itr->bit++)
