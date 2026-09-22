@@ -6,10 +6,11 @@
 #include <stdio.h>
 
 // Smaller number not aligned with the word size
-const int bitset_small_size = 83;
+#define BITSET_SMALL_SIZE 83
+
 
 BITSET_DEFINE(test_bitset, BITSET_MAX_BITS)
-BITSET_DEFINE(test_bitset_small, bitset_small_size)
+BITSET_DEFINE(test_bitset_small, BITSET_SMALL_SIZE)
 
 // bitset_set_idx
 // bitset_get_idx
@@ -117,10 +118,10 @@ void test_bitset_set_all(void)
 
     bitset_set_all(&test_bitset_small);
 
-    assert(bitset_num_set_bits(&test_bitset_small) == bitset_small_size);
+    assert(bitset_num_set_bits(&test_bitset_small) == BITSET_SMALL_SIZE);
 
     int i = 0;
-    for (; i < bitset_small_size; i++)
+    for (; i < BITSET_SMALL_SIZE; i++)
     {
         assert(bitset_get_idx(&test_bitset_small, i));
     }
