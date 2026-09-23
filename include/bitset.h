@@ -109,7 +109,7 @@ void bitset_set_idx(Bitset* bitset, int idx, bool on);
  *
  * @return the value of the flag as `true` or `false`
  */
-int bitset_get_idx(Bitset* bitset, int idx);
+bool bitset_get_idx(Bitset* bitset, int idx);
 
 /**
  * @brief Set the next free index in the bitset and return the index value

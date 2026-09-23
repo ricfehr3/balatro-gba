@@ -125,10 +125,6 @@ void test_bitset_set_all(void)
     {
         assert(bitset_get_idx(&test_bitset_small, i));
     }
-    for (; i < BITSET_MAX_BITS; i++)
-    {
-        assert(bitset_get_idx(&test_bitset_small, i) == UNDEFINED);
-    }
 
     bitset_clear(&test_bitset_small);
     assert(bitset_is_empty(&test_bitset_small));

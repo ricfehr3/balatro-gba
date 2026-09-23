@@ -90,12 +90,12 @@ bool bitset_is_empty(Bitset* bitset)
     return true;
 }
 
-int bitset_get_idx(Bitset* bitset, int idx)
+bool bitset_get_idx(Bitset* bitset, int idx)
 {
     if (!bitset || idx < 0 || idx >= bitset->cap)
     {
         MGBA_ERROR("Unable to get bitset value at index");
-        return UNDEFINED;
+        return false;
     }
 
     uint32_t i = idx / BITSET_BITS_PER_WORD;

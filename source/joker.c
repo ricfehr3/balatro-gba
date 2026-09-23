@@ -334,10 +334,7 @@ static inline bool no_rollable_jokers(void)
 GBAL_UNUSED
 static inline bool joker_is_rollable(int joker_id)
 {
-    int is_rollable = bitset_get_idx(&s_rollable_jokers_bitset, joker_id);
-    if (is_rollable == UNDEFINED)
-        return false;
-    return is_rollable;
+    return bitset_get_idx(&s_rollable_jokers_bitset, joker_id);
 }
 
 void joker_reset_rollable_jokers(void)
