@@ -120,8 +120,7 @@ void test_bitset_set_all(void)
 
     assert(bitset_num_set_bits(&test_bitset_small) == BITSET_SMALL_SIZE);
 
-    int i = 0;
-    for (; i < BITSET_SMALL_SIZE; i++)
+    for (int i = 0; i < BITSET_SMALL_SIZE; i++)
     {
         assert(bitset_get_idx(&test_bitset_small, i));
     }
